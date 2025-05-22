@@ -1,10 +1,8 @@
-FROM node:22.11.0-alpine
+FROM node:22-bullseye
 
 WORKDIR /app
 
 COPY package.json .
-
-RUN apt-get update && apt-get install -y python3 make g++
 
 RUN npm install --legacy-peer-deps
 
