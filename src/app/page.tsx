@@ -1,7 +1,5 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
-const Home = () => {
-  return <></>;
-};
-
-export default Home;
+export default function Home() {
+  redirect('/dapp');
+}
