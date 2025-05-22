@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MIMING CAT - DAPP",
-  description: "The Cross-Chain Cat of Destiny",
+  title: "MIMING",
+  description: "$MIMING Cross-chain Access Token (CAT)",
 };
 
 export default function RootLayout({
