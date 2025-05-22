@@ -1,7 +1,7 @@
 "use client";
 
-import AppWalletProvider from "@/components/app-wallet-provider";
+import SolanaWalletProvider from "@/components/solana-wallet-provider";
 
 export default function DappLayout({ children }: { children: React.ReactNode }) {
-  return <AppWalletProvider>{children}</AppWalletProvider>;
+  return <SolanaWalletProvider>{children}</SolanaWalletProvider>;
 }

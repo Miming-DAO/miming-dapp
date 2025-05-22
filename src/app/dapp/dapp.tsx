@@ -11,32 +11,104 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 
 import { Menu, X } from "lucide-react";
 
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
+
+import { NetworkAsset } from "@/interface/network";
 
 const DappPage = () => {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
 
-  const [balance, setBalance] = useState<number>(0);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const getBalanceEvery10Seconds = async () => {
+  const networkAssets: NetworkAsset[] = [
+    {
+      network: {
+        name: "Solana",
+        rpc: "",
+      },
+      assets: ["SOL"],
+    },
+  ];
+  const [selectedNetwork, setSelectedNetwork] = useState("solana");
+  const [selectedAsset, setSelectedAsset] = useState("sol");
+
+  const [SOLBalance, setSOLBalance] = useState<number>(0);
+  const [MIMINGBalance, setMIMINGBalance] = useState<number>(0);
+
+  const [quantityValue, setQuantityValue] = useState("");
+
+  const getSOLBalance = async () => {
     if (publicKey) {
       const newBalance = await connection.getBalance(publicKey);
-      setBalance(newBalance / LAMPORTS_PER_SOL);
+      setSOLBalance(newBalance / LAMPORTS_PER_SOL);
     }
 
     setTimeout(() => {
-      getBalanceEvery10Seconds();
+      getSOLBalance();
     }, 10_000);
   };
 
+  const getMIMINGBalance = async () => {
+    const mimingAddress = "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr";
+    const mimingTokenMintAddress = new PublicKey(mimingAddress);
+
+    if (publicKey) {
+      const mimingAssociatedTokenAddress = await getAssociatedTokenAddress(mimingTokenMintAddress, publicKey);
+      let tokenAmount = await connection.getTokenAccountBalance(mimingAssociatedTokenAddress);
+
+      const rawAmount = parseInt(tokenAmount.value.amount);
+      const decimals = tokenAmount.value.decimals;
+      const readableAmount = rawAmount / Math.pow(10, decimals);
+
+      setMIMINGBalance(readableAmount);
+    }
+
+    setTimeout(() => {
+      getMIMINGBalance();
+    }, 10_000);
+  };
+
+  const currentAssets = networkAssets.find((entry) => entry.network.name.toLowerCase() === selectedNetwork)?.assets || [];
+  const selectDefaultAsset = (network: string) => {
+    const currentAssets = networkAssets.find((entry) => entry.network.name.toLowerCase() === network)?.assets || [];
+    if (currentAssets.length > 0) {
+      setSelectedAsset(currentAssets[0].toLowerCase());
+    }
+  };
+
   useEffect(() => {
-    getBalanceEvery10Seconds();
-  }, [publicKey, connection, balance]);
+    getSOLBalance();
+    getMIMINGBalance();
+  }, [publicKey, connection]);
+
+  const quantityHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let input = e.target.value;
+    input = input.replace(/,/g, "");
+
+    if (/^\d*\.?\d{0,5}$/.test(input)) {
+      setQuantityValue(input);
+    }
+  };
+
+  const quantityFormatWithCommas = (val: string) => {
+    if (!val) return "";
+
+    const parts = val.split(".");
+    const integerPart = parts[0];
+    const decimalPart = parts[1];
+
+    const withCommas = parseInt(integerPart).toLocaleString("en-US");
+
+    return decimalPart !== undefined ? `${withCommas}.${decimalPart}` : withCommas;
+  };
+
+  const quantityHandleBlur = () => {
+    setQuantityValue(quantityFormatWithCommas(quantityValue));
+  };
 
   return (
     <div className="flex justify-center min-h-screen lg:p-4">
@@ -110,23 +182,25 @@ const DappPage = () => {
                   <Label htmlFor="network" className="text-lg text-[#DCB00B]">
                     Network:
                   </Label>
-                  <Select>
+                  <Select
+                    value={selectedNetwork}
+                    onValueChange={(value) => {
+                      setSelectedNetwork(value);
+                      selectDefaultAsset(value);
+                    }}
+                  >
                     <SelectTrigger className="w-full bg-white text-gray-800 font-bold rounded-[15px] px-3 py-3 focus:ring-0">
-                      <SelectValue placeholder="Select Network" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="solana">
-                        <div className="flex items-center space-x-2">
-                          <Image src="/assets/solana-logo.png" alt="Solana" width={20} height={20} />
-                          <span>Solana</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="polkadot">
-                        <div className="flex items-center space-x-2">
-                          <Image src="/assets/polkadot-logo.png" alt="Polkadot" width={20} height={20} />
-                          <span>Polkadot</span>
-                        </div>
-                      </SelectItem>
+                      {networkAssets.map(({ network }) => (
+                        <SelectItem key={network.name.toLowerCase()} value={network.name.toLowerCase()}>
+                          <div className="flex items-center space-x-2">
+                            <Image src={`/assets/${network.name.toLowerCase()}-logo.png`} alt={network.name} width={20} height={20} />
+                            <span>{network.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -135,23 +209,19 @@ const DappPage = () => {
                   <Label htmlFor="asset" className="text-lg text-[#DCB00B]">
                     Token / Asset:
                   </Label>
-                  <Select>
+                  <Select value={selectedAsset} onValueChange={setSelectedAsset}>
                     <SelectTrigger className="w-full bg-white text-gray-800 font-bold rounded-[15px] px-3 py-3 focus:ring-0">
-                      <SelectValue placeholder="Select Asset" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sol">
-                        <div className="flex items-center space-x-2">
-                          <Image src="/assets/solana-logo.png" alt="SOL" width={20} height={20} />
-                          <span>SOL</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="dot">
-                        <div className="flex items-center space-x-2">
-                          <Image src="/assets/polkadot-logo.png" alt="DOT" width={20} height={20} />
-                          <span>DOT</span>
-                        </div>
-                      </SelectItem>
+                      {currentAssets.map((asset) => (
+                        <SelectItem key={asset.toLowerCase()} value={asset.toLowerCase()}>
+                          <div className="flex items-center space-x-2">
+                            <Image src={`/assets/${selectedNetwork}-logo.png`} alt={asset} width={20} height={20} />
+                            <span>{asset}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -165,7 +235,12 @@ const DappPage = () => {
                   <div className="relative w-full">
                     <Input
                       id="quantity"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="0.00"
+                      value={quantityValue}
+                      onChange={quantityHandleChange}
+                      onBlur={quantityHandleBlur}
                       className="teleport-input-default-font-size bg-transparent text-gray-800 pr-[65px] text-right font-bold border-none focus:ring-0 placeholder:text-gray-400"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-800 font-bold text-2xl">SOL</span>
@@ -196,14 +271,17 @@ const DappPage = () => {
 
                   <div className="relative w-full text-right">
                     <p id="xode-asset-received" className="inline-block text-gray-800 text-2xl font-bold">
-                      <span className="pr-[5px]">1.2</span>
+                      <span className="pr-[5px]">{quantityValue}</span>
                       <span className="font-bold">wSOL</span>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <Button variant="secondary" className="w-full text-white text-2xl font-bold h-[70px] bg-[#3E56EF] hover:bg-[#3E56CE] rounded-[15px]">
+              <Button
+                variant="secondary"
+                className="w-full text-white text-2xl font-bold h-[70px] bg-[#3E56EF] hover:bg-[#3E56CE] rounded-[15px] hover:cursor-pointer"
+              >
                 Teleport
               </Button>
 
@@ -235,14 +313,18 @@ const DappPage = () => {
                           <Image src="/assets/miming-logo.png" alt="MIMING" width={32} height={32} />
                           <span className="text-[#DCB00B] font-bold">MIMING</span>
                         </td>
-                        <td className="px-6 py-4 text-xl text-white-800 font-extrabold text-right">1,000</td>
+                        <td className="px-6 py-4 text-xl text-white-800 font-extrabold text-right">
+                          {MIMINGBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+                        </td>
                       </tr>
                       <tr className="border-t border-white/20">
                         <td className="flex items-center space-x-2 px-6 py-4">
                           <Image src="/assets/solana-logo.png" alt="SOL" width={32} height={32} />
                           <span className="text-[#DCB00B] font-bold">SOL</span>
                         </td>
-                        <td className="px-6 py-4 text-xl text-white-800 font-extrabold text-right">{balance}</td>
+                        <td className="px-6 py-4 text-xl text-white-800 font-extrabold text-right">
+                          {SOLBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
