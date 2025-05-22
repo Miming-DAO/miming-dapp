@@ -151,7 +151,29 @@ const DappPage = () => {
       const teleporterMimingToken = await getAssociatedTokenAddress(mimingTokenMintAddress, teleporter);
       const vaultMimingToken = await getAssociatedTokenAddress(mimingTokenMintAddress, vaultPda, true);
 
-      const [vaultRegistryLedgerPda] = PublicKey.findProgramAddressSync([Buffer.from("miming_vault_registry")], program.programId);
+      const [vaultRegistryLedgerPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("miming_vault_registry"), teleporter.toBuffer()],
+        program.programId
+      );
+
+      console.log("Vault Registry Address: ", vaultRegistryLedgerPda.toBase58());
+      console.log("Vault Address: ", vaultPda.toBase58());
+
+      await program.account.vaultRegistry
+        .fetch(vaultRegistryLedgerPda)
+        .then((results) => {
+          console.log("Ledger: ", results.ledger);
+
+          for(let i =0; i < results.ledger.length; i++) {
+            console.log("User: ", results.ledger[i].user.toBase58())
+            console.log("Token Symbol: ", results.ledger[i].tokenSymbol)
+            console.log("Balance In: ", results.ledger[i].balanceIn.toString())
+            console.log("Balance Out: ", results.ledger[i].balanceOut.toString())
+          }
+        })
+        .catch((err: any) => {
+          console.log(err);
+        });
 
       setVaultTeleportAccount({
         teleporter: teleporter,
@@ -247,7 +269,12 @@ const DappPage = () => {
         setIsTeleportProcessing(false);
         setIsTeleportSuccessful(true);
         setTeleportTxSignature(txSig);
+
+        setQuantityValue("0");
+        setXodeRecipientValue("");
       } catch (err: any) {
+        console.log(err);
+
         setIsTeleportProcessing(false);
         setOpenTeleportProcessingDialog(false);
 

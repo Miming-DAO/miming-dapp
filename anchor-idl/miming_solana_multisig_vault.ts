@@ -848,9 +848,21 @@ export type MimingSolanaMultisigVault = {
                   114,
                   121
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "teleporter"
+              },
+              {
+                "kind": "account",
+                "path": "clock.unix_timestamp"
               }
             ]
           }
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
         },
         {
           "name": "tokenProgram",
@@ -917,43 +929,13 @@ export type MimingSolanaMultisigVault = {
   "errors": [
     {
       "code": 6000,
-      "name": "alreadyRegistered",
-      "msg": "This public key is already registered."
+      "name": "insufficientSolBalance",
+      "msg": "Insufficient SOL balance."
     },
     {
       "code": 6001,
-      "name": "notRegistered",
-      "msg": "This public key is not registered."
-    },
-    {
-      "code": 6002,
-      "name": "notAMember",
-      "msg": "You are not a member of this multisig."
-    },
-    {
-      "code": 6003,
-      "name": "notARequiredSigner",
-      "msg": "You are not listed as a required signer."
-    },
-    {
-      "code": 6004,
-      "name": "alreadyProcessed",
-      "msg": "Proposal has already been approved or rejected."
-    },
-    {
-      "code": 6005,
-      "name": "proposalNotFound",
-      "msg": "Proposal not found."
-    },
-    {
-      "code": 6006,
-      "name": "incompleteSignatures",
-      "msg": "Not all required signatures are present."
-    },
-    {
-      "code": 6007,
-      "name": "alreadySigned",
-      "msg": "This signer has already signed."
+      "name": "insufficientMimingBalance",
+      "msg": "Insufficient MIMING token balance."
     }
   ],
   "types": [
