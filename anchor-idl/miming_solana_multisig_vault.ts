@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/miming_solana_multisig_vault.json`.
  */
 export type MimingSolanaMultisigVault = {
-  "address": "4RkfJdTLcWP1xVqgqDuT4F8Kn9QgzaGcqiYP9Nm8FnBE",
+  "address": "BceBSfdZfBSEApAiu4wNuHSauvUJxYhCLoY9UyxE5EAc",
   "metadata": {
     "name": "mimingSolanaMultisigVault",
     "version": "0.1.0",
@@ -339,9 +339,6 @@ export type MimingSolanaMultisigVault = {
           }
         },
         {
-          "name": "freezeAuthority"
-        },
-        {
           "name": "stakingConfig",
           "writable": true,
           "pda": {
@@ -376,6 +373,46 @@ export type MimingSolanaMultisigVault = {
           }
         },
         {
+          "name": "stakingRegistry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  109,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -388,7 +425,12 @@ export type MimingSolanaMultisigVault = {
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "referenceNumber",
+          "type": "string"
+        }
+      ]
     },
     {
       "name": "stakingThaw",
@@ -503,9 +545,6 @@ export type MimingSolanaMultisigVault = {
           }
         },
         {
-          "name": "freezeAuthority"
-        },
-        {
           "name": "stakingConfig",
           "writable": true,
           "pda": {
@@ -540,6 +579,46 @@ export type MimingSolanaMultisigVault = {
           }
         },
         {
+          "name": "stakingRegistry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  109,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -553,43 +632,6 @@ export type MimingSolanaMultisigVault = {
         }
       ],
       "args": []
-    },
-    {
-      "name": "vaultLedger",
-      "discriminator": [
-        241,
-        151,
-        155,
-        238,
-        242,
-        226,
-        241,
-        50
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "vaultRegistry",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [],
-      "returns": {
-        "vec": {
-          "defined": {
-            "name": "vaultLedger"
-          }
-        }
-      }
     },
     {
       "name": "vaultTeleport",
@@ -819,52 +861,6 @@ export type MimingSolanaMultisigVault = {
           }
         },
         {
-          "name": "vaultRegistry",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  105,
-                  109,
-                  105,
-                  110,
-                  103,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116,
-                  95,
-                  114,
-                  101,
-                  103,
-                  105,
-                  115,
-                  116,
-                  114,
-                  121
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "teleporter"
-              },
-              {
-                "kind": "account",
-                "path": "clock.unix_timestamp"
-              }
-            ]
-          }
-        },
-        {
-          "name": "clock",
-          "address": "SysvarC1ock11111111111111111111111111111111"
-        },
-        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -913,46 +909,62 @@ export type MimingSolanaMultisigVault = {
       ]
     },
     {
-      "name": "vaultRegistry",
+      "name": "stakingRegistry",
       "discriminator": [
-        15,
-        54,
-        133,
-        46,
-        80,
+        82,
+        145,
+        139,
         169,
-        250,
-        79
+        210,
+        136,
+        180,
+        49
       ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "insufficientSolBalance",
-      "msg": "Insufficient SOL balance."
+      "name": "alreadyRegistered",
+      "msg": "This public key is already registered."
     },
     {
       "code": 6001,
-      "name": "insufficientMimingBalance",
-      "msg": "Insufficient MIMING token balance."
+      "name": "notRegistered",
+      "msg": "This public key is not registered."
+    },
+    {
+      "code": 6002,
+      "name": "notAMember",
+      "msg": "You are not a member of this multisig."
+    },
+    {
+      "code": 6003,
+      "name": "notARequiredSigner",
+      "msg": "You are not listed as a required signer."
+    },
+    {
+      "code": 6004,
+      "name": "alreadyProcessed",
+      "msg": "Proposal has already been approved or rejected."
+    },
+    {
+      "code": 6005,
+      "name": "proposalNotFound",
+      "msg": "Proposal not found."
+    },
+    {
+      "code": 6006,
+      "name": "incompleteSignatures",
+      "msg": "Not all required signatures are present."
+    },
+    {
+      "code": 6007,
+      "name": "alreadySigned",
+      "msg": "This signer has already signed."
     }
   ],
   "types": [
-    {
-      "name": "ledgerStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "pending"
-          },
-          {
-            "name": "completed"
-          }
-        ]
-      }
-    },
     {
       "name": "multisigMember",
       "type": {
@@ -1096,67 +1108,13 @@ export type MimingSolanaMultisigVault = {
       }
     },
     {
-      "name": "vaultLedger",
+      "name": "stakingRegistry",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "user",
-            "type": "pubkey"
-          },
-          {
-            "name": "tokenSymbol",
+            "name": "referenceId",
             "type": "string"
-          },
-          {
-            "name": "tokenContractAddress",
-            "type": "pubkey"
-          },
-          {
-            "name": "balanceIn",
-            "type": "u64"
-          },
-          {
-            "name": "balanceOut",
-            "type": "u64"
-          },
-          {
-            "name": "referenceUuid",
-            "type": "string"
-          },
-          {
-            "name": "remarks",
-            "type": "string"
-          },
-          {
-            "name": "status",
-            "type": {
-              "defined": {
-                "name": "ledgerStatus"
-              }
-            }
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "vaultRegistry",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "ledger",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "vaultLedger"
-                }
-              }
-            }
           }
         ]
       }

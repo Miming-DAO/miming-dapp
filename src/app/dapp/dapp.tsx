@@ -151,29 +151,8 @@ const DappPage = () => {
       const teleporterMimingToken = await getAssociatedTokenAddress(mimingTokenMintAddress, teleporter);
       const vaultMimingToken = await getAssociatedTokenAddress(mimingTokenMintAddress, vaultPda, true);
 
-      const [vaultRegistryLedgerPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("miming_vault_registry"), teleporter.toBuffer()],
-        program.programId
-      );
-
-      console.log("Vault Registry Address: ", vaultRegistryLedgerPda.toBase58());
-      console.log("Vault Address: ", vaultPda.toBase58());
-
-      await program.account.vaultRegistry
-        .fetch(vaultRegistryLedgerPda)
-        .then((results) => {
-          console.log("Ledger: ", results.ledger);
-
-          for(let i =0; i < results.ledger.length; i++) {
-            console.log("User: ", results.ledger[i].user.toBase58())
-            console.log("Token Symbol: ", results.ledger[i].tokenSymbol)
-            console.log("Balance In: ", results.ledger[i].balanceIn.toString())
-            console.log("Balance Out: ", results.ledger[i].balanceOut.toString())
-          }
-        })
-        .catch((err: any) => {
-          console.log(err);
-        });
+      console.log(vaultPda.toBase58())
+      console.log(vaultMimingToken.toBase58())
 
       setVaultTeleportAccount({
         teleporter: teleporter,
@@ -181,7 +160,6 @@ const DappPage = () => {
         mimingToken: mimingToken.address,
         teleporterMimingToken: teleporterMimingToken,
         vaultMimingToken: vaultMimingToken,
-        vaultRegistry: vaultRegistryLedgerPda,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
