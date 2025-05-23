@@ -1,5 +1,5 @@
 {
-  "address": "4RkfJdTLcWP1xVqgqDuT4F8Kn9QgzaGcqiYP9Nm8FnBE",
+  "address": "BceBSfdZfBSEApAiu4wNuHSauvUJxYhCLoY9UyxE5EAc",
   "metadata": {
     "name": "miming_solana_multisig_vault",
     "version": "0.1.0",
@@ -333,9 +333,6 @@
           }
         },
         {
-          "name": "freeze_authority"
-        },
-        {
           "name": "staking_config",
           "writable": true,
           "pda": {
@@ -370,6 +367,46 @@
           }
         },
         {
+          "name": "staking_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  109,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -382,7 +419,12 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "reference_number",
+          "type": "string"
+        }
+      ]
     },
     {
       "name": "staking_thaw",
@@ -497,9 +539,6 @@
           }
         },
         {
-          "name": "freeze_authority"
-        },
-        {
           "name": "staking_config",
           "writable": true,
           "pda": {
@@ -534,6 +573,46 @@
           }
         },
         {
+          "name": "staking_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  109,
+                  105,
+                  110,
+                  103,
+                  95,
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "staker"
+              }
+            ]
+          }
+        },
+        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -547,43 +626,6 @@
         }
       ],
       "args": []
-    },
-    {
-      "name": "vault_ledger",
-      "discriminator": [
-        241,
-        151,
-        155,
-        238,
-        242,
-        226,
-        241,
-        50
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "vault_registry",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [],
-      "returns": {
-        "vec": {
-          "defined": {
-            "name": "VaultLedger"
-          }
-        }
-      }
     },
     {
       "name": "vault_teleport",
@@ -813,52 +855,6 @@
           }
         },
         {
-          "name": "vault_registry",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  105,
-                  109,
-                  105,
-                  110,
-                  103,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116,
-                  95,
-                  114,
-                  101,
-                  103,
-                  105,
-                  115,
-                  116,
-                  114,
-                  121
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "teleporter"
-              },
-              {
-                "kind": "account",
-                "path": "clock.unix_timestamp"
-              }
-            ]
-          }
-        },
-        {
-          "name": "clock",
-          "address": "SysvarC1ock11111111111111111111111111111111"
-        },
-        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -907,46 +903,62 @@
       ]
     },
     {
-      "name": "VaultRegistry",
+      "name": "StakingRegistry",
       "discriminator": [
-        15,
-        54,
-        133,
-        46,
-        80,
+        82,
+        145,
+        139,
         169,
-        250,
-        79
+        210,
+        136,
+        180,
+        49
       ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "InsufficientSolBalance",
-      "msg": "Insufficient SOL balance."
+      "name": "AlreadyRegistered",
+      "msg": "This public key is already registered."
     },
     {
       "code": 6001,
-      "name": "InsufficientMimingBalance",
-      "msg": "Insufficient MIMING token balance."
+      "name": "NotRegistered",
+      "msg": "This public key is not registered."
+    },
+    {
+      "code": 6002,
+      "name": "NotAMember",
+      "msg": "You are not a member of this multisig."
+    },
+    {
+      "code": 6003,
+      "name": "NotARequiredSigner",
+      "msg": "You are not listed as a required signer."
+    },
+    {
+      "code": 6004,
+      "name": "AlreadyProcessed",
+      "msg": "Proposal has already been approved or rejected."
+    },
+    {
+      "code": 6005,
+      "name": "ProposalNotFound",
+      "msg": "Proposal not found."
+    },
+    {
+      "code": 6006,
+      "name": "IncompleteSignatures",
+      "msg": "Not all required signatures are present."
+    },
+    {
+      "code": 6007,
+      "name": "AlreadySigned",
+      "msg": "This signer has already signed."
     }
   ],
   "types": [
-    {
-      "name": "LedgerStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Pending"
-          },
-          {
-            "name": "Completed"
-          }
-        ]
-      }
-    },
     {
       "name": "MultisigMember",
       "type": {
@@ -1090,67 +1102,13 @@
       }
     },
     {
-      "name": "VaultLedger",
+      "name": "StakingRegistry",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "user",
-            "type": "pubkey"
-          },
-          {
-            "name": "token_symbol",
+            "name": "reference_id",
             "type": "string"
-          },
-          {
-            "name": "token_contract_address",
-            "type": "pubkey"
-          },
-          {
-            "name": "balance_in",
-            "type": "u64"
-          },
-          {
-            "name": "balance_out",
-            "type": "u64"
-          },
-          {
-            "name": "reference_uuid",
-            "type": "string"
-          },
-          {
-            "name": "remarks",
-            "type": "string"
-          },
-          {
-            "name": "status",
-            "type": {
-              "defined": {
-                "name": "LedgerStatus"
-              }
-            }
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "VaultRegistry",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "ledger",
-            "type": {
-              "vec": {
-                "defined": {
-                  "name": "VaultLedger"
-                }
-              }
-            }
           }
         ]
       }

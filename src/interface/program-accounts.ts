@@ -6,7 +6,6 @@ export interface VaultTeleportAccount {
     mimingToken: PublicKey;
     teleporterMimingToken: PublicKey;
     vaultMimingToken: PublicKey;
-    vaultRegistry: PublicKey;
     tokenProgram: PublicKey;
     associatedTokenProgram: PublicKey;
     systemProgram: PublicKey;
