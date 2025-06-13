@@ -8,50 +8,32 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { Menu, X } from "lucide-react";
 
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import {
-  getAssociatedTokenAddress,
-  getMint,
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  createAssociatedTokenAccountInstruction,
-} from "@solana/spl-token";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 import { Program, AnchorProvider, getProvider, setProvider, BN } from "@coral-xyz/anchor";
 
 import { networkAssets } from "@/data/network-assets";
 
-import { VaultTeleportAccount } from "@/interface/program-accounts";
+import { VaultInitializeAccount, VaultTeleportAccount } from "@/interface/program-accounts";
 import { ErrorMessage } from "@/interface/error-messages";
 
-import type { MimingSolanaMultisigVault } from "../../../anchor-idl/miming_solana_multisig_vault";
-import idl from "../../../anchor-idl/miming_solana_multisig_vault.json";
+import type { MimingSpokeSolana } from "../../../anchor-idl/miming_spoke_solana";
+import idl from "../../../anchor-idl/miming_spoke_solana.json";
 
 const DappPage = () => {
   const { connection } = useConnection();
@@ -65,15 +47,11 @@ const DappPage = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>("sol");
 
   const [SOLBalance, setSOLBalance] = useState<number>(0);
-  const [MIMINGBalance, setMIMINGBalance] = useState<number>(0);
 
   const [quantityValue, setQuantityValue] = useState<string>("0");
   const [xodeRecipientValue, setXodeRecipientValue] = useState<string>("");
 
-  const mimingAddress = process.env.NEXT_PUBLIC_MIMING_ADDRESS || "";
-
-  const [program, setProgram] = useState<Program<MimingSolanaMultisigVault> | null>(null);
-  const [vaultTeleportAccount, setVaultTeleportAccount] = useState<VaultTeleportAccount | null>(null);
+  const [program, setProgram] = useState<Program<MimingSpokeSolana> | null>(null);
 
   const [openInitializingDialog, setOpenInitializingDialog] = useState<boolean>(false);
 
@@ -97,26 +75,12 @@ const DappPage = () => {
     if (publicKey) {
       const solBalance = await connection.getBalance(publicKey);
       setSOLBalance(solBalance / LAMPORTS_PER_SOL);
-
-      const mimingTokenMintAddress = new PublicKey(mimingAddress);
-      const mimingAssociatedTokenAddress = await getAssociatedTokenAddress(mimingTokenMintAddress, publicKey);
-
-      const mimingTokenAmount = await connection.getTokenAccountBalance(mimingAssociatedTokenAddress);
-      const mimingRawAmount = parseInt(mimingTokenAmount.value.amount);
-      const mimingTokendecimals = mimingTokenAmount.value.decimals;
-      const mimingReadableAmount = mimingRawAmount / Math.pow(10, mimingTokendecimals);
-      setMIMINGBalance(mimingReadableAmount);
     }
 
     setTimeout(() => {
       getAssetBalances();
     }, 10_000);
   };
-
-  useEffect(() => {
-    getAssetBalances();
-    getAnchorProgramProvider();
-  }, [publicKey, connection]);
 
   const getAnchorProgramProvider = async () => {
     if (anchorWallet) {
@@ -127,8 +91,40 @@ const DappPage = () => {
       });
       setProvider(provider);
 
-      const program = new Program<MimingSolanaMultisigVault>(idl as MimingSolanaMultisigVault, provider);
+      const program = new Program<MimingSpokeSolana>(idl as MimingSpokeSolana, provider);
       setProgram(program);
+    }
+  };
+
+  useEffect(() => {
+    getAssetBalances();
+    getAnchorProgramProvider();
+  }, [publicKey, connection]);
+
+  const initializeVaultTeleportAccount = async () => {
+    const provider = getProvider();
+
+    if (program && publicKey && provider) {
+      const signer = publicKey;
+      const [ledgerIdentifierPda] = PublicKey.findProgramAddressSync([Buffer.from("ledger_identifier")], program.programId);
+
+      if (!ledgerIdentifierPda) {
+        const vaultInitializeAccount: VaultInitializeAccount = {
+          signer: signer,
+          ledgerIdentifier: ledgerIdentifierPda,
+          systemProgram: SystemProgram.programId,
+        };
+
+        await program.methods
+          .vaultInitialize()
+          .accounts(vaultInitializeAccount)
+          .rpc()
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      setOpenInitializingDialog(false);
     }
   };
 
@@ -137,47 +133,6 @@ const DappPage = () => {
       initializeVaultTeleportAccount();
     }
   }, [program]);
-
-  const initializeVaultTeleportAccount = async () => {
-    const provider = getProvider();
-
-    if (program && publicKey && provider) {
-      const teleporter = publicKey;
-      const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from("miming_vault")], program.programId);
-
-      const mimingTokenMintAddress = new PublicKey(mimingAddress);
-      const mimingToken = await getMint(connection, mimingTokenMintAddress, "confirmed", TOKEN_PROGRAM_ID);
-
-      const teleporterMimingToken = await getAssociatedTokenAddress(mimingTokenMintAddress, teleporter);
-      const vaultMimingToken = await getAssociatedTokenAddress(mimingTokenMintAddress, vaultPda, true);
-
-      console.log(vaultPda.toBase58())
-      console.log(vaultMimingToken.toBase58())
-
-      setVaultTeleportAccount({
-        teleporter: teleporter,
-        vault: vaultPda,
-        mimingToken: mimingToken.address,
-        teleporterMimingToken: teleporterMimingToken,
-        vaultMimingToken: vaultMimingToken,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-      });
-
-      setOpenInitializingDialog(false);
-
-      const vaultMimingTokenInfo = await provider.connection.getAccountInfo(vaultMimingToken);
-      if (!vaultMimingTokenInfo) {
-        const ix = createAssociatedTokenAccountInstruction(teleporter, vaultMimingToken, vaultPda, mimingTokenMintAddress);
-        const tx = new Transaction().add(ix);
-
-        if ("sendAndConfirm" in provider) {
-          await (provider as AnchorProvider).sendAndConfirm(tx, []);
-        }
-      }
-    }
-  };
 
   const quantityHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value;
@@ -236,13 +191,31 @@ const DappPage = () => {
       return;
     }
 
-    if (program && vaultTeleportAccount) {
+    if (program && publicKey) {
       setIsTeleportProcessing(true);
       setIsTeleportSuccessful(false);
       setTeleportTxSignature("");
 
       setOpenTeleportProcessingDialog(true);
       try {
+        const signer = publicKey;
+        const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from("vault")], program.programId);
+
+        const [ledgerIdentifierPda] = PublicKey.findProgramAddressSync([Buffer.from("ledger_identifier")], program.programId);
+        const ledgerIdentifier = await program.account.identifierAccount.fetch(ledgerIdentifierPda);
+        const [ledgerPda] = PublicKey.findProgramAddressSync(
+          [Buffer.from("ledger"), new BN(ledgerIdentifier.id).toArrayLike(Buffer, "le", 8)],
+          program.programId
+        );
+
+        const vaultTeleportAccount: VaultTeleportAccount = {
+          signer: signer,
+          vault: vaultPda,
+          ledgerIdentifier: ledgerIdentifierPda,
+          ledger: ledgerPda,
+          systemProgram: SystemProgram.programId,
+        };
+
         const txSig = await program.methods.vaultTeleport(amount).accounts(vaultTeleportAccount).rpc();
         setIsTeleportProcessing(false);
         setIsTeleportSuccessful(true);
@@ -488,15 +461,6 @@ const DappPage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="border-t border-white/20">
-                          <td className="flex items-center space-x-2 px-6 py-4">
-                            <Image src="/assets/miming-logo.png" alt="MIMING" width={32} height={32} />
-                            <span className="text-[#DCB00B] font-bold">MIMING</span>
-                          </td>
-                          <td className="px-6 py-4 text-xl text-white-800 font-extrabold text-right">
-                            {MIMINGBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
-                          </td>
-                        </tr>
                         <tr className="border-t border-white/20">
                           <td className="flex items-center space-x-2 px-6 py-4">
                             <Image src="/assets/solana-logo.png" alt="SOL" width={32} height={32} />
