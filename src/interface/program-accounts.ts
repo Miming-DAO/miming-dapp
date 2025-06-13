@@ -1,12 +1,15 @@
 import { PublicKey } from "@solana/web3.js";
 
+export interface VaultInitializeAccount {
+    signer: PublicKey;
+    ledgerIdentifier: PublicKey;
+    systemProgram: PublicKey;
+}
+
 export interface VaultTeleportAccount {
-    teleporter: PublicKey;
+    signer: PublicKey;
     vault: PublicKey;
-    mimingToken: PublicKey;
-    teleporterMimingToken: PublicKey;
-    vaultMimingToken: PublicKey;
-    tokenProgram: PublicKey;
-    associatedTokenProgram: PublicKey;
+    ledgerIdentifier: PublicKey;
+    ledger: PublicKey;
     systemProgram: PublicKey;
 }
