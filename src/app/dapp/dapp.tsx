@@ -20,10 +20,9 @@ import {
 
 import { Menu, X } from "lucide-react";
 
-import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 import { Program, AnchorProvider, getProvider, setProvider, BN } from "@coral-xyz/anchor";
 
