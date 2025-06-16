@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/miming_spoke_solana.json`.
  */
 export type MimingSpokeSolana = {
-  "address": "3e2igyWExmDZmJfRpMRwn5mrM838Fam3AMzPYvttxRT8",
+  "address": "CvMMhmL2wULc6nJ3obF1Ge9PiZ9ooDTD6CQhYj3rsN3B",
   "metadata": {
     "name": "mimingSpokeSolana",
     "version": "0.1.0",
@@ -765,6 +765,10 @@ export type MimingSpokeSolana = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "xodeAddress",
+          "type": "string"
         }
       ]
     },
@@ -1093,6 +1097,10 @@ export type MimingSpokeSolana = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "xodeAddress",
+          "type": "string"
         }
       ]
     }
@@ -1208,33 +1216,8 @@ export type MimingSpokeSolana = {
   "errors": [
     {
       "code": 6000,
-      "name": "thresholdLimitReached",
-      "msg": "The proposal has already reached the required number of approvals."
-    },
-    {
-      "code": 6001,
-      "name": "signerLimitReached",
-      "msg": "The number of signers has reached the allowed maximum."
-    },
-    {
-      "code": 6002,
-      "name": "alreadyResolved",
-      "msg": "This proposal has been finalized and cannot be changed."
-    },
-    {
-      "code": 6003,
-      "name": "unauthorizedSigner",
-      "msg": "The public key is not authorized to sign this proposal."
-    },
-    {
-      "code": 6004,
-      "name": "duplicateSignature",
-      "msg": "This public key has already provided a signature."
-    },
-    {
-      "code": 6005,
-      "name": "insufficientSignatures",
-      "msg": "Not enough signatures have been collected to proceed."
+      "name": "insufficientStakingBalance",
+      "msg": "Token balance is too low to complete the staking request."
     }
   ],
   "types": [
@@ -1424,10 +1407,6 @@ export type MimingSpokeSolana = {
         "kind": "struct",
         "fields": [
           {
-            "name": "id",
-            "type": "u64"
-          },
-          {
             "name": "user",
             "type": "pubkey"
           },
@@ -1509,6 +1488,10 @@ export type MimingSpokeSolana = {
               {
                 "name": "amount",
                 "type": "u64"
+              },
+              {
+                "name": "xodeAddress",
+                "type": "string"
               }
             ]
           },
@@ -1522,6 +1505,10 @@ export type MimingSpokeSolana = {
               {
                 "name": "amount",
                 "type": "u64"
+              },
+              {
+                "name": "xodeAddress",
+                "type": "string"
               }
             ]
           }

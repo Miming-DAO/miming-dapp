@@ -1,5 +1,5 @@
 {
-  "address": "3e2igyWExmDZmJfRpMRwn5mrM838Fam3AMzPYvttxRT8",
+  "address": "CvMMhmL2wULc6nJ3obF1Ge9PiZ9ooDTD6CQhYj3rsN3B",
   "metadata": {
     "name": "miming_spoke_solana",
     "version": "0.1.0",
@@ -759,6 +759,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "xode_address",
+          "type": "string"
         }
       ]
     },
@@ -1087,6 +1091,10 @@
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "xode_address",
+          "type": "string"
         }
       ]
     }
@@ -1202,33 +1210,8 @@
   "errors": [
     {
       "code": 6000,
-      "name": "ThresholdLimitReached",
-      "msg": "The proposal has already reached the required number of approvals."
-    },
-    {
-      "code": 6001,
-      "name": "SignerLimitReached",
-      "msg": "The number of signers has reached the allowed maximum."
-    },
-    {
-      "code": 6002,
-      "name": "AlreadyResolved",
-      "msg": "This proposal has been finalized and cannot be changed."
-    },
-    {
-      "code": 6003,
-      "name": "UnauthorizedSigner",
-      "msg": "The public key is not authorized to sign this proposal."
-    },
-    {
-      "code": 6004,
-      "name": "DuplicateSignature",
-      "msg": "This public key has already provided a signature."
-    },
-    {
-      "code": 6005,
-      "name": "InsufficientSignatures",
-      "msg": "Not enough signatures have been collected to proceed."
+      "name": "InsufficientStakingBalance",
+      "msg": "Token balance is too low to complete the staking request."
     }
   ],
   "types": [
@@ -1418,10 +1401,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "id",
-            "type": "u64"
-          },
-          {
             "name": "user",
             "type": "pubkey"
           },
@@ -1503,6 +1482,10 @@
               {
                 "name": "amount",
                 "type": "u64"
+              },
+              {
+                "name": "xode_address",
+                "type": "string"
               }
             ]
           },
@@ -1516,6 +1499,10 @@
               {
                 "name": "amount",
                 "type": "u64"
+              },
+              {
+                "name": "xode_address",
+                "type": "string"
               }
             ]
           }
