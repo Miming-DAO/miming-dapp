@@ -20,10 +20,9 @@ import {
 
 import { Menu, X } from "lucide-react";
 
-import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 import { Program, AnchorProvider, getProvider, setProvider, BN } from "@coral-xyz/anchor";
 
@@ -105,24 +104,22 @@ const DappPage = () => {
     const provider = getProvider();
 
     if (program && publicKey && provider) {
-      const signer = publicKey;
-      const [ledgerIdentifierPda] = PublicKey.findProgramAddressSync([Buffer.from("ledger_identifier")], program.programId);
+      // const signer = publicKey;
+      // const [ledgerIdentifierPda] = PublicKey.findProgramAddressSync([Buffer.from("ledger_identifier")], program.programId);
 
-      if (!ledgerIdentifierPda) {
-        const vaultInitializeAccount: VaultInitializeAccount = {
-          signer: signer,
-          ledgerIdentifier: ledgerIdentifierPda,
-          systemProgram: SystemProgram.programId,
-        };
+      // const vaultInitializeAccount: VaultInitializeAccount = {
+      //   signer: signer,
+      //   ledgerIdentifier: ledgerIdentifierPda,
+      //   systemProgram: SystemProgram.programId,
+      // };
 
-        await program.methods
-          .vaultInitialize()
-          .accounts(vaultInitializeAccount)
-          .rpc()
-          .catch((e) => {
-            console.log(e);
-          });
-      }
+      // await program.methods
+      //   .vaultInitialize()
+      //   .accounts(vaultInitializeAccount)
+      //   .rpc()
+      //   .catch((e) => {
+      //     console.log(e);
+      //   });
 
       setOpenInitializingDialog(false);
     }
@@ -216,7 +213,7 @@ const DappPage = () => {
           systemProgram: SystemProgram.programId,
         };
 
-        const txSig = await program.methods.vaultTeleport(amount).accounts(vaultTeleportAccount).rpc();
+        const txSig = await program.methods.vaultTeleport(amount, xodeRecipientValue).accounts(vaultTeleportAccount).rpc();
         setIsTeleportProcessing(false);
         setIsTeleportSuccessful(true);
         setTeleportTxSignature(txSig);
