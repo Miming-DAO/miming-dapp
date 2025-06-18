@@ -420,7 +420,7 @@ const DappPage = () => {
                     <div className="relative w-full text-right">
                       <p id="xode-asset-received" className="inline-block text-gray-800 text-2xl font-bold">
                         <span className="pr-[5px]">{quantityValue}</span>
-                        <span className="font-bold">wSOL</span>
+                        <span className="font-bold">mSOL</span>
                       </p>
                     </div>
                   </div>
