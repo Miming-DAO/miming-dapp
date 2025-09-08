@@ -1,0 +1,259 @@
+<div class="miming-background"></div>
+
+<div class="p-2 sm:p-5">
+  <p-menubar [model]="menuItems" class="glass p-3 border-1 border-white-alpha-20 shadow-8">
+    <ng-template #start>
+      <img src="/images/backgrounds/miming-logo.png" class="h-3rem md:h-4rem lg:h-6rem" />
+      <span class="text-yellow-500 text-xl md:text-3xl lg:text-5xl font-bold ml-2 mr-2">
+        MIMING CAT
+      </span>
+    </ng-template>
+    <ng-template #item let-item let-root="root">
+      <p-button label="{{ item.label }}" variant="text"
+        styleClass="w-full text-gray-900 md:text-white border-round-xl hover:bg-pink-700 hover:text-white active:bg-pink-900" />
+    </ng-template>
+    <ng-template #end>
+      @if (getCurrentWallet()) {
+      <button pButton severity="secondary"
+        class="w-full bg-white border-pink-900 border-round-xl text-gray-900 shadow-1 flex align-items-center h-3rem"
+        (click)="getPolkadotWalletAccount()">
+        <app-polkadot-identicon-util [address]="getCurrentWallet()?.address || ''" [size]="20" class="mt-1">
+        </app-polkadot-identicon-util>
+        <span class="font-bold">{{ getCurrentWallet()?.name }}</span>
+        <span class="text-xs">
+          ({{ getCurrentWallet()?.address?.slice(0, 5) + '...' + getCurrentWallet()?.address?.slice(-5) }})
+        </span>
+      </button>
+      }
+      @else {
+      <p-button label="Connect Wallet" severity="secondary"
+        styleClass="w-full bg-white border-pink-900 border-round-xl text-gray-900 font-bold shadow-1 h-3rem"
+        (click)="connectWallet()" />
+      }
+    </ng-template>
+  </p-menubar>
+  <br />
+  <div class="grid">
+    <div class="col-12 md:col-3 lg:col-3"></div>
+    <div class="col-12 md:col-6 lg:col-6">
+      <div class="glass-form p-5 border-1 border-white-alpha-20 shadow-8">
+        <div class="grid">
+          <div class="col-12 md:col-6 lg:col-6">
+            <label class="text-lg text-yellow-500 font-semibold">Source Network:</label>
+            <p-select [options]="sourceNetworks" [(ngModel)]="selectedSourceNetwork" optionLabel="name"
+              class="w-full mt-1 border-round-2xl" size="large" (onChange)="getTargetNetworks()">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2 text-xl" *ngIf="selectedOption">
+                  <img [src]="'images/networks/' + selectedOption.image" height="27" />
+                  <div>{{ selectedOption.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-network #item>
+                <div class="flex items-center gap-2">
+                  <img [src]="'images/networks/' + network.image" height="23" />
+                  <div>{{ network.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template #dropdownicon>
+                <i class="pi pi-angle-down"></i>
+              </ng-template>
+              <ng-template #header>
+                <div class="font-medium p-3">Select Network</div>
+              </ng-template>
+            </p-select>
+          </div>
+          <div class="col-12 md:col-6 lg:col-6">
+            <label class="text-lg text-yellow-500 font-semibold">Target Network:</label>
+            <p-select [options]="targetNetworks" [(ngModel)]="selectedTargetNetwork" optionLabel="name"
+              class="w-full mt-1 border-round-2xl" size="large" (onChange)="getTokens()">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2 text-xl" *ngIf="selectedOption">
+                  <img [src]="'images/networks/' + selectedOption.image" height="27" />
+                  <div>{{ selectedOption.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-network #item>
+                <div class="flex items-center gap-2">
+                  <img [src]="'images/networks/' + network.image" height="23" />
+                  <div>{{ network.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template #dropdownicon>
+                <i class="pi pi-angle-down"></i>
+              </ng-template>
+              <ng-template #header>
+                <div class="font-medium p-3">Select Network</div>
+              </ng-template>
+            </p-select>
+          </div>
+          <div class="col-12 md:col-12 lg:col-12">
+            <label class="text-lg text-yellow-500 font-semibold">
+              {{ selectedTargetNetwork?.name }}'s Recipient Address:
+            </label>
+            <p-inputgroup class="mt-1">
+              <p-inputgroup-addon [style]="{ 'padding-left': '15px', 'padding-right': '15px' }"
+                class="border-round-left-2xl">
+                <img [src]="'images/networks/' + selectedTargetNetwork?.image" height="27" />
+              </p-inputgroup-addon>
+              <input pInputText pSize="large" class="w-full border-round-right-2xl text-xl"
+                [(ngModel)]="recipientAddress" />
+            </p-inputgroup>
+          </div>
+          <div class="col-12 md:col-6 lg:col-6">
+            <label class="text-lg text-yellow-500 font-semibold">Token:</label>
+            <p-select [options]="tokens" [(ngModel)]="selectedToken" optionLabel="name"
+              class="w-full mt-1 border-round-2xl" size="large">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2 text-xl" *ngIf="selectedOption">
+                  <img [src]="'images/tokens/' + selectedOption.image" height="27" />
+                  <div>{{ selectedOption.symbol + " (" + selectedOption.name + ")" }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-token #item>
+                <div class="flex items-center gap-2">
+                  <img [src]="'images/tokens/' + token.image" height="23" />
+                  <div>{{ token.symbol + " (" + token.name + ")" }}</div>
+                </div>
+              </ng-template>
+              <ng-template #dropdownicon>
+                <i class="pi pi-angle-down"></i>
+              </ng-template>
+              <ng-template #header>
+                <div class="font-medium p-3">Select Token</div>
+              </ng-template>
+            </p-select>
+          </div>
+          <div class="col-12 md:col-6 lg:col-6">
+            <label class="text-lg text-yellow-500 font-semibold">Quantity:</label>
+            <p-inputnumber class="w-full" inputStyleClass="w-full mt-1 border-round-2xl text-right font-bold text-xl"
+              size="large" inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2"
+              [maxFractionDigits]="selectedToken?.decimals" [(ngModel)]="quantity" />
+          </div>
+          <div class="col-12 md:col-12 lg:col-12">
+            <label class="text-lg text-yellow-500 font-semibold">Asset Received:</label>
+            <p-inputgroup class="mt-1">
+              <p-inputgroup-addon [style]="{ 'padding-left': '20px', 'padding-right': '20px' }"
+                class="border-none bg-yellow-500 font-bold text-gray-900 text-xl h-4rem border-round-left-2xl">
+                <img [src]="'images/tokens/' + receivedToken?.image" height="27" [style]="{ 'margin-right': '1px' }" />
+                &nbsp;{{ receivedToken?.symbol }}
+              </p-inputgroup-addon>
+              <p-inputnumber class="w-full"
+                inputStyleClass="w-full border-none bg-yellow-500 font-bold text-gray-900 text-right border-round-right-2xl text-xl"
+                size="large" inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2"
+                [maxFractionDigits]="selectedToken?.decimals" [(ngModel)]="quantity" readonly />
+            </p-inputgroup>
+          </div>
+        </div>
+        <div class="grid mt-4 mb-2">
+          <div class="col-12 md:col-12 lg:col-12">
+            <button pButton type="button" label="Teleport"
+              class="p-button-lg w-full bg-blue-600 border-blue-600 border-round-2xl h-5rem"></button>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="col-12 md:col-12 lg:col-12 text-center">
+            <p class="note text-lg text-white">
+              Teleport will only freeze your asset on your wallet while minting equivalent wrapped asset. 100 MIMING
+              will be locked to secure the asset.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 md:col-3 lg:col-3"></div>
+  </div>
+</div>
+
+<p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true" [style]="{ width: '30rem' }">
+  <ng-template #header>
+    <span class="font-bold text-lg">Choose Wallet</span>
+  </ng-template>
+  <div class="flex flex-column gap-2">
+    <p-button severity="secondary"
+      styleClass="w-full flex align-items-center justify-content-start gap-2 p-4 border-round-2xl"
+      (click)="connectPolkadotJsWallet()">
+      <img src="/images/wallets/polkadotjs.png" alt="PolkadotJS" class="w-2rem h-2rem" />
+      <span class="font-medium text-lg">PolkadotJS</span>
+    </p-button>
+    <p-button severity="secondary"
+      styleClass="w-full flex align-items-center justify-content-start gap-2 p-4 border-round-2xl"
+      (click)="connectTalismanWallet()">
+      <img src="/images/wallets/talisman.png" alt="Talisman Wallet" class="w-2rem h-2rem" />
+      <span class="font-medium text-lg">Talisman</span>
+    </p-button>
+    <p-button severity="secondary"
+      styleClass="w-full flex align-items-center justify-content-start gap-2 p-4 border-round-2xl"
+      (click)="connectSolanaWallet()">
+      <img src="/images/wallets/solana.png" alt="Solana Wallet" class="w-2rem h-2rem" />
+      <span class="font-medium text-lg">Solana Wallet</span>
+    </p-button>
+  </div>
+  <ng-template #footer>
+    <p-button label="Cancel" severity="secondary" styleClass="w-full border-round-2xl"
+      (click)="showAvailableWalletsDialog = false" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true" [style]="{ width: '30rem' }"
+  [dismissableMask]="true">
+  <ng-template #header>
+    <span class="font-bold text-xl">Choose Account</span>
+  </ng-template>
+  <div class="flex flex-column gap-2">
+    @for (account of polkadotWalletAccounts; track account.address) {
+    <div class="wallet-option p-3 border-round-2xl flex align-items-center gap-3 cursor-pointer transition-all"
+      [ngClass]="{ 'wallet-selected': selectedPolkadotWalletAccount?.address === account.address }"
+      (click)="selectedPolkadotWalletAccount = account">
+      <app-polkadot-identicon-util [address]="account.address" [size]="40"></app-polkadot-identicon-util>
+      <div class="flex flex-column mb-1">
+        <span class="font-bold text-lg">{{ account.name }}</span>
+        <span class="text-sm">
+          {{ account.address.slice(0, 5) }}...{{ account.address.slice(-5) }}
+        </span>
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template #footer>
+    <p-button label="Connect" icon="pi pi-check" [disabled]="!selectedPolkadotWalletAccount || isProcessing"
+      styleClass="bg-blue-600 border-blue-600 border-round-2xl"
+      (click)="connectPolkadotWalletAccount(selectedPolkadotWalletAccount!)" />
+    <p-button label="Cancel" severity="secondary" styleClass="border-round-2xl"
+      (click)="showPolkadotWalletAccountsDialog = false" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true" [style]="{ width: '30rem' }"
+  [dismissableMask]="true">
+  <ng-template #header>
+    <span class="font-bold text-xl">Account Details</span>
+  </ng-template>
+  <div class="flex flex-column gap-2">
+    <div class="wallet-option p-3 border-round-2xl flex align-items-center gap-3">
+      <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount?.address || ''" [size]="40">
+      </app-polkadot-identicon-util>
+      <div class="flex flex-column mb-1 w-full">
+        <span class="font-bold text-lg">{{ selectedPolkadotWalletAccount?.name }}</span>
+        <div class="flex align-items-center gap-2">
+          <span class="text-sm">
+            {{ selectedPolkadotWalletAccount?.address?.slice(0, 5) }}...
+            {{ selectedPolkadotWalletAccount?.address?.slice(-5) }}
+          </span>
+          <p-button icon="pi pi-copy" text rounded size="small"
+            (click)="copyAddressToClipboard(selectedPolkadotWalletAccount?.address)"
+            styleClass="p-button-text p-button-plain p-0 mb-1" [pTooltip]="'Copy Address'" tooltipPosition="bottom" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div class="flex justify-content-between w-full">
+      <p-button label="Logout" severity="danger" icon="pi pi-sign-out" styleClass="border-round-2xl"
+        (click)="logoutPolkadotWalletAccount()" [disabled]="isProcessing" />
+      <p-button label="Close" severity="secondary" styleClass="border-round-2xl"
+        (click)="showPolkadotWalletAccountDialog = false" />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-toast />
