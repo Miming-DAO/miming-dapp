@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/extension-inject/types';
+
 import { MenuItem, MessageService } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
@@ -12,9 +14,9 @@ import { SelectModule } from 'primeng/select';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
 
-import { PolkadotWallet, PolkadotWalletAccount } from '../../models/wallet.model';
 import { Network } from '../../models/network.model';
 import { Token } from '../../models/token.model';
 import { LimitedReserveTransferAssets } from '../../models/limited-reserve-transfer-assets.model';
@@ -22,6 +24,7 @@ import { ExecuteTransaction } from '../../models/execute-transactions.model';
 
 import { PolkadotJsService } from '../api/polkadot-js/polkadot-js.service';
 import { NetworksService } from '../api/networks/networks.service';
+import { ParachainsService } from '../api/parachains/parachains.service';
 import { TokensService } from '../api/tokens/tokens.service';
 import { PolkadotXcmService } from '../api/polkadot-xcm/polkadot-xcm.service';
 
@@ -41,6 +44,7 @@ import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkado
     InputGroupModule,
     InputGroupAddonModule,
     InputNumberModule,
+    ProgressSpinnerModule,
     ToastModule,
     PolkadotIdenticonUtil
   ],
@@ -52,6 +56,7 @@ export class Dapp {
   constructor(
     private polkadotJsService: PolkadotJsService,
     private networksService: NetworksService,
+    private parachainsService: ParachainsService,
     private tokenService: TokensService,
     private polkadotXcmService: PolkadotXcmService,
     private messageService: MessageService
@@ -60,12 +65,21 @@ export class Dapp {
   menuItems: MenuItem[] | undefined;
 
   showAvailableWalletsDialog: boolean = false;
+
   showPolkadotWalletAccountsDialog: boolean = false;
   polkadotWalletAccounts: PolkadotWalletAccount[] = [];
   selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
   showPolkadotWalletAccountDialog: boolean = false;
 
   isProcessing: boolean = false;
+
+  showProcessingDialog: boolean = false;
+  processingStatus: {
+    message: string;
+    details: string;
+    status: string;
+  } = { message: '', details: '', status: '' };
+  processingResults: any;
 
   sourceNetworks: Network[] = [];
   selectedSourceNetwork: Network | undefined;
@@ -77,11 +91,11 @@ export class Dapp {
   selectedToken: Token | undefined;
   receivedToken: Token | undefined;
 
-  quantity: number = 0;
-  recipientAddress: string = '';
+  quantity: number = 0.01;
+  recipientAddress: string = 'XqDaorD7pcAHV1qatA4aKPV4wCwHeMbUdjbKNJ5RZcL9VpeSr';
   assetReceived: number = 0;
 
-  getCurrentWallet(): PolkadotWalletAccount | undefined {
+  getCurrentPolkadotWalletAccount(): PolkadotWalletAccount | undefined {
     const storedAccount = localStorage.getItem('polkadot_wallet_account');
     if (storedAccount) {
       return JSON.parse(storedAccount) as PolkadotWalletAccount;
@@ -96,19 +110,8 @@ export class Dapp {
 
   async connectPolkadotJsWallet() {
     try {
-      if (!this.polkadotJsService.isWalletInstalled('polkadot-js')) {
-        const installUrl = this.polkadotJsService.getWalletInstallUrl('polkadot-js');
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Polkadot-JS not installed. Install from: ' + installUrl
-        });
-
-        return;
-      }
-
-      const result: PolkadotWallet = await this.polkadotJsService.connectToWallet('polkadot-js');
-      this.polkadotWalletAccounts = result.accounts;
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('polkadot-js');
+      this.polkadotWalletAccounts = results;
       this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
 
       this.showPolkadotWalletAccountsDialog = true;
@@ -123,19 +126,8 @@ export class Dapp {
 
   async connectTalismanWallet() {
     try {
-      if (!this.polkadotJsService.isWalletInstalled('talisman')) {
-        const installUrl = this.polkadotJsService.getWalletInstallUrl('talisman');
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Talisman not installed. Install from: ' + installUrl
-        });
-
-        return;
-      }
-
-      const result: PolkadotWallet = await this.polkadotJsService.connectToWallet('talisman');
-      this.polkadotWalletAccounts = result.accounts;
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('talisman');
+      this.polkadotWalletAccounts = results;
       this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
 
       this.showPolkadotWalletAccountsDialog = true;
@@ -152,11 +144,13 @@ export class Dapp {
 
   }
 
-  connectPolkadotWalletAccount(polkadotWalletAccount: PolkadotWalletAccount): void {
+  connectPolkadotWalletAccount(): void {
     this.isProcessing = true;
 
     setTimeout(() => {
-      localStorage.setItem('polkadot_wallet_account', JSON.stringify(polkadotWalletAccount));
+      localStorage.setItem('polkadot_wallet_account', JSON.stringify(this.selectedPolkadotWalletAccount));
+
+      this.showAvailableWalletsDialog = false;
       this.showPolkadotWalletAccountsDialog = false;
 
       this.messageService.add({
@@ -188,7 +182,7 @@ export class Dapp {
     this.isProcessing = true;
 
     setTimeout(() => {
-      localStorage.removeItem('polkadot_wallet_account');
+      localStorage.clear();
       this.showPolkadotWalletAccountDialog = false;
 
       this.messageService.add({
@@ -258,6 +252,124 @@ export class Dapp {
     }
   }
 
+  async teleport(): Promise<void> {
+    this.isProcessing = true;
+
+    this.showProcessingDialog = true;
+    this.processingStatus = {
+      message: "Preparing transaction...",
+      details: "Please wait while we prepare your teleport transaction.",
+      status: "In-Progress"
+    };
+
+    const sourceParaId = this.parachainsService.getAllParachains().find(p => p.networkId === this.selectedSourceNetwork?.id)?.para_id;
+    if (!sourceParaId) {
+      this.isProcessing = false;
+      this.processingStatus = {
+        message: "Invalid source parachain ID.",
+        details: "Please check the source parachain configuration.",
+        status: "Error"
+      };
+
+      return;
+    }
+
+    this.processingStatus = {
+      message: "Creating transaction...",
+      details: "Please wait while we create your teleport transaction.",
+      status: "In-Progress"
+    };
+
+    const data: LimitedReserveTransferAssets = {
+      dest: this.parachainsService.getAllParachains().find(p => p.networkId === this.selectedTargetNetwork?.id)?.para_id || 0,
+      beneficiary: this.recipientAddress,
+      assetId: this.selectedToken?.reference_id as number || 0,
+      amount: this.quantity * (10 ** (this.selectedToken?.decimals || 0))
+    }
+
+    this.polkadotXcmService.limitedReserveTransferAssets(sourceParaId, data).subscribe({
+      next: async transactionResults => {
+        const txHash = transactionResults.encoded as string;
+
+        this.processingStatus = {
+          message: "Signing transaction...",
+          details: "Please sign the transaction in your wallet.",
+          status: "In-Progress"
+        };
+
+        if (!this.selectedPolkadotWalletAccount) {
+          this.isProcessing = false;
+          this.processingStatus = {
+            message: "No wallet account selected.",
+            details: "Please select a wallet account to sign the transaction.",
+            status: "Error"
+          };
+
+          return;
+        }
+
+        const signedTx = await this.polkadotJsService.signTransaction(
+          this.selectedPolkadotWalletAccount,
+          this.selectedSourceNetwork as Network,
+          txHash
+        );
+
+        const executeData: ExecuteTransaction = {
+          signedTxHash: signedTx
+        };
+
+        this.processingStatus = {
+          message: "Submitting transaction...",
+          details: "Please wait while we submit your teleport transaction.",
+          status: "In-Progress"
+        };
+
+        this.polkadotXcmService.executeTransaction(sourceParaId, executeData).subscribe({
+          next: executionResults => {
+            console.log('Execution Results:', executionResults);
+
+            if (executionResults.type === "txBestBlocksState") {
+              if (executionResults.ok) {
+                this.isProcessing = false;
+                this.processingStatus = {
+                  message: "Transaction submitted successfully.",
+                  details: "Your teleport transaction has been submitted.",
+                  status: "Completed"
+                };
+                this.processingResults = executionResults;
+              } else {
+                if (executionResults.error) {
+                  this.isProcessing = false;
+                  this.processingStatus = {
+                    message: "Transaction submission failed.",
+                    details: executionResults.error,
+                    status: "Error"
+                  };
+                }
+              }
+            }
+          },
+          error: executionError => {
+            this.isProcessing = false;
+            this.processingStatus = {
+              message: executionError.error.message,
+              details: executionError.error.error,
+              status: "Error"
+            };
+          }
+        });
+      },
+      error: transactionError => {
+        this.isProcessing = false;
+        this.processingStatus = {
+          message: transactionError.error.message,
+          details: transactionError.error.error,
+          status: "Error"
+        };
+      }
+    });
+  }
+
   ngOnInit() {
     this.menuItems = [
       { label: 'Teleport / Cross-Chain', routerLink: "" },
@@ -265,6 +377,6 @@ export class Dapp {
     ];
 
     this.getSourceNetworks();
-    this.selectedPolkadotWalletAccount = this.getCurrentWallet();
+    this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
   }
 }

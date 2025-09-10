@@ -9,7 +9,7 @@ export class TokensService {
   private polkadotNetworkId = 1;
   private assethubPolkadotNetworkId = 2;
   private xodePolkadotNetworkId = 3;
-  private solanaNetworkId = 4;
+  // private solanaNetworkId = 4;
 
   private readonly tokens: Token[] = [
     {
@@ -78,32 +78,32 @@ export class TokensService {
         this.assethubPolkadotNetworkId
       ]
     },
-    {
-      id: 6,
-      reference_id: "So11111111111111111111111111111111111111111",
-      network_id: this.xodePolkadotNetworkId,
-      name: "Solana",
-      symbol: "mSOL",
-      decimals: 9,
-      type: "asset",
-      image: "msol.png",
-      target_networks: [
-        this.solanaNetworkId
-      ]
-    },
-    {
-      id: 7,
-      reference_id: "So11111111111111111111111111111111111111111",
-      network_id: this.solanaNetworkId,
-      name: "Solana",
-      symbol: "SOL",
-      decimals: 9,
-      type: "native",
-      image: "sol.png",
-      target_networks: [
-        this.xodePolkadotNetworkId
-      ]
-    },
+    // {
+    //   id: 6,
+    //   reference_id: "So11111111111111111111111111111111111111111",
+    //   network_id: this.xodePolkadotNetworkId,
+    //   name: "Solana",
+    //   symbol: "mSOL",
+    //   decimals: 9,
+    //   type: "asset",
+    //   image: "msol.png",
+    //   target_networks: [
+    //     this.solanaNetworkId
+    //   ]
+    // },
+    // {
+    //   id: 7,
+    //   reference_id: "So11111111111111111111111111111111111111111",
+    //   network_id: this.solanaNetworkId,
+    //   name: "Solana",
+    //   symbol: "SOL",
+    //   decimals: 9,
+    //   type: "native",
+    //   image: "sol.png",
+    //   target_networks: [
+    //     this.xodePolkadotNetworkId
+    //   ]
+    // },
   ];
 
   constructor() { }

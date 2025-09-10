@@ -1,93 +1,63 @@
 import { Injectable } from '@angular/core';
 
+import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
+import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
+
+import { ApiPromise, WsProvider } from '@polkadot/api';
 import { encodeAddress } from '@polkadot/util-crypto';
+import { hexToU8a } from '@polkadot/util';
 import { polkadotIcon } from '@polkadot/ui-shared';
 
-import { PolkadotWallet, PolkadotWalletAccount } from '../../../models/wallet.model';
+import { Network } from '../../../models/network.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PolkadotJsService {
-
-  private walletExtensions: Record<'talisman' | 'polkadot-js', {
-    extensionName: string;
-    source: string;
-    title: string;
-    installUrl: string;
-  }> = {
-      'talisman': {
-        extensionName: 'talisman',
-        source: 'talisman',
-        title: 'Talisman',
-        installUrl: 'https://chrome.google.com/webstore/detail/talisman/fijngjgcjhjmmpcmkeiomlglpeiijkld'
-      },
-      'polkadot-js': {
-        extensionName: 'polkadot-js',
-        source: 'polkadot-js',
-        title: 'Polkadot{.js}',
-        installUrl: 'https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd'
-      }
-    };
-
   private appName = 'miming-dapp';
+  private extensions = web3Enable(this.appName);
 
   constructor() { }
 
-  async connectToWallet(walletExtensionKey: string): Promise<PolkadotWallet> {
-    const wallet = this.walletExtensions[walletExtensionKey as 'polkadot-js' | 'talisman'];
-    if (!wallet) {
-      throw new Error(`Unknown wallet: ${walletExtensionKey}`);
+  async connectToWallet(wallet: string): Promise<InjectedAccountWithMeta[]> {
+    if ((await this.extensions).length === 0) {
+      throw new Error("No wallet extensions found. Please install a Polkadot wallet extension like Polkadot.js or Talisman.");
     }
 
-    const injected = (window as any).injectedWeb3?.[wallet.source];
-    if (!injected) {
-      throw new Error(`${wallet.title} is not installed. Please install it from: ${wallet.installUrl}`);
+    const allAccounts = await web3Accounts();
+    if (allAccounts.length === 0) {
+      throw new Error("No accounts found in the wallet. Please create an account in your Polkadot wallet extension.");
     }
+
+    const accounts = allAccounts.filter(account => account.meta.source === wallet);
+    if (accounts.length === 0) {
+      throw new Error(`No accounts found for the selected wallet: ${wallet}. Please ensure you have accounts in that wallet.`);
+    }
+
+    return accounts
+  }
+
+  async signTransaction(account: InjectedAccountWithMeta, network: Network, transactionHex: string): Promise<string> {
+    const injector = await web3FromSource(account.meta.source);
+    if (!injector.signer) {
+      throw new Error(`The selected wallet (${account.meta.source}) does not support signing transactions.`);
+    }
+
+    const wsProvider = new WsProvider(network.rpc_url);
+    const api = await ApiPromise.create({ provider: wsProvider });
 
     try {
-      let accounts = [];
+      const txBytes = hexToU8a(transactionHex);
+      const call = api.registry.createType('Call', txBytes);
+      const tx = api.tx(call);
 
-      const extension = await injected.enable(this.appName);
-      if (extension.accounts && typeof extension.accounts.get === 'function') {
-        accounts = await extension.accounts.get();
-      }
-
-      if (!accounts || accounts.length === 0) {
-        throw new Error(`No accounts found in ${wallet.title}. Make sure you have accounts in your wallet.`);
-      }
-
-      const polkadotAccounts: PolkadotWalletAccount[] = accounts.map((account: any) => ({
-        address: account.address,
-        name: account.name,
-        type: account.type
-      }));
-
-      const polkadotWallet: PolkadotWallet = {
-        name: wallet.source,
-        version: injected.version || '1.0.0',
-        signer: extension.signer,
-        provider: extension.provider,
-        title: wallet.title,
-        accounts: polkadotAccounts
-      }
-
-      return polkadotWallet
+      const signedTx = await tx.signAsync(account.address, { signer: injector.signer });
+      return signedTx.toHex();
     } catch (error) {
-      throw new Error(`Error connecting to ${wallet.title}: ${(error as Error).message}`);
+      throw error;
+    } finally {
+      await wsProvider.disconnect();
     }
-  }
-
-  isWalletInstalled(walletExtensionKey: string): boolean {
-    const wallet = this.walletExtensions[walletExtensionKey as 'polkadot-js' | 'talisman'];
-    if (!wallet) return false;
-
-    return !!(window as any).injectedWeb3?.[wallet.source];
-  }
-
-  getWalletInstallUrl(walletExtensionKey: string): string | null {
-    const wallet = this.walletExtensions[walletExtensionKey as 'polkadot-js' | 'talisman'];
-    return wallet?.installUrl || null;
   }
 
   generateIdenticon(address: string, size = 32): string {

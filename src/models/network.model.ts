@@ -6,4 +6,5 @@ export class Network {
   category: string = '';
   address_prefix: string | number | null = null;
   image: string = '';
+  rpc_url: string = '';
 }

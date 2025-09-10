@@ -10,7 +10,8 @@ import { ExecuteTransaction } from '../../../models/execute-transactions.model';
   providedIn: 'root'
 })
 export class PolkadotXcmService {
-  private apiUrl = 'https://api.miming.net';
+  private apiUrl = 'http://192.168.0.190:3000';
+  private apiPrefix = '/api/polkadot-xcm';
 
   constructor(
     private http: HttpClient
@@ -21,7 +22,7 @@ export class PolkadotXcmService {
     data: LimitedReserveTransferAssets
   ): Observable<any> {
     const params = new HttpParams().set('sourceParaId', sourceParaId.toString());
-    return this.http.post(`${this.apiUrl}/limited-reserve-transfer-assets`, data, { params });
+    return this.http.post(`${this.apiUrl}${this.apiPrefix}/limited-reserve-transfer-assets`, data, { params });
   }
 
   executeTransaction(
@@ -29,6 +30,6 @@ export class PolkadotXcmService {
     data: ExecuteTransaction
   ): Observable<any> {
     const params = new HttpParams().set('sourceParaId', sourceParaId.toString());
-    return this.http.post(`${this.apiUrl}/execute-transaction`, data, { params });
+    return this.http.post(`${this.apiUrl}${this.apiPrefix}/execute-transaction`, data, { params });
   }
 }

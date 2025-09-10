@@ -28,7 +28,6 @@
     "@angular/router": "^20.1.0",
     "@polkadot/api": "^16.4.6",
     "@polkadot/extension-dapp": "^0.61.7",
-    "@polkadot/react-identicon": "^3.16.1",
     "@polkadot/ui-shared": "^3.16.1",
     "@primeuix/themes": "^1.2.3",
     "primeflex": "^4.0.0",

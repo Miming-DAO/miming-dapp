@@ -14,7 +14,8 @@ export class NetworksService {
       decimal: 10,
       category: "Live",
       address_prefix: 0,
-      image: "polkadot.png"
+      image: "polkadot.png",
+      rpc_url: "wss://polkadot-rpc.n.dwellir.com"
     },
     {
       id: 2,
@@ -23,7 +24,8 @@ export class NetworksService {
       decimal: 10,
       category: "Live",
       address_prefix: 0,
-      image: "assethub.png"
+      image: "assethub.png",
+      rpc_url: "wss://polkadot-asset-hub-rpc.polkadot.io"
     },
     {
       id: 3,
@@ -32,17 +34,18 @@ export class NetworksService {
       decimal: 12,
       category: "Live",
       address_prefix: 280,
-      image: "xode.png"
+      image: "xode.png",
+      rpc_url: "wss://polkadot-rpcnode.xode.net"
     },
-    {
-      id: 4,
-      name: "Solana",
-      unit: "SOL",
-      decimal: 9,
-      category: "Live",
-      address_prefix: null,
-      image: "solana.png"
-    },
+    // {
+    //   id: 4,
+    //   name: "Solana",
+    //   unit: "SOL",
+    //   decimal: 9,
+    //   category: "Live",
+    //   address_prefix: null,
+    //   image: "solana.png"
+    // },
   ];
 
   constructor() { }

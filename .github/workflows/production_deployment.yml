@@ -12,24 +12,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create .env file
+      - name: Installing dependencies
         run: |
-          echo "${{ secrets.ENV_VARIABLES }}" > .env
+          npm install --legacy-peer-deps
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_NAMESPACE }}/miming-dapp:latest .
-
-      - name: Push image to DockerHub
+      - name: Building application
         run: |
-          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-          docker push ${{ secrets.DOCKER_HUB_NAMESPACE }}/miming-dapp:latest
+          npm run build
 
-      - name: SSH to EC2 Server
+      - name: SSH to Server
         run: |
           mkdir ~/.ssh
           echo -e "${{ secrets.PRODUCTION_PRIVATE_KEY }}" > ~/.ssh/ssh-key
           chmod 400 ~/.ssh/ssh-key
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} \
-            'cd ${{ secrets.PRODUCTION_PATH }} && \
-            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }} && \
-            sh deploy_production.sh'
+          rsync -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key" -r dist/* ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} 'sudo systemctl restart nginx'

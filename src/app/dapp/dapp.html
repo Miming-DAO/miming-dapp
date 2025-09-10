@@ -13,15 +13,16 @@
         styleClass="w-full text-gray-900 md:text-white border-round-xl hover:bg-pink-700 hover:text-white active:bg-pink-900" />
     </ng-template>
     <ng-template #end>
-      @if (getCurrentWallet()) {
+      @if (selectedPolkadotWalletAccount) {
       <button pButton severity="secondary"
         class="w-full bg-white border-pink-900 border-round-xl text-gray-900 shadow-1 flex align-items-center h-3rem"
         (click)="getPolkadotWalletAccount()">
-        <app-polkadot-identicon-util [address]="getCurrentWallet()?.address || ''" [size]="20" class="mt-1">
+        <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount.address || ''" [size]="20" class="mt-1">
         </app-polkadot-identicon-util>
-        <span class="font-bold">{{ getCurrentWallet()?.name }}</span>
+        <span class="font-bold">{{ selectedPolkadotWalletAccount.meta.name }}</span>
         <span class="text-xs">
-          ({{ getCurrentWallet()?.address?.slice(0, 5) + '...' + getCurrentWallet()?.address?.slice(-5) }})
+          ({{ selectedPolkadotWalletAccount.address.slice(0, 5) + '...' +
+          selectedPolkadotWalletAccount.address.slice(-5) }})
         </span>
       </button>
       }
@@ -147,7 +148,8 @@
         <div class="grid mt-4 mb-2">
           <div class="col-12 md:col-12 lg:col-12">
             <button pButton type="button" label="Teleport"
-              class="p-button-lg w-full bg-blue-600 border-blue-600 border-round-2xl h-5rem"></button>
+              class="p-button-lg w-full bg-blue-600 border-blue-600 border-round-2xl h-5rem" [disabled]="isProcessing"
+              (click)="teleport()"></button>
           </div>
         </div>
         <div class="grid">
@@ -206,7 +208,7 @@
       (click)="selectedPolkadotWalletAccount = account">
       <app-polkadot-identicon-util [address]="account.address" [size]="40"></app-polkadot-identicon-util>
       <div class="flex flex-column mb-1">
-        <span class="font-bold text-lg">{{ account.name }}</span>
+        <span class="font-bold text-lg">{{ account.meta.name }}</span>
         <span class="text-sm">
           {{ account.address.slice(0, 5) }}...{{ account.address.slice(-5) }}
         </span>
@@ -216,8 +218,7 @@
   </div>
   <ng-template #footer>
     <p-button label="Connect" icon="pi pi-check" [disabled]="!selectedPolkadotWalletAccount || isProcessing"
-      styleClass="bg-blue-600 border-blue-600 border-round-2xl"
-      (click)="connectPolkadotWalletAccount(selectedPolkadotWalletAccount!)" />
+      styleClass="bg-blue-600 border-blue-600 border-round-2xl" (click)="connectPolkadotWalletAccount()" />
     <p-button label="Cancel" severity="secondary" styleClass="border-round-2xl"
       (click)="showPolkadotWalletAccountsDialog = false" />
   </ng-template>
@@ -233,7 +234,7 @@
       <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount?.address || ''" [size]="40">
       </app-polkadot-identicon-util>
       <div class="flex flex-column mb-1 w-full">
-        <span class="font-bold text-lg">{{ selectedPolkadotWalletAccount?.name }}</span>
+        <span class="font-bold text-lg">{{ selectedPolkadotWalletAccount?.meta?.name }}</span>
         <div class="flex align-items-center gap-2">
           <span class="text-sm">
             {{ selectedPolkadotWalletAccount?.address?.slice(0, 5) }}...
@@ -255,5 +256,58 @@
     </div>
   </ng-template>
 </p-dialog>
+
+<p-dialog [(visible)]="showProcessingDialog" [modal]="true" [style]="{ width: '40rem' }" [dismissableMask]="false"
+  [closable]="false" [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="header">
+    <span class="font-bold text-xl">Processing</span>
+  </ng-template>
+  <div class="flex flex-column gap-4 py-3">
+    @if (processingStatus.status === "In-Progress") {
+    <div class="flex flex-column align-items-center text-center gap-3">
+      <p-progressSpinner strokeWidth="4" class="w-4rem h-4rem"></p-progressSpinner>
+      <div class="mt-4">
+        <span class="font-bold text-lg">
+          Please wait while your transaction is being processed...
+        </span>
+        <p class="text-500">
+          This may take a few moments.
+        </p>
+        <p class="mt-3 text-700">{{ processingStatus.message }}</p>
+        <p class="text-600">{{ processingStatus.details }}</p>
+      </div>
+    </div>
+    } @else if (processingStatus.status === "Error") {
+    <div class="flex flex-column align-items-center text-center gap-2 text-red-500">
+      <i class="pi pi-times-circle text-6xl"></i>
+      <div class="mt-4">
+        <span class="font-bold text-lg">{{ processingStatus.message }}</span>
+        <p class="mt-3 text-500">{{ processingStatus.details }}</p>
+        <div>
+          {{ processingResults | json }}
+        </div>
+      </div>
+    </div>
+    } @else if (processingStatus.status === "Completed") {
+    <div class="flex flex-column align-items-center text-center gap-2 text-green-600">
+      <i class="pi pi-check-circle text-6xl"></i>
+      <div class="mt-4">
+        <span class="font-bold text-lg">{{ processingStatus.message }}</span>
+        <p class="mt-3 text-500">{{ processingStatus.details }}</p>
+        <div>
+          {{ processingResults | json }}
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end w-full">
+      <p-button label="Close" severity="secondary" styleClass="border-round-2xl px-4"
+        (click)="showProcessingDialog = false" [disabled]="isProcessing" />
+    </div>
+  </ng-template>
+</p-dialog>
+
 
 <p-toast />
