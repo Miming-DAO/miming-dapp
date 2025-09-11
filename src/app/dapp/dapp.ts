@@ -15,6 +15,9 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { CardModule } from 'primeng/card';
+import { PanelModule } from 'primeng/panel';
+import { AccordionModule } from 'primeng/accordion';
 import { ToastModule } from 'primeng/toast';
 
 import { Network } from '../../models/network.model';
@@ -45,7 +48,10 @@ import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkado
     InputGroupAddonModule,
     InputNumberModule,
     ProgressSpinnerModule,
+    CardModule,
+    PanelModule,
     ToastModule,
+    AccordionModule,
     PolkadotIdenticonUtil
   ],
   providers: [MessageService],
@@ -359,6 +365,14 @@ export class Dapp {
         };
       }
     });
+  }
+
+  closeProcessingDialog() {
+    this.showProcessingDialog = false;
+  }
+
+  retryTransaction() {
+    this.teleport();
   }
 
   ngOnInit() {
