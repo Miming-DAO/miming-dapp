@@ -13,17 +13,17 @@ export class ParachainsService {
   private readonly parachains: Parachain[] = [
     {
       id: 1,
-      networkId: this.polkadotNetworkId,
+      network_id: this.polkadotNetworkId,
       para_id: 0,
     },
     {
       id: 2,
-      networkId: this.assethubPolkadotNetworkId,
+      network_id: this.assethubPolkadotNetworkId,
       para_id: 1000,
     },
     {
       id: 3,
-      networkId: this.xodePolkadotNetworkId,
+      network_id: this.xodePolkadotNetworkId,
       para_id: 3417,
     },
   ];

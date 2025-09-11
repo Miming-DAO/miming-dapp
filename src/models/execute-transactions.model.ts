@@ -1,3 +1,4 @@
 export class ExecuteTransaction {
-    signedTxHash: string = "";
+    ledger_id: string = "";
+    signed_extrinsic: string = "";
 }

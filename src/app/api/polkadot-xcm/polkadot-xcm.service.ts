@@ -10,26 +10,18 @@ import { ExecuteTransaction } from '../../../models/execute-transactions.model';
   providedIn: 'root'
 })
 export class PolkadotXcmService {
-  private apiUrl = 'http://192.168.0.190:3000';
+  private apiUrl = 'http://localhost:3000';
   private apiPrefix = '/api/polkadot-xcm';
 
   constructor(
     private http: HttpClient
   ) { }
 
-  limitedReserveTransferAssets(
-    sourceParaId: number,
-    data: LimitedReserveTransferAssets
-  ): Observable<any> {
-    const params = new HttpParams().set('sourceParaId', sourceParaId.toString());
-    return this.http.post(`${this.apiUrl}${this.apiPrefix}/limited-reserve-transfer-assets`, data, { params });
+  limitedReserveTransferAssets(data: LimitedReserveTransferAssets): Observable<any> {
+    return this.http.post(`${this.apiUrl}${this.apiPrefix}/limited-reserve-transfer-assets`, data, {});
   }
 
-  executeTransaction(
-    sourceParaId: number,
-    data: ExecuteTransaction
-  ): Observable<any> {
-    const params = new HttpParams().set('sourceParaId', sourceParaId.toString());
-    return this.http.post(`${this.apiUrl}${this.apiPrefix}/execute-transaction`, data, { params });
+  executeTransaction(data: ExecuteTransaction): Observable<any> {
+    return this.http.post(`${this.apiUrl}${this.apiPrefix}/execute-transaction`, data, {});
   }
 }

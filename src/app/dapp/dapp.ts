@@ -262,7 +262,7 @@ export class Dapp {
       status: "In-Progress"
     };
 
-    const sourceParaId = this.parachainsService.getAllParachains().find(p => p.networkId === this.selectedSourceNetwork?.id)?.para_id;
+    const sourceParaId = this.parachainsService.getAllParachains().find(p => p.network_id === this.selectedSourceNetwork?.id)?.para_id;
     if (!sourceParaId) {
       this.isProcessing = false;
       this.processingStatus = {
@@ -281,15 +281,18 @@ export class Dapp {
     };
 
     const data: LimitedReserveTransferAssets = {
-      dest: this.parachainsService.getAllParachains().find(p => p.networkId === this.selectedTargetNetwork?.id)?.para_id || 0,
+      user: this.selectedPolkadotWalletAccount?.address || "",
+      source: sourceParaId,
+      dest: this.parachainsService.getAllParachains().find(p => p.network_id === this.selectedTargetNetwork?.id)?.para_id || 0,
       beneficiary: this.recipientAddress,
       assetId: this.selectedToken?.reference_id as number || 0,
       amount: this.quantity * (10 ** (this.selectedToken?.decimals || 0))
     }
 
-    this.polkadotXcmService.limitedReserveTransferAssets(sourceParaId, data).subscribe({
+    this.polkadotXcmService.limitedReserveTransferAssets(data).subscribe({
       next: async transactionResults => {
-        const txHash = transactionResults.encoded as string;
+        const ledger_id = transactionResults._id;
+        const extrinsicHex = transactionResults.extrinsic_hex as string;
 
         this.processingStatus = {
           message: "Signing transaction...",
@@ -308,14 +311,15 @@ export class Dapp {
           return;
         }
 
-        const signedTx = await this.polkadotJsService.signTransaction(
+        const signedExtrinsic = await this.polkadotJsService.signTransaction(
           this.selectedPolkadotWalletAccount,
           this.selectedSourceNetwork as Network,
-          txHash
+          extrinsicHex
         );
 
         const executeData: ExecuteTransaction = {
-          signedTxHash: signedTx
+          ledger_id: ledger_id,
+          signed_extrinsic: signedExtrinsic
         };
 
         this.processingStatus = {
@@ -324,29 +328,16 @@ export class Dapp {
           status: "In-Progress"
         };
 
-        this.polkadotXcmService.executeTransaction(sourceParaId, executeData).subscribe({
+        this.polkadotXcmService.executeTransaction(executeData).subscribe({
           next: executionResults => {
-            console.log('Execution Results:', executionResults);
-
-            if (executionResults.type === "txBestBlocksState") {
-              if (executionResults.ok) {
-                this.isProcessing = false;
-                this.processingStatus = {
-                  message: "Transaction submitted successfully.",
-                  details: "Your teleport transaction has been submitted.",
-                  status: "Completed"
-                };
-                this.processingResults = executionResults;
-              } else {
-                if (executionResults.error) {
-                  this.isProcessing = false;
-                  this.processingStatus = {
-                    message: "Transaction submission failed.",
-                    details: executionResults.error,
-                    status: "Error"
-                  };
-                }
-              }
+            if (executionResults.txhash !== "" && executionResults.status === "BROADCASTED") {
+              this.isProcessing = false;
+              this.processingStatus = {
+                message: "Transaction submitted successfully.",
+                details: "Your teleport transaction has been submitted.",
+                status: "Completed"
+              };
+              this.processingResults = executionResults;
             }
           },
           error: executionError => {
