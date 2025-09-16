@@ -233,16 +233,8 @@ export class Dapp {
           if (this.selectedTargetChain) {
             this.tokenService.getTokensByChainId(this.selectedTargetChain.id).subscribe({
               next: (targetChainTokens: Token[]) => {
-                this.tokens = [];
-
-                for (let sourceToken of sourceChainTokens) {
-                  for (let targetToken of targetChainTokens) {
-                    if (sourceToken.symbol === targetToken.symbol) {
-                      this.tokens.push(sourceToken);
-                    }
-                  }
-                }
-
+                const targetSymbols = new Set(targetChainTokens.map(token => token.symbol));
+                this.tokens = sourceChainTokens.filter(token => targetSymbols.has(token.symbol));
                 this.selectedToken = this.tokens[0];
               }
             });
