@@ -20,16 +20,16 @@ import { PanelModule } from 'primeng/panel';
 import { AccordionModule } from 'primeng/accordion';
 import { ToastModule } from 'primeng/toast';
 
-import { Network } from '../../models/network.model';
+import { Chain } from '../../models/chain.model';
 import { Token } from '../../models/token.model';
-import { LimitedReserveTransferAssets } from '../../models/limited-reserve-transfer-assets.model';
+import { PolkadotXcm } from '../../models/polkadot-xcm.model';
 import { ExecuteTransaction } from '../../models/execute-transactions.model';
 
-import { PolkadotJsService } from '../api/polkadot-js/polkadot-js.service';
-import { NetworksService } from '../api/networks/networks.service';
-import { ParachainsService } from '../api/parachains/parachains.service';
+import { ChainsService } from '../api/chains/chains.service';
 import { TokensService } from '../api/tokens/tokens.service';
+import { PolkadotJsService } from '../api/polkadot-js/polkadot-js.service';
 import { PolkadotXcmService } from '../api/polkadot-xcm/polkadot-xcm.service';
+import { PolkadotApiService } from '../api/polkadot-api/polkadot-api.service';
 
 import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkadot-identicon-util';
 
@@ -61,10 +61,13 @@ import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkado
 export class Dapp {
   constructor(
     private polkadotJsService: PolkadotJsService,
-    private networksService: NetworksService,
-    private parachainsService: ParachainsService,
+
+    private chainsService: ChainsService,
     private tokenService: TokensService,
+
+    private polkadotApiService: PolkadotApiService,
     private polkadotXcmService: PolkadotXcmService,
+
     private messageService: MessageService
   ) { }
 
@@ -85,17 +88,15 @@ export class Dapp {
     details: string;
     status: string;
   } = { message: '', details: '', status: '' };
-  processingResults: any;
 
-  sourceNetworks: Network[] = [];
-  selectedSourceNetwork: Network | undefined;
+  sourceChains: Chain[] = [];
+  selectedSourceChain: Chain | undefined;
 
-  targetNetworks: Network[] = [];
-  selectedTargetNetwork: Network | undefined;
+  targetChains: Chain[] = [];
+  selectedTargetChain: Chain | undefined;
 
   tokens: Token[] = [];
   selectedToken: Token | undefined;
-  receivedToken: Token | undefined;
 
   quantity: number = 0.01;
   recipientAddress: string = 'XqDaorD7pcAHV1qatA4aKPV4wCwHeMbUdjbKNJ5RZcL9VpeSr';
@@ -201,64 +202,100 @@ export class Dapp {
     }, 1000);
   }
 
-  getSourceNetworks(): void {
-    this.sourceNetworks = this.networksService.getAllNetworks();
-    this.selectedSourceNetwork = this.sourceNetworks[0];
+  getSourceChains(): void {
+    this.chainsService.getChainsByNetworkId(1).subscribe({
+      next: (chains: Chain[]) => {
+        this.sourceChains = chains;
+        this.selectedSourceChain = this.sourceChains[0] || undefined;
 
-    this.getTargetNetworks();
+        this.getTargetChains();
+      }
+    });
   }
 
-  getTargetNetworks(): void {
-    if (this.sourceNetworks.length > 0) {
-      const networks = this.networksService.getAllNetworks();
+  getTargetChains(): void {
+    if (this.sourceChains.length > 0) {
+      this.chainsService.getChainsByNetworkId(1).subscribe({
+        next: (chains: Chain[]) => {
+          this.targetChains = chains.filter(chain => chain.id !== this.selectedSourceChain?.id);
+          this.selectedTargetChain = this.targetChains[0];
 
-      if (this.selectedSourceNetwork?.id === 1) {
-        this.targetNetworks = networks.filter(net => net.id !== 1 && net.id !== 4);
-        this.selectedTargetNetwork = this.targetNetworks[0];
-      }
-
-      if (this.selectedSourceNetwork?.id === 2) {
-        this.targetNetworks = networks.filter(net => net.id !== 2 && net.id !== 4);
-        this.selectedTargetNetwork = this.targetNetworks[0];
-      }
-
-      if (this.selectedSourceNetwork?.id === 3) {
-        this.targetNetworks = networks.filter(net => net.id !== 3);
-        this.selectedTargetNetwork = this.targetNetworks[0];
-      }
-
-      if (this.selectedSourceNetwork?.id === 4) {
-        this.targetNetworks = networks.filter(net => net.id !== 4 && net.id !== 1 && net.id !== 2);
-        this.selectedTargetNetwork = this.targetNetworks[0];
-      }
+          this.getTokens();
+        }
+      });
     }
-
-    this.getTokens();
   }
 
   getTokens(): void {
-    const tokens = this.tokenService.getAllTokens();
-    this.tokens = tokens.filter(
-      tok => tok.network_id === this.selectedSourceNetwork?.id && tok.target_networks.filter(tn => tn === this.selectedTargetNetwork?.id).length > 0
-    );
-    this.selectedToken = this.tokens[0];
-    this.getReceivedAsset();
-  }
-
-  getReceivedAsset(): void {
-    if (this.selectedToken && this.selectedTargetNetwork) {
-      const tokens = this.tokenService.getAllTokens();
-      const targetTokens = tokens.filter(tok => tok.network_id === this.selectedTargetNetwork?.id);
-      if (targetTokens.length > 0) {
-        const receivingTokens = targetTokens.filter(tok => tok.target_networks.filter(tn => tn === this.selectedSourceNetwork?.id).length > 0);
-        if (receivingTokens.length > 0) {
-          this.receivedToken = receivingTokens.find(rt => rt.reference_id === this.selectedToken?.reference_id);
+    if (this.selectedSourceChain) {
+      this.tokenService.getTokensByChainId(this.selectedSourceChain.id).subscribe({
+        next: (tokens: Token[]) => {
+          this.tokens = tokens;
+          this.selectedToken = this.tokens[0];
         }
-      }
+      });
     }
   }
 
+  isTeleportValid(): boolean {
+    if (!this.selectedSourceChain && !this.selectedTargetChain) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please select source and target chains.'
+      });
+
+      return false;
+    }
+
+    if (!this.selectedToken) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please select a token to teleport.'
+      });
+
+      return false;
+    }
+
+    if (this.quantity <= 0) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please enter a valid quantity to teleport.'
+      });
+
+      return false;
+    }
+
+    if (!this.recipientAddress || this.recipientAddress.trim() === '') {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please enter a valid recipient address.'
+      });
+
+      return false;
+    }
+
+    if (!this.selectedPolkadotWalletAccount) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please connect and select a wallet account to sign the transaction.'
+      });
+
+      return false;
+    }
+
+    return true;
+  }
+
   async teleport(): Promise<void> {
+    if (!this.isTeleportValid()) {
+      return;
+    }
+
     this.isProcessing = true;
 
     this.showProcessingDialog = true;
@@ -268,34 +305,22 @@ export class Dapp {
       status: "In-Progress"
     };
 
-    const sourceParaId = this.parachainsService.getAllParachains().find(p => p.network_id === this.selectedSourceNetwork?.id)?.para_id;
-    if (!sourceParaId) {
-      this.isProcessing = false;
-      this.processingStatus = {
-        message: "Invalid source parachain ID.",
-        details: "Please check the source parachain configuration.",
-        status: "Error"
-      };
-
-      return;
-    }
-
     this.processingStatus = {
       message: "Creating transaction...",
       details: "Please wait while we create your teleport transaction.",
       status: "In-Progress"
     };
 
-    const data: LimitedReserveTransferAssets = {
+    const data: PolkadotXcm = {
       user: this.selectedPolkadotWalletAccount?.address || "",
-      source: sourceParaId,
-      dest: this.parachainsService.getAllParachains().find(p => p.network_id === this.selectedTargetNetwork?.id)?.para_id || 0,
-      beneficiary: this.recipientAddress,
-      assetId: this.selectedToken?.reference_id as number || 0,
+      from_chain_id: this.selectedSourceChain?.id || 0,
+      to_chain_id: this.selectedTargetChain?.id || 0,
+      receiver: this.recipientAddress,
+      token_id: this.selectedToken?.id || 0,
       amount: this.quantity * (10 ** (this.selectedToken?.decimals || 0))
     }
 
-    this.polkadotXcmService.limitedReserveTransferAssets(data).subscribe({
+    this.polkadotXcmService.buildXcm(data).subscribe({
       next: async transactionResults => {
         const ledger_id = transactionResults._id;
         const extrinsicHex = transactionResults.extrinsic_hex as string;
@@ -308,9 +333,20 @@ export class Dapp {
 
         if (!this.selectedPolkadotWalletAccount) {
           this.isProcessing = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please connect and select a wallet account to sign the transaction.'
+          });
+
+          return;
+        }
+
+        if (!this.selectedSourceChain) {
+          this.isProcessing = false;
           this.processingStatus = {
-            message: "No wallet account selected.",
-            details: "Please select a wallet account to sign the transaction.",
+            message: "No source chain selected.",
+            details: "Please select a source chain to sign the transaction.",
             status: "Error"
           };
 
@@ -319,7 +355,7 @@ export class Dapp {
 
         const signedExtrinsic = await this.polkadotJsService.signTransaction(
           this.selectedPolkadotWalletAccount,
-          this.selectedSourceNetwork as Network,
+          this.selectedSourceChain,
           extrinsicHex
         );
 
@@ -334,7 +370,7 @@ export class Dapp {
           status: "In-Progress"
         };
 
-        this.polkadotXcmService.executeTransaction(executeData).subscribe({
+        this.polkadotApiService.executeTransaction(executeData).subscribe({
           next: executionResults => {
             if (executionResults.txhash !== "" && executionResults.status === "BROADCASTED") {
               this.isProcessing = false;
@@ -343,10 +379,11 @@ export class Dapp {
                 details: "Your teleport transaction has been submitted.",
                 status: "Completed"
               };
-              this.processingResults = executionResults;
             }
           },
           error: executionError => {
+            console.log(executionError);
+
             this.isProcessing = false;
             this.processingStatus = {
               message: executionError.error.message,
@@ -381,7 +418,7 @@ export class Dapp {
       { label: 'Staking', routerLink: "" }
     ];
 
-    this.getSourceNetworks();
+    this.getSourceChains();
     this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
   }
 }

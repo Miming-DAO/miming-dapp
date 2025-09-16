@@ -3,20 +3,20 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
-import { Network } from '../../../models/network.model';
+import { Chain } from '../../../models/chain.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NetworksService {
+export class ChainsService {
   private apiUrl = 'http://localhost:3000';
-  private apiPrefix = '/api/networks';
+  private apiPrefix = '/api/chains';
 
   constructor(
     private http: HttpClient
   ) { }
 
-  getAllNetworks(): Observable<Network[]> {
-    return this.http.get<Network[]>(`${this.apiUrl}${this.apiPrefix}`);
+  getChainsByNetworkId(network_id: number): Observable<Chain[]> {
+    return this.http.get<Chain[]>(`${this.apiUrl}${this.apiPrefix}/by_network_id/${network_id}`);
   }
 }

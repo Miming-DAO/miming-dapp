@@ -3,8 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
-import { LimitedReserveTransferAssets } from '../../../models/limited-reserve-transfer-assets.model';
-import { ExecuteTransaction } from '../../../models/execute-transactions.model';
+import { PolkadotXcm } from '../../../models/polkadot-xcm.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,11 +16,7 @@ export class PolkadotXcmService {
     private http: HttpClient
   ) { }
 
-  limitedReserveTransferAssets(data: LimitedReserveTransferAssets): Observable<any> {
-    return this.http.post(`${this.apiUrl}${this.apiPrefix}/limited-reserve-transfer-assets`, data, {});
-  }
-
-  executeTransaction(data: ExecuteTransaction): Observable<any> {
-    return this.http.post(`${this.apiUrl}${this.apiPrefix}/execute-transaction`, data, {});
+  buildXcm(data: PolkadotXcm): Observable<any> {
+    return this.http.post(`${this.apiUrl}${this.apiPrefix}/build-xcm`, data, {});
   }
 }

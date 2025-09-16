@@ -8,7 +8,7 @@ import { encodeAddress } from '@polkadot/util-crypto';
 import { hexToU8a } from '@polkadot/util';
 import { polkadotIcon } from '@polkadot/ui-shared';
 
-import { Network } from '../../../models/network.model';
+import { Chain } from '../../../models/chain.model';
 
 @Injectable({
   providedIn: 'root'
@@ -37,13 +37,13 @@ export class PolkadotJsService {
     return accounts
   }
 
-  async signTransaction(account: InjectedAccountWithMeta, network: Network, transactionHex: string): Promise<string> {
+  async signTransaction(account: InjectedAccountWithMeta, chain: Chain, transactionHex: string): Promise<string> {
     const injector = await web3FromSource(account.meta.source);
     if (!injector.signer) {
       throw new Error(`The selected wallet (${account.meta.source}) does not support signing transactions.`);
     }
 
-    const wsProvider = new WsProvider(network.rpc_url);
+    const wsProvider = new WsProvider(chain.rpc_url);
     const api = await ApiPromise.create({ provider: wsProvider });
 
     try {

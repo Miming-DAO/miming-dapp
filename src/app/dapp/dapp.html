@@ -40,61 +40,61 @@
       <div class="glass-form p-5 border-1 border-white-alpha-20 shadow-8">
         <div class="grid">
           <div class="col-12 md:col-6 lg:col-6">
-            <label class="text-lg text-yellow-500 font-semibold">Source Network:</label>
-            <p-select [options]="sourceNetworks" [(ngModel)]="selectedSourceNetwork" optionLabel="name"
-              class="w-full mt-1 border-round-2xl" size="large" (onChange)="getTargetNetworks()">
+            <label class="text-lg text-yellow-500 font-semibold">Source Chain:</label>
+            <p-select [options]="sourceChains" [(ngModel)]="selectedSourceChain" optionLabel="name"
+              class="w-full mt-1 border-round-2xl" size="large" (onChange)="getTargetChains()">
               <ng-template #selectedItem let-selectedOption>
                 <div class="flex items-center gap-2 text-xl" *ngIf="selectedOption">
-                  <img [src]="'images/networks/' + selectedOption.image" height="27" />
+                  <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'" height="27" />
                   <div>{{ selectedOption.name }}</div>
                 </div>
               </ng-template>
-              <ng-template let-network #item>
+              <ng-template let-chain #item>
                 <div class="flex items-center gap-2">
-                  <img [src]="'images/networks/' + network.image" height="23" />
-                  <div>{{ network.name }}</div>
+                  <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" height="23" />
+                  <div>{{ chain.name }}</div>
                 </div>
               </ng-template>
               <ng-template #dropdownicon>
                 <i class="pi pi-angle-down"></i>
               </ng-template>
               <ng-template #header>
-                <div class="font-medium p-3">Select Network</div>
+                <div class="font-medium p-3">Select Chain</div>
               </ng-template>
             </p-select>
           </div>
           <div class="col-12 md:col-6 lg:col-6">
-            <label class="text-lg text-yellow-500 font-semibold">Target Network:</label>
-            <p-select [options]="targetNetworks" [(ngModel)]="selectedTargetNetwork" optionLabel="name"
+            <label class="text-lg text-yellow-500 font-semibold">Target Chain:</label>
+            <p-select [options]="targetChains" [(ngModel)]="selectedTargetChain" optionLabel="name"
               class="w-full mt-1 border-round-2xl" size="large" (onChange)="getTokens()">
               <ng-template #selectedItem let-selectedOption>
                 <div class="flex items-center gap-2 text-xl" *ngIf="selectedOption">
-                  <img [src]="'images/networks/' + selectedOption.image" height="27" />
+                  <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'" height="27" />
                   <div>{{ selectedOption.name }}</div>
                 </div>
               </ng-template>
-              <ng-template let-network #item>
+              <ng-template let-chain #item>
                 <div class="flex items-center gap-2">
-                  <img [src]="'images/networks/' + network.image" height="23" />
-                  <div>{{ network.name }}</div>
+                  <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" height="23" />
+                  <div>{{ chain.name }}</div>
                 </div>
               </ng-template>
               <ng-template #dropdownicon>
                 <i class="pi pi-angle-down"></i>
               </ng-template>
               <ng-template #header>
-                <div class="font-medium p-3">Select Network</div>
+                <div class="font-medium p-3">Select Chain</div>
               </ng-template>
             </p-select>
           </div>
           <div class="col-12 md:col-12 lg:col-12">
             <label class="text-lg text-yellow-500 font-semibold">
-              {{ selectedTargetNetwork?.name }}'s Recipient Address:
+              {{ selectedTargetChain?.name }}'s Recipient Address:
             </label>
             <p-inputgroup class="mt-1">
               <p-inputgroup-addon [style]="{ 'padding-left': '15px', 'padding-right': '15px' }"
                 class="border-round-left-2xl">
-                <img [src]="'images/networks/' + selectedTargetNetwork?.image" height="27" />
+                <img [src]="'images/chains/' + selectedTargetChain?.name?.toLowerCase() + '.png'" height="27" />
               </p-inputgroup-addon>
               <input pInputText pSize="large" class="w-full border-round-right-2xl text-xl"
                 [(ngModel)]="recipientAddress" />
@@ -106,13 +106,13 @@
               class="w-full mt-1 border-round-2xl" size="large">
               <ng-template #selectedItem let-selectedOption>
                 <div class="flex items-center gap-2 text-xl" *ngIf="selectedOption">
-                  <img [src]="'images/tokens/' + selectedOption.image" height="27" />
+                  <img [src]="'images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'" height="27" />
                   <div>{{ selectedOption.symbol + " (" + selectedOption.name + ")" }}</div>
                 </div>
               </ng-template>
               <ng-template let-token #item>
                 <div class="flex items-center gap-2">
-                  <img [src]="'images/tokens/' + token.image" height="23" />
+                  <img [src]="'images/tokens/' + token.symbol.toLowerCase() + '.png'" height="23" />
                   <div>{{ token.symbol + " (" + token.name + ")" }}</div>
                 </div>
               </ng-template>
@@ -135,8 +135,9 @@
             <p-inputgroup class="mt-1">
               <p-inputgroup-addon [style]="{ 'padding-left': '20px', 'padding-right': '20px' }"
                 class="border-none bg-yellow-500 font-bold text-gray-900 text-xl h-4rem border-round-left-2xl">
-                <img [src]="'images/tokens/' + receivedToken?.image" height="27" [style]="{ 'margin-right': '1px' }" />
-                &nbsp;{{ receivedToken?.symbol }}
+                <img [src]="'images/tokens/' + selectedToken?.symbol?.toLowerCase() + '.png'" height="27"
+                  [style]="{ 'margin-right': '1px' }" />
+                &nbsp;{{ selectedToken?.symbol }}
               </p-inputgroup-addon>
               <p-inputnumber class="w-full"
                 inputStyleClass="w-full border-none bg-yellow-500 font-bold text-gray-900 text-right border-round-right-2xl text-xl"
@@ -293,21 +294,6 @@
         <div class="p-3 border-round-xl border-1 border-red-200">
           <h3 class="text-xl font-semibold text-red-600 mt-0 mb-2">{{ processingStatus.message }}</h3>
           <p class="text-600 text-sm line-height-3 m-0">{{ processingStatus.details }}</p>
-
-          @if (processingResults) {
-          <p-accordion value="0" class="mt-3">
-            <p-accordion-panel value="0">
-              <p-accordion-header>Technical Details</p-accordion-header>
-              <p-accordion-content>
-                <div class="error-details p-3 surface-50 border-round">
-                  <pre class="text-xs text-700 whitespace-pre-wrap m-0 font-family-monospace">
-                  {{ processingResults | json }}
-                </pre>
-                </div>
-              </p-accordion-content>
-            </p-accordion-panel>
-          </p-accordion>
-          }
         </div>
       </div>
     </div>
@@ -321,21 +307,6 @@
         <div class="p-3 border-round-xl border-1 border-green-200">
           <h3 class="text-xl font-semibold text-green-600 mt-0 mb-2">{{ processingStatus.message }}</h3>
           <p class="text-600 text-sm line-height-3 m-0">{{ processingStatus.details }}</p>
-
-          @if (processingResults) {
-          <p-accordion value="0" class="mt-3">
-            <p-accordion-panel value="0">
-              <p-accordion-header>Transaction Details</p-accordion-header>
-              <p-accordion-content>
-                <div class="error-details p-3 surface-50 border-round">
-                  <pre class="text-xs text-700 whitespace-pre-wrap m-0 font-family-monospace">
-                  {{ processingResults | json }}
-                </pre>
-                </div>
-              </p-accordion-content>
-            </p-accordion-panel>
-          </p-accordion>
-          }
         </div>
       </div>
     </div>
