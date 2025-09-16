@@ -229,9 +229,24 @@ export class Dapp {
   getTokens(): void {
     if (this.selectedSourceChain) {
       this.tokenService.getTokensByChainId(this.selectedSourceChain.id).subscribe({
-        next: (tokens: Token[]) => {
-          this.tokens = tokens;
-          this.selectedToken = this.tokens[0];
+        next: (sourceChainTokens: Token[]) => {
+          if (this.selectedTargetChain) {
+            this.tokenService.getTokensByChainId(this.selectedTargetChain.id).subscribe({
+              next: (targetChainTokens: Token[]) => {
+                this.tokens = [];
+
+                for (let sourceToken of sourceChainTokens) {
+                  for (let targetToken of targetChainTokens) {
+                    if (sourceToken.symbol === targetToken.symbol) {
+                      this.tokens.push(sourceToken);
+                    }
+                  }
+                }
+
+                this.selectedToken = this.tokens[0];
+              }
+            });
+          }
         }
       });
     }
