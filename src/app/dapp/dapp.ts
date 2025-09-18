@@ -99,9 +99,8 @@ export class Dapp {
   tokens: Token[] = [];
   selectedToken: Token | undefined;
 
-  quantity: number = 0.01;
-  recipientAddress: string = 'XqDaorD7pcAHV1qatA4aKPV4wCwHeMbUdjbKNJ5RZcL9VpeSr';
-  assetReceived: number = 0;
+  quantity: number = 0;
+  recipientAddress: string = '';
 
   getCurrentPolkadotWalletAccount(): PolkadotWalletAccount | undefined {
     const storedAccount = localStorage.getItem('polkadot_wallet_account');
