@@ -1,0 +1,6 @@
+services:
+  app:
+    image: oliverrigonan/miming-dapp:latest
+    container_name: miming-dapp
+    ports:
+     - 3002:80

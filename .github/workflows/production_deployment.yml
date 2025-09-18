@@ -12,18 +12,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Installing dependencies
-        run: |
-          npm install --legacy-peer-deps
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_HUB_NAMESPACE }}/miming-dapp:latest .
 
-      - name: Building application
+      - name: Push image to DockerHub
         run: |
-          npm run build
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker push ${{ secrets.DOCKER_HUB_NAMESPACE }}/miming-dapp:latest
 
       - name: SSH to Server
         run: |
           mkdir ~/.ssh
           echo -e "${{ secrets.PRODUCTION_PRIVATE_KEY }}" > ~/.ssh/ssh-key
           chmod 400 ~/.ssh/ssh-key
-          rsync -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key" -r dist/* ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} 'sudo systemctl restart nginx'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh-key ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} \
+            'cd ${{ secrets.PRODUCTION_PATH }} && \
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }} && \
+            sh deploy_production.sh'
