@@ -3,13 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
+import { environment } from './../../../environments/environment';
+
 import { Chain } from '../../../models/chain.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChainsService {
-  private apiUrl = 'http://localhost:3000';
+  private apiUrl = environment.apiUrl;
   private apiPrefix = '/api/chains';
 
   constructor(

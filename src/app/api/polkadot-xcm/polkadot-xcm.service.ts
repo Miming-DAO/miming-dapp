@@ -3,13 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
+import { environment } from './../../../environments/environment';
+
 import { PolkadotXcm } from '../../../models/polkadot-xcm.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PolkadotXcmService {
-  private apiUrl = 'http://localhost:3000';
+  private apiUrl = environment.apiUrl;
   private apiPrefix = '/api/polkadot-xcm';
 
   constructor(
