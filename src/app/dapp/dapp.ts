@@ -73,8 +73,9 @@ export class Dapp {
 
   menuItems: MenuItem[] | undefined;
 
-  showAvailableWalletsDialog: boolean = false;
+  showInitializingDialog: boolean = true;
 
+  showAvailableWalletsDialog: boolean = false;
   showPolkadotWalletAccountsDialog: boolean = false;
   polkadotWalletAccounts: PolkadotWalletAccount[] = [];
   selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
@@ -199,6 +200,8 @@ export class Dapp {
       });
 
       this.isProcessing = false;
+
+      location.reload();
     }, 1000);
   }
 
@@ -239,6 +242,10 @@ export class Dapp {
               }
             });
           }
+
+          setTimeout(() => {
+            this.showInitializingDialog = false;
+          }, 1000);
         }
       });
     }
