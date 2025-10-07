@@ -38,6 +38,19 @@ export class PolkadotJsService {
   }
 
   async signTransaction(account: InjectedAccountWithMeta, chain: Chain, transactionHex: string): Promise<string> {
+    // This is temporary support for Xterium wallet which has a different signing method
+    // Remove this block when Xterium supports the standard web3FromSource method
+    if (account.meta.source === "xterium") {
+      const signTx = await window.xterium.signTx({
+        currentNetwork: {
+          rpc: chain.rpc_url
+        },
+        txHash: transactionHex
+      });
+
+      return signTx.signedTx;
+    }
+
     const injector = await web3FromSource(account.meta.source);
     if (!injector.signer) {
       throw new Error(`The selected wallet (${account.meta.source}) does not support signing transactions.`);
