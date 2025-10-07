@@ -33,6 +33,12 @@ import { PolkadotApiService } from '../api/polkadot-api/polkadot-api.service';
 
 import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkadot-identicon-util';
 
+declare global {
+  interface Window {
+    xterium?: any;
+  }
+}
+
 @Component({
   selector: 'app-dapp',
   imports: [
@@ -147,7 +153,46 @@ export class Dapp {
     }
   }
 
-  connectSolanaWallet(): void {
+  async connectXteriumWallet(): Promise<void> {
+    try {
+      // Xterium wallet uses a different connection method
+      // Remove this block when Xterium supports the standard web3Enable and web3Accounts methods
+      if (typeof window.xterium !== 'undefined') {
+        const wallet = await window.xterium.enableXteriumWallet();
+        if (wallet) {
+          const name = wallet.name || '';
+          const formattedAddress = wallet.formattedAddress || '';
+
+          const account: PolkadotWalletAccount = {
+            address: formattedAddress,
+            meta: {
+              name: name,
+              source: 'xterium'
+            }
+          };
+
+          this.polkadotWalletAccounts = [account];
+          this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+          this.connectPolkadotWalletAccount();
+        }
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Xterium wallet extension not found. Please install the Xterium wallet extension.'
+        });
+      }
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
+  async connectSolanaWallet(): Promise<void> {
 
   }
 
