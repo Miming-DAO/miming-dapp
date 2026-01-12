@@ -1,0 +1,18 @@
+<div class="text-center">
+  <h1 class="text-5xl font-bold">helo</h1>
+</div>
+
+<div class="pt-1 px-1 text-center mb-3">
+  <p-button [rounded]="true" [className]="'w-100'" [fluid]="true" (onClick)="generate()">
+    <i class="pi pi-sparkles"></i> Ask AI
+  </p-button>
+</div>
+
+<p-menu [model]="menuItems" [style]="{'border':'none', 'background': 'none'}">
+  <ng-template #item let-item>
+    <a pRipple class="flex items-right p-menu-item-link py-2 px-3 hover:surface-200 border-round-3xl" [routerLink]="item.routerLink">
+      <span [class]="item.icon"></span>
+      <span class="ml-2">{{ item.label }}</span>
+    </a>
+  </ng-template>
+</p-menu>

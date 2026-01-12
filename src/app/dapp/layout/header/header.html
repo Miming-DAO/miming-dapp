@@ -1,0 +1,27 @@
+<div class="card">
+  <p-menubar class="border-noround border-none border-bottom-1">
+    <ng-template #start>
+      <p-button [icon]="'pi pi-bars'" [severity]="'secondary'" [variant]="'text'" [rounded]="true"
+        (click)="toggleSidebar()">
+      </p-button>
+    </ng-template>
+    <ng-template #item let-item let-root="root"></ng-template>
+    <ng-template #end>
+      <div class="user-header">
+        <p-button [icon]="'pi pi-sun'" [severity]="'secondary'" [variant]="'text'" [rounded]="true"
+          (click)="toggleTheme(true)">
+        </p-button>
+        <p-avatar shape="circle">
+          <img [src]="photoUrl" alt="User Photo" />
+        </p-avatar>
+        <span class="font-bold">{{ email }}</span>
+        <p-button [className]="'ml-1'" [icon]="'pi pi-power-off'" [severity]="'secondary'" [variant]="'text'"
+          [rounded]="true" (click)="onLogoutClick()">
+        </p-button>
+      </div>
+    </ng-template>
+  </p-menubar>
+</div>
+
+<p-confirmDialog [style]="{ width: '450px' }" />
+<p-toast />
