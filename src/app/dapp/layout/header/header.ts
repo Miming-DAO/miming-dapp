@@ -26,7 +26,7 @@ import { Router } from '@angular/router';
     PConfirmDialog,
   ],
   templateUrl: './header.html',
-  styleUrl: './header.scss',
+  styleUrls: ['./header.css'],
   providers: [MessageService, ConfirmationService],
 })
 export class Header {
@@ -40,7 +40,7 @@ export class Header {
 
   @Output() onToggleSidebar = new EventEmitter<void>();
 
-  email: string = 'loggedin_email';
+  walletAddress: string = 'xxx';
   photoUrl!: SafeUrl;
 
   toggleSidebar() {

@@ -15,20 +15,40 @@ import { ImageModule as PImageModule } from 'primeng/image';
     PImageModule
   ],
   templateUrl: './sidebar.html',
-  styleUrl: './sidebar.scss',
+  styleUrl: './sidebar.css',
 })
 export class Sidebar {
   @Output() onClickGenerate = new EventEmitter<void>();
+  @Output() onClose = new EventEmitter<void>();
 
   menuItems: PMenuItem[] = [
     {
-      label: 'Home',
-      icon: 'pi pi-home',
-      routerLink: ['/application/home'],
+      label: 'Cross-Chain',
+      icon: 'pi pi-link',
+      routerLink: ['/application/cross-chain'],
+    },
+    {
+      label: 'P2P',
+      icon: 'pi pi-users',
+      routerLink: ['/application/p2p'],
+    },
+    {
+      label: 'Settings',
+      icon: 'pi pi-cog',
+      routerLink: ['/application/settings'],
+    },
+    {
+      label: 'Profile',
+      icon: 'pi pi-user',
+      routerLink: ['/application/profile'],
     },
   ];
 
   generate() {
     this.onClickGenerate.emit();
+  }
+
+  closeSidebar() {
+    this.onClose.emit();
   }
 }

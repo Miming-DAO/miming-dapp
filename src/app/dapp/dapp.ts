@@ -14,6 +14,7 @@ import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
 
 import { Sidebar as LayoutSidebar } from './layout/sidebar/sidebar'
 import { Header as LayoutHeader } from './layout/header/header'
+import { Footer as LayoutFooter } from './layout/footer/footer'
 
 @Component({
   selector: 'app-dapp',
@@ -30,10 +31,11 @@ import { Header as LayoutHeader } from './layout/header/header'
     PTextareaModule,
     PInputTextModule,
     LayoutSidebar,
-    LayoutHeader
+    LayoutHeader,
+    LayoutFooter
   ],
   templateUrl: './dapp.html',
-  styleUrl: './dapp.css',
+  styleUrl: './dapp.css'
 })
 export class Dapp {
   isSidebarVisible = true;
@@ -60,6 +62,10 @@ export class Dapp {
     } else {
       this.isSidebarVisible = !this.isSidebarVisible;
     }
+  }
+
+  closeMobileDrawer() {
+    this.isMobileDrawerVisible = false;
   }
 
   generate() {

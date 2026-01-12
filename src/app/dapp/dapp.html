@@ -1,15 +1,39 @@
-<div class="layout-wrapper">
-  <aside class="desktop-sidebar surface-50" [class.collapsed]="!isSidebarVisible">
-    <app-sidebar (onClickGenerate)="generate()"></app-sidebar>
+<div class="relative h-screen overflow-y-auto bg-slate-950">
+  <aside
+    class="hidden md:block fixed top-0 left-0 w-64 h-full z-[1000] transition-transform duration-300 ease-in-out backdrop-blur-2xl bg-gradient-to-b from-purple-900/40 via-fuchsia-900/30 to-pink-900/40 shadow-2xl shadow-purple-500/10"
+    [class.-translate-x-full]="!isSidebarVisible" [class.translate-x-0]="isSidebarVisible">
+    <div class="h-full w-full bg-cover bg-center bg-no-repeat p-4 relative"
+      style="background-image: url('/images/backgrounds/miming-bg.png');">
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-purple-900/70 via-fuchsia-900/60 to-pink-900/70 pointer-events-none">
+      </div>
+      <div class="relative z-10">
+        <app-sidebar (onClickGenerate)="generate()"></app-sidebar>
+      </div>
+    </div>
   </aside>
-  <p-drawer class="mobile-drawer" [(visible)]="isMobileDrawerVisible" [modal]="true" [baseZIndex]="10000">
-    <app-sidebar (onClickGenerate)="generate()"></app-sidebar>
+
+  <p-drawer class="md:hidden" [(visible)]="isMobileDrawerVisible" [modal]="true" [baseZIndex]="10000"
+    [closable]="false">
+    <div class="h-full w-full bg-cover bg-center bg-no-repeat relative p-2"
+      style="background-image: url('/images/backgrounds/miming-bg.png');">
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-purple-900/70 via-fuchsia-900/60 to-pink-900/70 pointer-events-none">
+      </div>
+      <div class="relative z-10">
+        <app-sidebar (onClickGenerate)="generate()" (onClose)="closeMobileDrawer()"></app-sidebar>
+      </div>
+    </div>
   </p-drawer>
 
-  <main class="main-content" [class.shifted]="isSidebarVisible && !isMobile">
+  <main class="transition-all duration-300 ease-in-out min-h-screen bg-slate-950 flex flex-col"
+    [class.md:ml-64]="isSidebarVisible && !isMobile" [class.ml-0]="!isSidebarVisible || isMobile">
     <app-header (onToggleSidebar)="toggleSidebar()"></app-header>
-    <div class="p-4">
-      <router-outlet />
+    <div class="flex-1 p-6 md:p-8 lg:p-10">
+      <div class="max-w-7xl mx-auto">
+        <router-outlet />
+      </div>
     </div>
+    <app-footer></app-footer>
   </main>
 </div>

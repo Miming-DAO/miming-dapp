@@ -1,27 +1,41 @@
-<div class="card">
-  <p-menubar class="border-noround border-none border-bottom-1">
-    <ng-template #start>
-      <p-button [icon]="'pi pi-bars'" [severity]="'secondary'" [variant]="'text'" [rounded]="true"
-        (click)="toggleSidebar()">
-      </p-button>
-    </ng-template>
-    <ng-template #item let-item let-root="root"></ng-template>
-    <ng-template #end>
-      <div class="user-header">
-        <p-button [icon]="'pi pi-sun'" [severity]="'secondary'" [variant]="'text'" [rounded]="true"
-          (click)="toggleTheme(true)">
-        </p-button>
-        <p-avatar shape="circle">
-          <img [src]="photoUrl" alt="User Photo" />
-        </p-avatar>
-        <span class="font-bold">{{ email }}</span>
-        <p-button [className]="'ml-1'" [icon]="'pi pi-power-off'" [severity]="'secondary'" [variant]="'text'"
-          [rounded]="true" (click)="onLogoutClick()">
-        </p-button>
+<header
+  class="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/80 border-b border-slate-700/50 shadow-lg shadow-slate-900/20">
+  <div class="px-4 lg:px-6 py-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button (click)="toggleSidebar()"
+          class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-all duration-200 hover:scale-105 cursor-pointer">
+          <i class="pi pi-bars text-xl"></i>
+        </button>
+        <div class="hidden md:block">
+          <h2
+            class="text-lg font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+            MIMING DAPP
+          </h2>
+        </div>
       </div>
-    </ng-template>
-  </p-menubar>
-</div>
+
+      <div class="flex items-center gap-2">
+        <div
+          class="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10 cursor-pointer">
+          <div class="relative">
+            <img [src]="photoUrl" alt="User Photo"
+              class="w-9 h-9 rounded-full border-2 border-gradient-to-r from-purple-500 to-pink-500 object-cover" />
+            <span
+              class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-slate-900 rounded-full"></span>
+          </div>
+
+          <span class="hidden lg:block text-sm font-medium text-slate-200">{{ walletAddress }}</span>
+
+          <button (click)="onLogoutClick()"
+            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all duration-200 hover:scale-110 cursor-pointer">
+            <i class="pi pi-power-off text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
 <p-confirmDialog [style]="{ width: '450px' }" />
 <p-toast />
