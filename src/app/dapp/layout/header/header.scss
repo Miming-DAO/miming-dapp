@@ -1,0 +1,38 @@
+// Cosmic Dialog Styles
+::ng-deep .cosmic-dialog {
+  .p-dialog {
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(88, 28, 135, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25);
+  }
+
+  .p-dialog-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+    padding: 1.5rem;
+  }
+
+  .p-dialog-content {
+    background: transparent;
+    padding: 1.5rem;
+  }
+
+  .p-dialog-footer {
+    background: transparent;
+    border-top: 1px solid rgba(168, 85, 247, 0.2);
+    padding: 1.5rem;
+  }
+
+  .p-dialog-header-close {
+    color: rgb(203, 213, 225);
+
+    &:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+

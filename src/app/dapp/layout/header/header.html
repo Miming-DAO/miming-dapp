@@ -16,26 +16,174 @@
       </div>
 
       <div class="flex items-center gap-2">
+        @if (!selectedPolkadotWalletAccount) {
+        <button (click)="connectWallet()"
+          class="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold shadow-sm shadow-purple-500/20 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-purple-500/30 flex items-center gap-2 cursor-pointer">
+          <i class="pi pi-wallet text-base"></i>
+          <span>Connect</span>
+        </button>
+        }
+
+        @if (selectedPolkadotWalletAccount) {
         <div
-          class="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10 cursor-pointer">
+          class="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all duration-200 border border-white/10 cursor-pointer"
+          (click)="getPolkadotWalletAccount()">
           <div class="relative">
-            <img [src]="photoUrl" alt="User Photo"
-              class="w-9 h-9 rounded-full border-2 border-gradient-to-r from-purple-500 to-pink-500 object-cover" />
+            <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount.address"
+              [size]="30"></app-polkadot-identicon-util>
             <span
               class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-slate-900 rounded-full"></span>
           </div>
 
-          <span class="hidden lg:block text-sm font-medium text-slate-200">{{ walletAddress }}</span>
+          <span class="hidden lg:block text-sm font-medium text-slate-200">
+            {{
+            selectedPolkadotWalletAccount.address.slice(0, 6) }}...{{ selectedPolkadotWalletAccount.address.slice(-4)
+            }}
+          </span>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</header>
 
-          <button (click)="onLogoutClick()"
-            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all duration-200 hover:scale-110 cursor-pointer">
-            <i class="pi pi-power-off text-sm"></i>
+<p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true" [style]="{ width: '30rem' }"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-wallet text-white text-lg"></i>
+      </div>
+      <span
+        class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Choose
+        Wallet</span>
+    </div>
+  </ng-template>
+  <div class="flex flex-col gap-3 py-4">
+    <button
+      class="w-full flex items-center gap-3 p-4 rounded-2xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/30 hover:border-purple-500/50 transition-all duration-200 cursor-pointer group"
+      (click)="connectPolkadotJsWallet()">
+      <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden">
+        <img src="/images/wallets/polkadotjs.png" alt="PolkadotJS" class="w-8 h-8 object-contain" />
+      </div>
+      <span class="font-medium text-lg text-slate-200 group-hover:text-white transition-colors">PolkadotJS</span>
+    </button>
+    <button
+      class="w-full flex items-center gap-3 p-4 rounded-2xl bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/30 hover:border-purple-500/50 transition-all duration-200 cursor-pointer group"
+      (click)="connectTalismanWallet()">
+      <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden">
+        <img src="/images/wallets/talisman.png" alt="Talisman Wallet" class="w-8 h-8 object-contain" />
+      </div>
+      <span class="font-medium text-lg text-slate-200 group-hover:text-white transition-colors">Talisman</span>
+    </button>
+  </div>
+  <ng-template #footer>
+    <button (click)="showAvailableWalletsDialog = false"
+      class="w-full px-4 py-3 rounded-xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+      Cancel
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true" [style]="{ width: '30rem' }"
+  [dismissableMask]="true" styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-user text-white text-lg"></i>
+      </div>
+      <span
+        class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Choose
+        Account</span>
+    </div>
+  </ng-template>
+  <div class="flex flex-col gap-3 py-4">
+    @for (account of polkadotWalletAccounts; track account.address) {
+    <div class="p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all duration-200 border"
+      [class.bg-slate-800/50]="selectedPolkadotWalletAccount?.address !== account.address"
+      [class.hover:bg-slate-700/50]="selectedPolkadotWalletAccount?.address !== account.address"
+      [class.border-slate-600/30]="selectedPolkadotWalletAccount?.address !== account.address"
+      [class.hover:border-purple-500/50]="selectedPolkadotWalletAccount?.address !== account.address"
+      [class.bg-gradient-to-r]="selectedPolkadotWalletAccount?.address === account.address"
+      [class.from-purple-500/20]="selectedPolkadotWalletAccount?.address === account.address"
+      [class.via-fuchsia-500/20]="selectedPolkadotWalletAccount?.address === account.address"
+      [class.to-pink-500/20]="selectedPolkadotWalletAccount?.address === account.address"
+      [class.border-purple-500/50]="selectedPolkadotWalletAccount?.address === account.address"
+      (click)="selectedPolkadotWalletAccount = account">
+      <app-polkadot-identicon-util [address]="account.address" [size]="40"></app-polkadot-identicon-util>
+      <div class="flex flex-col">
+        <span class="font-bold text-lg text-white">{{ account.meta.name }}</span>
+        <span class="text-sm text-slate-400">
+          {{ account.address.slice(0, 5) }}...{{ account.address.slice(-5) }}
+        </span>
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-2">
+      <button [disabled]="!selectedPolkadotWalletAccount || isProcessing" (click)="connectPolkadotWalletAccount()"
+        class="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 border-0 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        <i class="pi pi-check"></i>
+        <span>Connect</span>
+      </button>
+      <button (click)="showPolkadotWalletAccountsDialog = false"
+        class="flex-1 px-4 py-3 rounded-xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true" [style]="{ width: '30rem' }"
+  [dismissableMask]="true" styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-id-card text-white text-lg"></i>
+      </div>
+      <span
+        class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Account
+        Details</span>
+    </div>
+  </ng-template>
+  <div class="flex flex-col gap-3 py-4">
+    <div class="p-4 rounded-2xl flex items-center gap-3 bg-slate-800/50 border border-slate-600/30">
+      <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount?.address || ''" [size]="48">
+      </app-polkadot-identicon-util>
+      <div class="flex flex-col flex-1">
+        <span class="font-bold text-lg text-white">{{ selectedPolkadotWalletAccount?.meta?.name }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-400">
+            {{ selectedPolkadotWalletAccount?.address?.slice(0, 5) }}...
+            {{ selectedPolkadotWalletAccount?.address?.slice(-5) }}
+          </span>
+          <button (click)="copyAddressToClipboard(selectedPolkadotWalletAccount?.address)"
+            class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-purple-400 transition-all duration-200 cursor-pointer"
+            pTooltip="Copy Address" tooltipPosition="bottom">
+            <i class="pi pi-copy text-sm"></i>
           </button>
         </div>
       </div>
     </div>
   </div>
-</header>
+  <ng-template #footer>
+    <div class="flex gap-2">
+      <button (click)="logoutPolkadotWalletAccount()" [disabled]="isProcessing"
+        class="flex-1 px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 disabled:bg-slate-600/20 text-red-400 hover:text-red-300 disabled:text-slate-500 font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/50 disabled:border-slate-600/20 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        <i class="pi pi-sign-out"></i>
+        <span>Logout</span>
+      </button>
+      <button (click)="showPolkadotWalletAccountDialog = false"
+        class="flex-1 px-4 py-3 rounded-xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        Close
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
 
 <p-confirmDialog [style]="{ width: '450px' }" />
 <p-toast />

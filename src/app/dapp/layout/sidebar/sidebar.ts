@@ -25,28 +25,19 @@ export class Sidebar {
     {
       label: 'Cross-Chain',
       icon: 'pi pi-link',
-      routerLink: ['/application/cross-chain'],
+      routerLink: ['/dapp/cross-chain'],
     },
     {
       label: 'P2P',
       icon: 'pi pi-users',
-      routerLink: ['/application/p2p'],
-    },
-    {
-      label: 'Settings',
-      icon: 'pi pi-cog',
-      routerLink: ['/application/settings'],
+      routerLink: ['/dapp/p2p'],
     },
     {
       label: 'Profile',
       icon: 'pi pi-user',
-      routerLink: ['/application/profile'],
+      routerLink: ['/dapp/profile'],
     },
   ];
-
-  generate() {
-    this.onClickGenerate.emit();
-  }
 
   closeSidebar() {
     this.onClose.emit();
