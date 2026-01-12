@@ -60,7 +60,6 @@
   color: white;
 }
 
-/* Cosmic Select Dropdown Styles */
 ::ng-deep .p-select-overlay {
   background: linear-gradient(
     135deg,
@@ -71,6 +70,14 @@
   border: 1px solid rgba(168, 85, 247, 0.3) !important;
   border-radius: 1rem !important;
   box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25) !important;
+}
+
+::ng-deep .p-select {
+  border-radius: 9999px !important;
+}
+
+::ng-deep .p-select .p-select-label {
+  border-radius: 9999px !important;
 }
 
 ::ng-deep .p-select-list {
@@ -123,7 +130,7 @@
 ::ng-deep .p-select-filter {
   background: rgba(30, 41, 59, 0.5) !important;
   border: 1px solid rgba(168, 85, 247, 0.2) !important;
-  border-radius: 0.75rem !important;
+  border-radius: 9999px !important;
   color: white !important;
   padding: 0.5rem 1rem !important;
 }
@@ -138,6 +145,7 @@
   background: rgba(15, 23, 42, 0.5) !important;
   border: 1px solid rgba(168, 85, 247, 0.2) !important;
   color: white !important;
+  border-radius: 9999px !important;
 }
 
 ::ng-deep .p-inputnumber-input:hover {
@@ -149,13 +157,29 @@
   box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1) !important;
 }
 
+/* Text Input Styles */
+::ng-deep .p-inputtext {
+  border-radius: 0 !important;
+  border: none;
+}
+
 ::ng-deep .p-inputnumber-button-group .p-button {
   background: rgba(168, 85, 247, 0.2) !important;
   border: 1px solid rgba(168, 85, 247, 0.3) !important;
   color: rgb(203, 213, 225) !important;
+  border-radius: 9999px !important;
 }
 
 ::ng-deep .p-inputnumber-button-group .p-button:hover {
   background: rgba(168, 85, 247, 0.3) !important;
   color: white !important;
+}
+
+/* All Button Styles */
+::ng-deep .p-button {
+  border-radius: 9999px !important;
+}
+
+::ng-deep button {
+  border-radius: 9999px !important;
 }
