@@ -1,0 +1,12 @@
+/* P2P Portal Styling - Professional Admin Panel */
+
+/* Minimal clean styling - using Tailwind for all UI */
+
+/* Ensure dialog appears on top */
+:host ::ng-deep .p-dialog {
+  z-index: 1100 !important;
+}
+
+:host ::ng-deep .p-dialog-mask {
+  z-index: 1099 !important;
+}
