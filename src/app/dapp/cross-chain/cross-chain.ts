@@ -243,9 +243,13 @@ export class CrossChain {
     if (this.selectedSourceChain) {
       this.tokenService.getTokensByChainId(this.selectedSourceChain.id).subscribe({
         next: (sourceChainTokens: Token[]) => {
+          console.log('Source Chain Tokens:', sourceChainTokens);
+
           if (this.selectedTargetChain) {
             this.tokenService.getTokensByChainId(this.selectedTargetChain.id).subscribe({
               next: (targetChainTokens: Token[]) => {
+                console.log('Target Chain Tokens:', targetChainTokens);
+
                 const targetSymbols = new Set(targetChainTokens.map(token => token.symbol));
                 this.tokens = sourceChainTokens.filter(token => targetSymbols.has(token.symbol));
                 this.selectedToken = this.tokens[0];
