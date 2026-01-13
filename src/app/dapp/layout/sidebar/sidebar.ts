@@ -24,18 +24,13 @@ export class Sidebar {
   menuItems: PMenuItem[] = [
     {
       label: 'Teleport',
-      icon: 'pi pi-link',
+      icon: 'pi pi-arrow-right-arrow-left',
       routerLink: ['/dapp/cross-chain'],
     },
     {
       label: 'P2P',
-      icon: 'pi pi-users',
+      icon: 'pi pi-shopping-bag',
       routerLink: ['/dapp/p2p'],
-    },
-    {
-      label: 'Profile',
-      icon: 'pi pi-user',
-      routerLink: ['/dapp/profile'],
     },
   ];
 

@@ -4,21 +4,24 @@ import { FormsModule } from '@angular/forms';
 
 import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/extension-inject/types';
 
-import { MenuItem, MessageService } from 'primeng/api';
-import { MenubarModule } from 'primeng/menubar';
-import { ButtonModule } from 'primeng/button';
-import { TooltipModule } from 'primeng/tooltip';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { CardModule } from 'primeng/card';
-import { PanelModule } from 'primeng/panel';
-import { AccordionModule } from 'primeng/accordion';
-import { ToastModule } from 'primeng/toast';
+import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
+import { MenubarModule as PMenubarModule } from 'primeng/menubar';
+import { SelectModule as PSelectModule } from 'primeng/select';
+import { InputGroupModule as PInputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule as PInputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputNumberModule as PInputNumberModule } from 'primeng/inputnumber';
+import { ProgressSpinnerModule as PProgressSpinnerModule } from 'primeng/progressspinner';
+import { CardModule as PCardModule } from 'primeng/card';
+import { PanelModule as PPanelModule } from 'primeng/panel';
+import { AccordionModule as PAccordionModule } from 'primeng/accordion';
+import { ButtonModule as PButtonModule } from 'primeng/button';
+import { BadgeModule as PBadgeModule } from 'primeng/badge';
+import { AvatarModule as PAvatarModule } from 'primeng/avatar';
+import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
+import { ToastModule as PToastModule } from 'primeng/toast';
+import { ConfirmDialog as PConfirmDialog } from 'primeng/confirmdialog';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
+import { TooltipModule as PTooltipModule } from 'primeng/tooltip';
 
 import { Chain } from '../../../models/chain.model';
 import { Token } from '../../../models/token.model';
@@ -31,6 +34,8 @@ import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.ser
 import { PolkadotXcmService } from '../../../services/polkadot-xcm/polkadot-xcm.service';
 import { PolkadotApiService } from '../../../services/polkadot-api/polkadot-api.service';
 
+import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkadot-identicon-util';
+
 declare global {
   interface Window {
     xterium?: any;
@@ -42,24 +47,28 @@ declare global {
   imports: [
     CommonModule,
     FormsModule,
-    MenubarModule,
-    ButtonModule,
-    TooltipModule,
-    DialogModule,
-    InputTextModule,
-    SelectModule,
-    InputGroupModule,
-    InputGroupAddonModule,
-    InputNumberModule,
-    ProgressSpinnerModule,
-    CardModule,
-    PanelModule,
-    ToastModule,
-    AccordionModule,
+    PMenubarModule,
+    PSelectModule,
+    PInputGroupModule,
+    PInputGroupAddonModule,
+    PInputNumberModule,
+    PProgressSpinnerModule,
+    PCardModule,
+    PPanelModule,
+    PAccordionModule,
+    PButtonModule,
+    PBadgeModule,
+    PAvatarModule,
+    PInputTextModule,
+    PToastModule,
+    PConfirmDialog,
+    PDialogModule,
+    PTooltipModule,
+    PolkadotIdenticonUtil
   ],
-  providers: [MessageService],
   templateUrl: './cross-chain.html',
   styleUrl: './cross-chain.css',
+  providers: [MessageService, ConfirmationService],
 })
 export class CrossChain {
   constructor(
@@ -76,11 +85,18 @@ export class CrossChain {
 
   menuItems: MenuItem[] | undefined;
 
-  showInitializingDialog: boolean = true;
+  photoUrl: string = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default';
+  walletAddress: string = '';
 
+  showAvailableWalletsDialog: boolean = false;
+  showPolkadotWalletAccountsDialog: boolean = false;
+  polkadotWalletAccounts: PolkadotWalletAccount[] = [];
   selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
+  showPolkadotWalletAccountDialog: boolean = false;
 
   isProcessing: boolean = false;
+
+  showInitializingDialog: boolean = true;
 
   showProcessingDialog: boolean = false;
   processingStatus: {
@@ -109,6 +125,95 @@ export class CrossChain {
 
     return undefined;
   }
+
+  connectWallet(): void {
+    this.showAvailableWalletsDialog = true;
+  }
+
+  async connectPolkadotJsWallet() {
+    try {
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('polkadot-js');
+      this.polkadotWalletAccounts = results;
+      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+      this.showPolkadotWalletAccountsDialog = true;
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
+  async connectTalismanWallet() {
+    try {
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('talisman');
+      this.polkadotWalletAccounts = results;
+      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+      this.showPolkadotWalletAccountsDialog = true;
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
+  connectPolkadotWalletAccount(): void {
+    this.isProcessing = true;
+
+    setTimeout(() => {
+      localStorage.setItem('wallet_address', JSON.stringify(this.selectedPolkadotWalletAccount));
+
+      this.showAvailableWalletsDialog = false;
+      this.showPolkadotWalletAccountsDialog = false;
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Connected',
+        detail: 'Wallet connected successfully'
+      });
+
+      this.isProcessing = false;
+    }, 500);
+  }
+
+  logoutPolkadotWalletAccount(): void {
+    this.isProcessing = true;
+
+    setTimeout(() => {
+      localStorage.clear();
+      this.showPolkadotWalletAccountDialog = false;
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Disconnected',
+        detail: 'Wallet disconnected successfully'
+      });
+
+      this.isProcessing = false;
+      location.reload();
+    }, 500);
+  }
+
+  getPolkadotWalletAccount(): void {
+    this.showPolkadotWalletAccountDialog = true;
+  }
+
+  copyAddressToClipboard(address?: string): void {
+    if (!address) return;
+    navigator.clipboard.writeText(address).then(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Copied',
+        detail: 'Address copied to clipboard'
+      });
+    });
+  }
+
 
   getSourceChains(): void {
     this.chainsService.getChainsByNetworkId(1).subscribe({
