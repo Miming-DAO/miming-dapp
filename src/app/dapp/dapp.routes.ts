@@ -14,5 +14,9 @@ export const routes: Routes = [{
       path: "cross-chain",
       loadComponent: () => import('./cross-chain/cross-chain').then(m => m.CrossChain)
     },
+    {
+      path: "p2p",
+      loadComponent: () => import('./p2p/p2p').then(m => m.P2p)
+    },
   ]
 }];
