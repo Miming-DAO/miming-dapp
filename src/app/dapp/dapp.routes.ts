@@ -5,7 +5,7 @@ export const routes: Routes = [{
   path: "",
   component: Dapp,
   children: [
-    { path: '', redirectTo: '/dapp/home', pathMatch: 'full' },
+    { path: '', redirectTo: '/dapp/cross-chain', pathMatch: 'full' },
     {
       path: "home",
       loadComponent: () => import('./home/home').then(m => m.Home)
