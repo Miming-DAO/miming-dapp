@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TabsModule } from 'primeng/tabs';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { SelectModule as PSelectModule } from 'primeng/select';
+
+import { Chain } from '../../../models/chain.model';
+import { ChainsService } from '../../../services/chains/chains.service';
 
 @Component({
   selector: 'app-p2p',
@@ -15,11 +19,23 @@ import { ButtonModule } from 'primeng/button';
     DialogModule,
     InputTextModule,
     ButtonModule,
+    PSelectModule,
   ],
   templateUrl: './p2p.html',
   styleUrl: './p2p.css',
 })
-export class P2p {
+export class P2p implements OnInit {
+
+  constructor(private chainsService: ChainsService) { }
+
+  ngOnInit(): void {
+    this.getSourceChains();
+  }
+
+  // Source chain properties
+  sourceChains: Chain[] = [];
+  selectedSourceChain: Chain | undefined;
+
   // User login state (simulated)
   isP2PUserLoggedIn: boolean = true; // Set to true to show menu
 
@@ -347,5 +363,14 @@ export class P2p {
       'disputed': 'bg-orange-500/20 text-orange-400 border-orange-500/30'
     };
     return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  }
+
+  getSourceChains(): void {
+    this.chainsService.getChainsByNetworkId(1).subscribe({
+      next: (chains: Chain[]) => {
+        this.sourceChains = chains;
+        this.selectedSourceChain = this.sourceChains[0] || undefined;
+      }
+    });
   }
 }

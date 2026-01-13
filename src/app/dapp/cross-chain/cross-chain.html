@@ -58,7 +58,7 @@
 </div>
 
 <!-- Cover Photo Section -->
-<div class="w-full h-80 overflow-hidden bg-slate-900 relative">
+<div class="w-full h-65 md:h-80 overflow-hidden bg-slate-900 relative">
   <img src="/images/backgrounds/miming-cover.png" alt="Cover" class="w-full h-full object-cover blur-[2px]"
     style="object-position: center center;" />
   <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
@@ -68,15 +68,8 @@
 <div class="px-4 -mt-60 sm:px-6 lg:px-8 pb-12">
   <div class="max-w-4xl mx-auto">
     <div
-      class="backdrop-blur-xl bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 shadow-2xl shadow-purple-500/10 p-6 md:p-8 relative">
-      <div
-        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl">
-      </div>
-      <div
-        class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-fuchsia-500/10 to-purple-500/10 rounded-full blur-3xl">
-      </div>
-
-      <div class="relative z-10 space-y-6">
+      class="backdrop-blur-lg bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border-none p-6 md:p-8">
+      <div class="space-y-6">
 
         <!-- Chain Selection Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -90,20 +83,16 @@
               class="w-full rounded-full" size="large" (onChange)="getTargetChains()">
               <ng-template #selectedItem let-selectedOption>
                 @if (selectedOption) {
-                <div class="flex items-center gap-3 text-xl">
-                  <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
-                      class="w-7 h-7 object-contain" />
-                  </div>
+                <div class="flex items-center gap-2 text-xl">
+                  <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
+                    class="w-7 h-7 object-contain" />
                   <span class="font-medium text-white">{{ selectedOption.name }}</span>
                 </div>
                 }
               </ng-template>
               <ng-template let-chain #item>
-                <div class="flex items-center gap-3 transition-colors">
-                  <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
-                  </div>
+                <div class="flex items-center gap-2 transition-colors">
+                  <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
                   <span class="font-medium">{{ chain.name }}</span>
                 </div>
               </ng-template>
@@ -119,20 +108,16 @@
               size="large" (onChange)="getTokens()">
               <ng-template #selectedItem let-selectedOption>
                 @if (selectedOption) {
-                <div class="flex items-center gap-3 text-xl">
-                  <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
-                      class="w-7 h-7 object-contain" />
-                  </div>
+                <div class="flex items-center gap-2 text-xl">
+                  <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
+                    class="w-7 h-7 object-contain" />
                   <span class="font-medium text-white">{{ selectedOption.name }}</span>
                 </div>
                 }
               </ng-template>
               <ng-template let-chain #item>
-                <div class="flex items-center gap-3 transition-colors">
-                  <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
-                  </div>
+                <div class="flex items-center gap-2 transition-colors">
+                  <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
                   <span class="font-medium">{{ chain.name }}</span>
                 </div>
               </ng-template>
@@ -146,16 +131,14 @@
             {{ selectedTargetChain?.name || 'Target' }} Recipient Address
           </label>
           <div
-            class="flex items-center gap-0 bg-slate-900 border border-purple-500/30 rounded-full overflow-hidden hover:border-purple-500/40 transition-all h-14">
-            <div class="py-3 pl-3 pr-2 bg-black border-r border-purple-500/30 h-full flex items-center">
-              <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                <img [src]="'images/chains/' + selectedTargetChain?.name?.toLowerCase() + '.png'"
-                  class="w-7 h-7 object-contain" />
-              </div>
+            class="flex items-center gap-0 bg-slate-900/90 border-1 border-gray-100/30 rounded-full overflow-hidden hover:border-gray-100/40 transition-all h-14">
+            <div class="py-3 pl-3 bg-slate-900/90 border-r-none border-gray-100/30 h-full flex items-center">
+              <img [src]="'images/chains/' + selectedTargetChain?.name?.toLowerCase() + '.png'"
+                class="w-7 h-7 object-contain" />
             </div>
             <input pInputText [(ngModel)]="recipientAddress" placeholder="Enter recipient address"
-              class="flex-1 bg-transparent border-none text-white text-xl px-4 py-3 focus:outline-none focus:ring-0 h-full"
-              style="border: none; border-radius: 0px;" />
+              class="flex-1 bg-transparent text-white text-xl px-4 py-3 h-full"
+              style="border: none; border-radius: 0px; background-color: oklch(20.8% 0.042 265.755);" />
           </div>
         </div>
 
@@ -168,22 +151,17 @@
             <p-select [options]="tokens" [(ngModel)]="selectedToken" optionLabel="name" class="w-full" size="large">
               <ng-template #selectedItem let-selectedOption>
                 @if (selectedOption) {
-                <div class="flex items-center gap-3 text-xl">
-                  <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img [src]="'images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'"
-                      class="w-7 h-7 object-contain" />
-                  </div>
+                <div class="flex items-center gap-2 text-xl">
+                  <img [src]="'images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'"
+                    class="w-7 h-7 object-contain" />
                   <span class="font-medium text-white">{{ selectedOption.symbol }}</span>
                   <span class="text-slate-400 text-sm">({{ selectedOption.name }})</span>
                 </div>
                 }
               </ng-template>
               <ng-template let-token #item>
-                <div class="flex items-center gap-3 transition-colors">
-                  <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img [src]="'images/tokens/' + token.symbol.toLowerCase() + '.png'"
-                      class="w-6 h-6 object-contain" />
-                  </div>
+                <div class="flex items-center gap-2 transition-colors">
+                  <img [src]="'images/tokens/' + token.symbol.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
                   <span class="font-medium">{{ token.symbol }}</span>
                   <span class="text-slate-400 text-sm">({{ token.name }})</span>
                 </div>
@@ -196,8 +174,8 @@
             <label class="block text-lg font-semibold text-white">
               Quantity
             </label>
-            <p-inputnumber class="w-full bg-black rounded-full"
-              inputStyleClass="w-full text-right font-bold text-2xl text-white border border-purple-500/30 px-4 py-3 hover:border-purple-500/40 transition-all"
+            <p-inputnumber class="w-full bg-black rounded-full border border-gray-100/30 hover:border-gray-100/40"
+              inputStyleClass="w-full text-right font-bold text-2xl text-white border border-gray-100/30 px-4 py-3 hover:border-gray-100/40 transition-all"
               size="large" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="selectedToken?.decimals"
               [(ngModel)]="quantity" placeholder="0.00" />
           </div>
