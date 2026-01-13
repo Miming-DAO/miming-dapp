@@ -521,8 +521,9 @@
 </div>
 
 <!-- Order Chat Dialog -->
-<p-dialog [(visible)]="showOrderChatDialog" [modal]="true" [style]="{ 'width': '600px', 'max-width': '90vw' }"
-  [dismissableMask]="true" styleClass="cosmic-dialog">
+<p-dialog [(visible)]="showOrderChatDialog" [modal]="true"
+  [style]="{ 'width': '600px', 'max-width': '90vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
   <ng-template #header>
     @if (selectedOrder) {
     <div class="flex items-center justify-between w-full">
@@ -631,6 +632,83 @@
       </button>
       <button (click)="showOrderChatDialog = false"
         class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        Close
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Coming Soon Dialog -->
+<p-dialog [(visible)]="showComingSoonDialog" [modal]="true"
+  [style]="{ 'width': '600px', 'max-width': '90vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog" [closable]="false">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-clock text-white text-xl"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          P2P Trading
+        </span>
+        <div class="text-sm text-slate-400">Coming Soon</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="text-center py-8">
+    <div class="mb-6">
+      <div
+        class="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-shopping-bag text-white text-3xl"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-white mb-2">P2P Trading Portal</h3>
+      <p class="text-slate-400 mb-6">Peer-to-peer trading functionality is under development</p>
+    </div>
+
+    <div class="backdrop-blur-xl bg-slate-800/50 rounded-2xl border border-purple-500/20 p-6 mb-6 text-left">
+      <h4 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <i class="pi pi-star text-yellow-400"></i>
+        Upcoming Features
+      </h4>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <i class="pi pi-check-circle text-green-400 mt-1"></i>
+          <div>
+            <div class="text-white font-medium">Direct P2P Trading</div>
+            <div class="text-slate-400 text-sm">Trade directly with other users without intermediaries</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i class="pi pi-check-circle text-green-400 mt-1"></i>
+          <div>
+            <div class="text-white font-medium">Multi-Chain Support</div>
+            <div class="text-slate-400 text-sm">Trade assets across different blockchain networks</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i class="pi pi-check-circle text-green-400 mt-1"></i>
+          <div>
+            <div class="text-white font-medium">Real-time Chat</div>
+            <div class="text-slate-400 text-sm">Communicate with trading partners during transactions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-slate-400 text-sm mb-4">
+      <i class="pi pi-calendar mr-2"></i>
+      Expected launch: Q1 2026
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <div class="flex gap-3 pt-5 justify-end">
+      <button (click)="closeComingSoonDialog()"
+        class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white font-semibold hover:scale-105 transition-all duration-300 cursor-pointer">
+        <i class="pi pi-times mr-2"></i>
         Close
       </button>
     </div>

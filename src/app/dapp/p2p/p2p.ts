@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TabsModule } from 'primeng/tabs';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -26,11 +27,16 @@ import { ChainsService } from '../../../services/chains/chains.service';
 })
 export class P2p implements OnInit {
 
-  constructor(private chainsService: ChainsService) { }
+  constructor(private chainsService: ChainsService, private router: Router) { }
 
   ngOnInit(): void {
     this.getSourceChains();
+    // Show coming soon dialog when component loads
+    this.showComingSoonDialog = true;
   }
+
+  // Coming soon dialog
+  showComingSoonDialog: boolean = false;
 
   // Source chain properties
   sourceChains: Chain[] = [];
@@ -363,6 +369,11 @@ export class P2p implements OnInit {
       'disputed': 'bg-orange-500/20 text-orange-400 border-orange-500/30'
     };
     return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  }
+
+  closeComingSoonDialog(): void {
+    this.showComingSoonDialog = false;
+    this.router.navigate(['/dapp/cross-chain']);
   }
 
   getSourceChains(): void {

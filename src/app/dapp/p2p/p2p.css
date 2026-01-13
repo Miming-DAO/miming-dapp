@@ -9,4 +9,13 @@
 
 :host ::ng-deep .p-dialog-mask {
   z-index: 1099 !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Coming soon dialog backdrop blur effect */
+:host ::ng-deep .cosmic-dialog .p-dialog-mask {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(0, 0, 0, 1) !important;
 }
