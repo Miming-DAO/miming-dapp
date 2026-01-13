@@ -23,7 +23,7 @@ export class Sidebar {
 
   menuItems: PMenuItem[] = [
     {
-      label: 'Cross-Chain',
+      label: 'Teleport',
       icon: 'pi pi-link',
       routerLink: ['/dapp/cross-chain'],
     },

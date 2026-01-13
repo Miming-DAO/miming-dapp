@@ -7,15 +7,15 @@
 
 <div class="flex justify-center mb-8 pt-4">
   <div
-    class="w-32 h-32 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg shadow-purple-500/20 flex items-center justify-center overflow-hidden">
+    class="w-32 h-32 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg shadow-purple-500/20 flex items-center justify-center overflow-hidden">
     <img src="/images/logos/miming-logo.png" alt="Logo" class="w-full h-full object-contain p-3" />
   </div>
 </div>
 
 <nav class="px-2 space-y-1">
   @for (item of menuItems; track item.label) {
-  <a [routerLink]="item.routerLink" routerLinkActive="bg-white/20 shadow-md shadow-purple-500/30"
-    class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-white/15 hover:text-white transition-all duration-200 group cursor-pointer">
+  <a [routerLink]="item.routerLink" routerLinkActive="bg-white/20"
+    class="flex items-center gap-3 px-4 py-3 rounded-full text-white/90 hover:bg-white/15 hover:text-white transition-all duration-200 group cursor-pointer">
     <i [class]="item.icon + ' text-lg group-hover:scale-110 transition-transform duration-200'"></i>
     <span class="font-medium">{{ item.label }}</span>
   </a>

@@ -101,6 +101,15 @@ export class CrossChain {
   quantity: number = 0;
   recipientAddress: string = '';
 
+  getCurrentPolkadotWalletAccount(): PolkadotWalletAccount | undefined {
+    const storedAccount = localStorage.getItem('wallet_address');
+    if (storedAccount) {
+      return JSON.parse(storedAccount) as PolkadotWalletAccount;
+    }
+
+    return undefined;
+  }
+
   getSourceChains(): void {
     this.chainsService.getChainsByNetworkId(1).subscribe({
       next: (chains: Chain[]) => {
@@ -328,6 +337,7 @@ export class CrossChain {
       { label: 'Staking', routerLink: "" }
     ];
 
+    this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
     this.getSourceChains();
   }
 }
