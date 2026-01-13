@@ -1,13 +1,10 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'dapp', pathMatch: 'full' },
   {
     path: 'dapp',
-    loadComponent: () => import('./dapp/dapp').then((m) => m.Dapp),
-  },
-  {
-    path: '',
-    redirectTo: 'dapp',
-    pathMatch: 'full',
+    loadChildren: () =>
+      import('./dapp/dapp.routes').then((m) => m.routes),
   },
 ];
