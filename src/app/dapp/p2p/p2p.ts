@@ -32,8 +32,53 @@ export class P2p implements OnInit {
   ngOnInit(): void {
     this.getSourceChains();
     // Show coming soon dialog when component loads
-    this.showComingSoonDialog = true;
+    // this.showComingSoonDialog = true;
   }
+
+  /**
+   * Open login dialog
+   */
+  loginP2PUser(): void {
+    this.showLoginDialog = true;
+  }
+
+  /**
+   * Handle login form submission
+   */
+  handleLogin(): void {
+    // In a real application, this would validate credentials and authenticate
+    if (this.loginEmail && this.loginPassword) {
+      this.isP2PUserLoggedIn = true;
+      this.activeMenu = 'marketplace';
+      this.showLoginDialog = false;
+      // Clear form
+      this.loginEmail = '';
+      this.loginPassword = '';
+    }
+  }
+
+  /**
+   * Handle Google login
+   */
+  handleGoogleLogin(): void {
+    // In a real application, this would integrate with Google OAuth
+    this.isP2PUserLoggedIn = true;
+    this.activeMenu = 'marketplace';
+    this.showLoginDialog = false;
+  }
+
+  /**
+   * Handle logout
+   */
+  logoutP2PUser(): void {
+    this.isP2PUserLoggedIn = false;
+    this.activeMenu = 'marketplace';
+  }
+
+  // Login dialog
+  showLoginDialog: boolean = false;
+  loginEmail: string = '';
+  loginPassword: string = '';
 
   // Coming soon dialog
   showComingSoonDialog: boolean = false;
@@ -42,8 +87,18 @@ export class P2p implements OnInit {
   sourceChains: Chain[] = [];
   selectedSourceChain: Chain | undefined;
 
+  // Payment type filter
+  paymentTypes: string[] = ['GCash', 'Bank Transfer'];
+  selectedPaymentType: string | undefined;
+
+  // Search filter
+  searchTerm: string = '';
+
   // User login state (simulated)
-  isP2PUserLoggedIn: boolean = true; // Set to true to show menu
+  isP2PUserLoggedIn: boolean = false; // Set to true to show menu
+
+  // User role (simulated)
+  isAdmin: boolean = true; // Set to true to show admin console
 
   // Mobile menu toggle
   mobileMenuOpen: boolean = false;
@@ -374,6 +429,10 @@ export class P2p implements OnInit {
   closeComingSoonDialog(): void {
     this.showComingSoonDialog = false;
     this.router.navigate(['/dapp/cross-chain']);
+  }
+
+  navigateToAdminConsole(): void {
+    this.router.navigate(['/dapp/p2p-admin']);
   }
 
   getSourceChains(): void {

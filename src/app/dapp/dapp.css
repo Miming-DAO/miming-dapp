@@ -5,6 +5,7 @@
   --sidebar-bg-image: url('/images/backgrounds/miming-bg.png');
 }
 
+/* primeng - drawer */
 ::ng-deep .p-drawer-header {
   display: none !important;
   padding: 0 !important;
@@ -14,6 +15,7 @@
   padding: 0 !important;
 }
 
+/* primeng - select */
 ::ng-deep .p-select-overlay {
   background: linear-gradient(
     135deg,
@@ -78,7 +80,7 @@
   ) !important;
 }
 
-/* Input Number Styles */
+/* primeng - input number */
 ::ng-deep .p-inputnumber-input {
   background-color: oklch(20.8% 0.042 265.755) !important;
   color: white !important;

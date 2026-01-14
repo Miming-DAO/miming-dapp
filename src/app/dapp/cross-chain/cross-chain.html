@@ -227,7 +227,7 @@
   </div>
 </div>
 
-
+<!-- Available Wallets Dialog -->
 <p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true"
   [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -268,6 +268,7 @@
   </ng-template>
 </p-dialog>
 
+<!-- Polkadot Wallet Accounts Dialog -->
 <p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true"
   [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -320,6 +321,7 @@
   </ng-template>
 </p-dialog>
 
+<!-- Polkadot Wallet Account Details Dialog -->
 <p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true"
   [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -368,7 +370,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- Initializing Dialog -->
+<!-- Initializing and Processing Dialogs -->
 <p-dialog [(visible)]="showInitializingDialog" [modal]="true" [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }"
   [dismissableMask]="false" [closable]="false" [draggable]="false" [resizable]="false" styleClass="cosmic-dialog">
   <ng-template pTemplate="header">
