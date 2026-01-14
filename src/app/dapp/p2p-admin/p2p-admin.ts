@@ -34,6 +34,12 @@ export class P2pAdmin implements OnInit {
     this.router.navigate(['/dapp/p2p']);
   }
 
+  logout() {
+    // Clear any stored authentication data
+    // Navigate to login or home page
+    this.router.navigate(['/login']); // or '/home' depending on your app structure
+  }
+
   // Active tab/section
   activeSection: 'users' | 'orders' = 'users';
 
