@@ -66,162 +66,250 @@
 
 <!-- Main Content Container -->
 <div class="px-4 -mt-60 sm:px-6 lg:px-8 pb-12">
-  <div class="max-w-4xl mx-auto">
-    <div
-      class="backdrop-blur-lg bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border-none p-6 md:p-8">
-      <div class="space-y-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Side - Main Form -->
+      <div class="lg:col-span-2">
+        <div
+          class="backdrop-blur-lg bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border-none p-6 md:p-8">
+          <div class="space-y-6">
 
-        <!-- Chain Selection Row -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Chain Selection Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <!-- Source Chain -->
-          <div class="space-y-2">
-            <label class="block text-lg font-semibold text-white">
-              Source Chain
-            </label>
-            <p-select [options]="sourceChains" [(ngModel)]="selectedSourceChain" optionLabel="name"
-              class="w-full rounded-full" size="large" (onChange)="getTargetChains()">
-              <ng-template #selectedItem let-selectedOption>
-                @if (selectedOption) {
-                <div class="flex items-center gap-2 text-xl">
-                  <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
-                    class="w-7 h-7 object-contain" />
-                  <span class="font-medium text-white">{{ selectedOption.name }}</span>
-                </div>
-                }
-              </ng-template>
-              <ng-template let-chain #item>
-                <div class="flex items-center gap-2 transition-colors">
-                  <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
-                  <span class="font-medium">{{ chain.name }}</span>
-                </div>
-              </ng-template>
-            </p-select>
-          </div>
-
-          <!-- Target Chain -->
-          <div class="space-y-2">
-            <label class="block text-lg font-semibold text-white">
-              Target Chain
-            </label>
-            <p-select [options]="targetChains" [(ngModel)]="selectedTargetChain" optionLabel="name" class="w-full"
-              size="large" (onChange)="getTokens()">
-              <ng-template #selectedItem let-selectedOption>
-                @if (selectedOption) {
-                <div class="flex items-center gap-2 text-xl">
-                  <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
-                    class="w-7 h-7 object-contain" />
-                  <span class="font-medium text-white">{{ selectedOption.name }}</span>
-                </div>
-                }
-              </ng-template>
-              <ng-template let-chain #item>
-                <div class="flex items-center gap-2 transition-colors">
-                  <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
-                  <span class="font-medium">{{ chain.name }}</span>
-                </div>
-              </ng-template>
-            </p-select>
-          </div>
-        </div>
-
-        <!-- Recipient Address -->
-        <div class="space-y-2">
-          <label class="block text-lg font-semibold text-white">
-            {{ selectedTargetChain?.name || 'Target' }} Recipient Address
-          </label>
-          <div
-            class="flex items-center gap-0 bg-slate-900/90 border-1 border-gray-100/30 rounded-full overflow-hidden hover:border-gray-100/40 transition-all h-14">
-            <div class="py-3 pl-3 bg-slate-900/90 border-r-none border-gray-100/30 h-full flex items-center">
-              <img [src]="'images/chains/' + selectedTargetChain?.name?.toLowerCase() + '.png'"
-                class="w-7 h-7 object-contain" />
-            </div>
-            <input pInputText [(ngModel)]="recipientAddress" placeholder="Enter recipient address"
-              class="flex-1 bg-transparent text-white text-xl px-4 py-3 h-full"
-              style="border: none; border-radius: 0px; background-color: oklch(20.8% 0.042 265.755);" />
-          </div>
-        </div>
-
-        <!-- Token and Quantity Row -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label class="block text-lg font-semibold text-white">
-              Token
-            </label>
-            <p-select [options]="tokens" [(ngModel)]="selectedToken" optionLabel="name" class="w-full" size="large">
-              <ng-template #selectedItem let-selectedOption>
-                @if (selectedOption) {
-                <div class="flex items-center gap-2 text-xl">
-                  <img [src]="'images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'"
-                    class="w-7 h-7 object-contain" />
-                  <span class="font-medium text-white">{{ selectedOption.symbol }}</span>
-                  <span class="text-slate-400 text-sm">({{ selectedOption.name }})</span>
-                </div>
-                }
-              </ng-template>
-              <ng-template let-token #item>
-                <div class="flex items-center gap-2 transition-colors">
-                  <img [src]="'images/tokens/' + token.symbol.toLowerCase() + '.png'" class="w-6 h-6 object-contain" />
-                  <span class="font-medium">{{ token.symbol }}</span>
-                  <span class="text-slate-400 text-sm">({{ token.name }})</span>
-                </div>
-              </ng-template>
-            </p-select>
-          </div>
-
-          <!-- Quantity -->
-          <div class="space-y-2">
-            <label class="block text-lg font-semibold text-white">
-              Quantity
-            </label>
-            <p-inputnumber class="w-full bg-black rounded-full border border-gray-100/30 hover:border-gray-100/40"
-              inputStyleClass="w-full text-right font-bold text-2xl text-white border border-gray-100/30 px-4 py-3 hover:border-gray-100/40 transition-all"
-              size="large" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="selectedToken?.decimals"
-              [(ngModel)]="quantity" placeholder="0.00" />
-          </div>
-        </div>
-
-        <!-- Asset Received Display -->
-        <div class="space-y-2">
-          <label class="block text-lg font-semibold text-white">
-            Asset Received
-          </label>
-          <div
-            class="flex items-center gap-0 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full overflow-hidden shadow-lg shadow-yellow-500/20">
-            <div class="px-6 py-4 flex items-center gap-2">
-              <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                <img [src]="'images/tokens/' + selectedToken?.symbol?.toLowerCase() + '.png'"
-                  class="w-7 h-7 object-contain" />
+              <!-- Source Chain -->
+              <div class="space-y-2">
+                <label class="block text-lg font-semibold text-white">
+                  Source Chain
+                </label>
+                <p-select [options]="sourceChains" [(ngModel)]="selectedSourceChain" optionLabel="name"
+                  class="w-full rounded-full" size="large" (onChange)="getTargetChains()">
+                  <ng-template #selectedItem let-selectedOption>
+                    @if (selectedOption) {
+                    <div class="flex items-center gap-2 text-xl">
+                      <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
+                        class="w-7 h-7 object-contain" />
+                      <span class="font-medium text-white">{{ selectedOption.name }}</span>
+                    </div>
+                    }
+                  </ng-template>
+                  <ng-template let-chain #item>
+                    <div class="flex items-center gap-2 transition-colors">
+                      <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'"
+                        class="w-6 h-6 object-contain" />
+                      <span class="font-medium">{{ chain.name }}</span>
+                    </div>
+                  </ng-template>
+                </p-select>
               </div>
-              <span class="font-bold text-gray-900 text-xl">{{ selectedToken?.symbol || 'TOKEN' }}</span>
+
+              <!-- Target Chain -->
+              <div class="space-y-2">
+                <label class="block text-lg font-semibold text-white">
+                  Target Chain
+                </label>
+                <p-select [options]="targetChains" [(ngModel)]="selectedTargetChain" optionLabel="name" class="w-full"
+                  size="large" (onChange)="getTokens()">
+                  <ng-template #selectedItem let-selectedOption>
+                    @if (selectedOption) {
+                    <div class="flex items-center gap-2 text-xl">
+                      <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
+                        class="w-7 h-7 object-contain" />
+                      <span class="font-medium text-white">{{ selectedOption.name }}</span>
+                    </div>
+                    }
+                  </ng-template>
+                  <ng-template let-chain #item>
+                    <div class="flex items-center gap-2 transition-colors">
+                      <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'"
+                        class="w-6 h-6 object-contain" />
+                      <span class="font-medium">{{ chain.name }}</span>
+                    </div>
+                  </ng-template>
+                </p-select>
+              </div>
             </div>
-            <div class="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-4 text-right">
-              <span class="font-bold text-gray-900 text-2xl">
-                {{ quantity || 0 | number:'1.2-' + (selectedToken?.decimals || 2) }}
-              </span>
+
+            <!-- Recipient Address -->
+            <div class="space-y-2">
+              <label class="block text-lg font-semibold text-white">
+                {{ selectedTargetChain?.name || 'Target' }} Recipient Address
+              </label>
+              <div
+                class="flex items-center gap-0 bg-slate-900/90 border-1 border-gray-100/30 rounded-full overflow-hidden hover:border-gray-100/40 transition-all h-14">
+                <div class="py-3 pl-3 bg-slate-900/90 border-r-none border-gray-100/30 h-full flex items-center">
+                  <img [src]="'images/chains/' + selectedTargetChain?.name?.toLowerCase() + '.png'"
+                    class="w-7 h-7 object-contain" />
+                </div>
+                <input pInputText [(ngModel)]="recipientAddress" placeholder="Enter recipient address"
+                  class="flex-1 bg-transparent text-white text-xl px-4 py-3 h-full"
+                  style="border: none; border-radius: 0px; background-color: oklch(20.8% 0.042 265.755);" />
+              </div>
+            </div>
+
+            <!-- Token and Quantity Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label class="block text-lg font-semibold text-white">
+                  Token
+                </label>
+                <p-select [options]="tokens" [(ngModel)]="selectedToken" optionLabel="name" class="w-full" size="large">
+                  <ng-template #selectedItem let-selectedOption>
+                    @if (selectedOption) {
+                    <div class="flex items-center gap-2 text-xl">
+                      <img [src]="'images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'"
+                        class="w-7 h-7 object-contain" />
+                      <span class="font-medium text-white">{{ selectedOption.symbol }}</span>
+                      <span class="text-slate-400 text-sm">({{ selectedOption.name }})</span>
+                    </div>
+                    }
+                  </ng-template>
+                  <ng-template let-token #item>
+                    <div class="flex items-center gap-2 transition-colors">
+                      <img [src]="'images/tokens/' + token.symbol.toLowerCase() + '.png'"
+                        class="w-6 h-6 object-contain" />
+                      <span class="font-medium">{{ token.symbol }}</span>
+                      <span class="text-slate-400 text-sm">({{ token.name }})</span>
+                    </div>
+                  </ng-template>
+                </p-select>
+              </div>
+
+              <!-- Quantity -->
+              <div class="space-y-2">
+                <label class="block text-lg font-semibold text-white">
+                  Quantity
+                </label>
+                <p-inputnumber class="w-full bg-black rounded-full border border-gray-100/30 hover:border-gray-100/40"
+                  inputStyleClass="w-full text-right font-bold text-2xl text-white border border-gray-100/30 px-4 py-3 hover:border-gray-100/40 transition-all"
+                  size="large" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="selectedToken?.decimals"
+                  [(ngModel)]="quantity" placeholder="0.00" />
+              </div>
+            </div>
+
+            <!-- Asset Received Display -->
+            <div class="space-y-2">
+              <label class="block text-lg font-semibold text-white">
+                Asset Received
+              </label>
+              <div
+                class="flex items-center gap-0 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full overflow-hidden shadow-lg shadow-yellow-500/20">
+                <div class="px-6 py-4 flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                    <img [src]="'images/tokens/' + selectedToken?.symbol?.toLowerCase() + '.png'"
+                      class="w-7 h-7 object-contain" />
+                  </div>
+                  <span class="font-bold text-gray-900 text-xl">{{ selectedToken?.symbol || 'TOKEN' }}</span>
+                </div>
+                <div class="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-4 text-right">
+                  <span class="font-bold text-gray-900 text-2xl">
+                    {{ quantity || 0 | number:'1.2-' + (selectedToken?.decimals || 2) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info Note -->
+            <div class="mt-6 p-4 rounded-3xl bg-purple-500/10 border border-purple-500/20">
+              <div class="flex items-start gap-3">
+                <i class="pi pi-info-circle text-purple-400 text-xl flex-shrink-0"></i>
+                <div class="text-slate-300 text-sm leading-relaxed">
+                  <p>
+                    Network fee: <span class="text-yellow-400 font-semibold">0.01 USDT or DOT</span> per transaction to
+                    Xode. This covers cross-chain validation and bridge operation costs.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Teleport Button -->
+            <button (click)="teleport()" [disabled]="isProcessing"
+              class="w-full py-5 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-bold text-xl shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer flex items-center justify-center gap-3">
+              <i class="pi pi-send text-2xl"></i>
+              <span>Teleport Asset</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side - Balance Panels -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-4 space-y-4">
+          <div
+            class="backdrop-blur-lg bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+                <i class="pi pi-wallet text-white text-lg"></i>
+              </div>
+              <h3 class="text-lg font-bold text-white">Chain Balances</h3>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Selected Source Chain First -->
+              @if (selectedSourceChain) {
+              <div
+                class="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-4 border border-purple-500/30 hover:border-purple-500/50 transition-all">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <img [src]="'images/chains/' + selectedSourceChain.name.toLowerCase() + '.png'"
+                      class="w-5 h-5 object-contain" />
+                    <span class="text-sm font-semibold text-white">{{ selectedSourceChain.name }}</span>
+                    <span
+                      class="px-2 py-0.5 text-xs font-bold bg-purple-500/30 text-purple-300 rounded-full">Active</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    @if (selectedToken) {
+                    <img [src]="'images/tokens/' + selectedToken.symbol.toLowerCase() + '.png'"
+                      class="w-6 h-6 object-contain" />
+                    <span class="text-base font-bold text-white">{{ selectedToken.symbol }}</span>
+                    } @else {
+                    <span class="text-sm text-slate-400">Select Token</span>
+                    }
+                  </div>
+                  <span class="text-xl font-bold text-white">0.00</span>
+                </div>
+              </div>
+
+              <!-- Divider -->
+              <div class="flex items-center gap-3 py-2">
+                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+                <span class="text-xs text-slate-500 uppercase tracking-wider">Other Chains</span>
+                <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+              </div>
+              }
+
+              <!-- Rest of the Chains -->
+              @for (chain of sourceChains; track chain.id) {
+              @if (!selectedSourceChain || chain.id !== selectedSourceChain.id) {
+              <div
+                class="bg-slate-900/50 rounded-2xl p-4 border border-purple-500/10 hover:border-purple-500/30 transition-all">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'" class="w-5 h-5 object-contain" />
+                    <span class="text-sm font-semibold text-white">{{ chain.name }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    @if (selectedToken) {
+                    <img [src]="'images/tokens/' + selectedToken.symbol.toLowerCase() + '.png'"
+                      class="w-6 h-6 object-contain" />
+                    <span class="text-base font-bold text-white">{{ selectedToken.symbol }}</span>
+                    } @else {
+                    <span class="text-sm text-slate-400">Select Token</span>
+                    }
+                  </div>
+                  <span class="text-xl font-bold text-white">0.00</span>
+                </div>
+              </div>
+              }
+              }
             </div>
           </div>
         </div>
-
-        <!-- Info Note -->
-        <div class="mt-6 p-4 rounded-3xl bg-purple-500/10 border border-purple-500/20">
-          <div class="flex items-start gap-3">
-            <i class="pi pi-info-circle text-purple-400 text-xl flex-shrink-0"></i>
-            <div class="text-slate-300 text-sm leading-relaxed">
-              <p>
-                Network fee: <span class="text-yellow-400 font-semibold">0.01 USDT or DOT</span> per transaction to
-                Xode. This covers cross-chain validation and bridge operation costs.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Teleport Button -->
-        <button (click)="teleport()" [disabled]="isProcessing"
-          class="w-full py-5 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-bold text-xl shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer flex items-center justify-center gap-3">
-          <i class="pi pi-send text-2xl"></i>
-          <span>Teleport Asset</span>
-        </button>
       </div>
     </div>
   </div>
