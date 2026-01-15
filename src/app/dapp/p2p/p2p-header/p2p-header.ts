@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { TabsModule as PTabsModule } from 'primeng/tabs';
 import { DialogModule as PDialogModule } from 'primeng/dialog';
@@ -35,6 +36,15 @@ export class P2pHeader {
   loginPassword: string = '';
 
   isP2PUserLoggedIn: boolean = false;
+  isXteriumMode: boolean = false;
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.isXteriumMode = params['xterium'] === 'true';
+    });
+  }
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
