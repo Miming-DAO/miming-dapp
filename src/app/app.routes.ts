@@ -7,4 +7,9 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./dapp/dapp.routes').then((m) => m.routes),
   },
+  {
+    path: 'auth',
+    loadChildren: () =>
+      import('./auth/auth.routes').then((m) => m.routes),
+  }
 ];

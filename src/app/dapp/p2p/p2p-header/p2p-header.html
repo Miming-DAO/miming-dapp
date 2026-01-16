@@ -24,13 +24,19 @@
     @if (isP2PUserLoggedIn) {
     <div class="flex items-center gap-2 md:gap-3">
       <div class="text-right hidden md:block">
-        <div class="text-sm font-semibold text-white">John Trader</div>
-        <div class="text-xs text-slate-400">Verified Merchant</div>
+        <div class="text-sm font-semibold text-white">{{ currentUser()?.full_name || currentUser()?.username || 'User'
+          }}</div>
+        <div class="text-xs text-slate-400">{{ currentUser()?.type || 'Verified Merchant' }}</div>
       </div>
+      @if (currentUser()?.photo_url) {
+      <img [src]="currentUser()?.photo_url" alt="User Profile"
+        class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-purple-500/50" />
+      } @else {
       <div
         class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm md:text-base">
-        JT
+        {{ (currentUser()?.full_name || currentUser()?.username || 'U').substring(0, 2).toUpperCase() }}
       </div>
+      }
       <button (click)="logoutP2PUser()" title="Logout"
         class="px-3 py-2 rounded-full bg-slate-800/50 hover:bg-red-500/20 border border-slate-600/30 hover:border-red-500/50 text-slate-300 hover:text-red-400 transition-all duration-200 cursor-pointer">
         <i class="pi pi-sign-out"></i>
@@ -71,14 +77,21 @@
   </ng-template>
 
   <div class="py-4">
+    @if (errorMessage()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+      <i class="pi pi-exclamation-triangle mr-2"></i>
+      {{ errorMessage() }}
+    </div>
+    }
+
     <div class="mb-4">
       <label class="block text-sm font-semibold text-slate-300 mb-2">
         <i class="pi pi-envelope mr-2"></i>
         Email or Username
       </label>
       <input [(ngModel)]="loginEmail" type="text" placeholder="Enter your email or username"
-        (keyup.enter)="handleLogin()"
-        class="w-full px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all" />
+        (keyup.enter)="handleLogin()" [disabled]="isLoading()"
+        class="w-full px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
     </div>
 
     <div class="mb-6">
@@ -87,13 +100,19 @@
         Password
       </label>
       <input [(ngModel)]="loginPassword" type="password" placeholder="Enter your password" (keyup.enter)="handleLogin()"
-        class="w-full px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all" />
+        [disabled]="isLoading()"
+        class="w-full px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
     </div>
 
-    <button (click)="handleLogin()" [disabled]="!loginEmail || !loginPassword"
+    <button (click)="handleLogin()" [disabled]="!loginEmail || !loginPassword || isLoading()"
       class="w-full px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-pink-700 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 disabled:cursor-not-allowed cursor-pointer mb-4">
+      @if (isLoading()) {
+      <i class="pi pi-spin pi-spinner mr-2"></i>
+      Signing in...
+      } @else {
       <i class="pi pi-sign-in mr-2"></i>
       Sign In
+      }
     </button>
 
     <div class="flex items-center gap-3 mb-4">
@@ -102,8 +121,12 @@
       <div class="flex-1 h-px bg-slate-600/30"></div>
     </div>
 
-    <button (click)="handleGoogleLogin()"
-      class="w-full px-6 py-3 rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/30 hover:border-slate-500/50 text-white font-semibold transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer">
+    <button (click)="handleGoogleLogin()" [disabled]="isLoading()"
+      class="w-full px-6 py-3 rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/30 hover:border-slate-500/50 text-white font-semibold transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+      @if (isLoading()) {
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Connecting...</span>
+      } @else {
       <svg class="w-5 h-5" viewBox="0 0 24 24">
         <path fill="#4285F4"
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -115,6 +138,7 @@
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
       </svg>
       <span>Sign in with Google</span>
+      }
     </button>
 
     <!-- Footer Links -->

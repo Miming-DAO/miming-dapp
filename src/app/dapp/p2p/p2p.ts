@@ -42,6 +42,18 @@ export class P2p {
   activeMenu: 'marketplace' | 'my-ads' | 'orders' = 'marketplace';
   activeTab: 'buy' | 'sell' = 'buy';
 
+  ngOnInit() {
+    // Check if user is logged in by checking google_user in localStorage
+    this.checkAuthStatus();
+  }
+
+  checkAuthStatus(): void {
+    const googleUser = localStorage.getItem('google_user');
+    if (googleUser) {
+      this.isP2PUserLoggedIn = true;
+    }
+  }
+
   mobileMenuOpenOnClick(mobileMenuOpen: boolean): void {
     this.mobileMenuOpen = mobileMenuOpen;
   }
