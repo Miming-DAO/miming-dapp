@@ -38,5 +38,6 @@ export interface UpdateP2pAdDto {
   available_amount?: number;
   limit_from?: number;
   limit_to?: number;
+  payment_instructions?: string;
   status?: string;
 }

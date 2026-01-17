@@ -5,7 +5,7 @@
         <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">My Advertisements</h2>
         <p class="text-sm md:text-base text-slate-400">Manage your P2P listings</p>
       </div>
-      <button
+      <button (click)="openCreateDialog()"
         class="w-full sm:w-auto px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm text-sm md:text-base cursor-pointer">
         <i class="pi pi-plus mr-1 md:mr-2"></i>
         Create New Ad
@@ -25,7 +25,7 @@
           <div class="md:col-span-2">
             <div class="flex items-center gap-2">
               <span
-                [class]="ad.type === 'buy' ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-green-500/20 text-green-300 border-green-500/30'"
+                [class]="ad.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
                 class="px-3 py-1.5 rounded-full text-xs md:text-sm font-bold border uppercase">
                 <i [class]="ad.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
                 {{ ad.type }}
@@ -69,7 +69,7 @@
               {{ ad.status }}
             </span>
             <div class="flex gap-2">
-              <button
+              <button (click)="openEditDialog(ad)"
                 class="w-8 h-8 rounded-full bg-slate-700/50 hover:bg-purple-500/30 text-slate-300 hover:text-purple-300 transition-all duration-200 flex items-center justify-center cursor-pointer">
                 <i class="pi pi-pencil text-xs"></i>
               </button>
@@ -97,3 +97,269 @@
     </div>
   </div>
 </div>
+
+<!-- Create Ad Dialog -->
+<p-dialog [(visible)]="showCreateDialog" [modal]="true"
+  [style]="{ 'width': '900px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-plus text-white text-lg"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Create New Advertisement
+        </span>
+        <div class="text-xs text-slate-400">Fill out the details below to publish a P2P ad</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="submitAd()" class="space-y-6" autocomplete="off">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-end">
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Type</label>
+        <div class="flex gap-2">
+          <label [class]="newAd.type === 'sell' ? 'bg-purple-500/20 border-purple-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-purple-500/40">
+            <input type="radio" name="type" value="sell" [(ngModel)]="newAd.type" class="accent-purple-500" />
+            <span class="text-white font-semibold text-sm">Sell</span>
+          </label>
+          <label [class]="newAd.type === 'buy' ? 'bg-green-500/20 border-green-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-green-500/40">
+            <input type="radio" name="type" value="buy" [(ngModel)]="newAd.type" class="accent-green-500" />
+            <span class="text-white font-semibold text-sm">Buy</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Asset</label>
+        <p-select [options]="assetOptions" [(ngModel)]="newAd.asset" name="asset" placeholder="Select Asset"
+          class="w-full" size="large" />
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Price (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="newAd.price" name="price" placeholder="0.00" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Available</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="6" [(ngModel)]="newAd.available" name="available"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Min Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="newAd.minLimit" name="minLimit"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Max Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="newAd.maxLimit" name="maxLimit"
+          placeholder="0.00" />
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Payment Methods</label>
+      <div class="flex flex-wrap gap-2">
+        <label (click)="togglePaymentMethod('Bank Transfer')"
+          [class]="isPaymentMethodSelected('Bank Transfer') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isPaymentMethodSelected('Bank Transfer') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          Bank Transfer
+        </label>
+        <label (click)="togglePaymentMethod('PayPal')"
+          [class]="isPaymentMethodSelected('PayPal') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isPaymentMethodSelected('PayPal') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          PayPal
+        </label>
+        <label (click)="togglePaymentMethod('Wise')"
+          [class]="isPaymentMethodSelected('Wise') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isPaymentMethodSelected('Wise') ? 'pi pi-check-square' : 'pi pi-square'" class="mr-2 text-sm"></i>
+          Wise
+        </label>
+        <label (click)="togglePaymentMethod('Revolut')"
+          [class]="isPaymentMethodSelected('Revolut') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isPaymentMethodSelected('Revolut') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          Revolut
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Payment Instructions (optional)</label>
+      <textarea pTextarea rows="3" [(ngModel)]="newAd.instructions" name="instructions"
+        placeholder="Provide any special instructions for buyers/sellers" class="w-full" [rows]="5"
+        style="border-radius: 1.5rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+    </div>
+  </form>
+  <ng-template #footer>
+    <div class="flex gap-2 pt-5">
+      <button type="submit" (click)="submitAd()"
+        class="flex-1 px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Publish
+      </button>
+      <button type="button" (click)="closeCreateDialog()"
+        class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Ad Dialog -->
+<p-dialog [(visible)]="showEditDialog" [modal]="true"
+  [style]="{ 'width': '900px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-pencil text-white text-lg"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Edit Advertisement
+        </span>
+        <div class="text-xs text-slate-400">Update the details of your P2P ad</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="updateAd()" class="space-y-6" autocomplete="off">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-end">
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Type</label>
+        <div class="flex gap-2">
+          <label [class]="editAd.type === 'sell' ? 'bg-purple-500/20 border-purple-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-purple-500/40">
+            <input type="radio" name="editType" value="sell" [(ngModel)]="editAd.type" class="accent-purple-500" />
+            <span class="text-white font-semibold text-sm">Sell</span>
+          </label>
+          <label [class]="editAd.type === 'buy' ? 'bg-green-500/20 border-green-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-green-500/40">
+            <input type="radio" name="editType" value="buy" [(ngModel)]="editAd.type" class="accent-green-500" />
+            <span class="text-white font-semibold text-sm">Buy</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Asset</label>
+        <p-select [options]="assetOptions" [(ngModel)]="editAd.asset" name="editAsset" placeholder="Select Asset"
+          class="w-full" size="large" />
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Price (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="editAd.price" name="editPrice"
+          placeholder="0.00" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Available</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="6" [(ngModel)]="editAd.available" name="editAvailable"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Min Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="editAd.minLimit" name="editMinLimit"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Max Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="editAd.maxLimit" name="editMaxLimit"
+          placeholder="0.00" />
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Payment Methods</label>
+      <div class="flex flex-wrap gap-2">
+        <label (click)="toggleEditPaymentMethod('Bank Transfer')"
+          [class]="isEditPaymentMethodSelected('Bank Transfer') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isEditPaymentMethodSelected('Bank Transfer') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          Bank Transfer
+        </label>
+        <label (click)="toggleEditPaymentMethod('PayPal')"
+          [class]="isEditPaymentMethodSelected('PayPal') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isEditPaymentMethodSelected('PayPal') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          PayPal
+        </label>
+        <label (click)="toggleEditPaymentMethod('Wise')"
+          [class]="isEditPaymentMethodSelected('Wise') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isEditPaymentMethodSelected('Wise') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          Wise
+        </label>
+        <label (click)="toggleEditPaymentMethod('Revolut')"
+          [class]="isEditPaymentMethodSelected('Revolut') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
+          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
+          <i [class]="isEditPaymentMethodSelected('Revolut') ? 'pi pi-check-square' : 'pi pi-square'"
+            class="mr-2 text-sm"></i>
+          Revolut
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Payment Instructions (optional)</label>
+      <textarea pTextarea rows="3" [(ngModel)]="editAd.instructions" name="editInstructions"
+        placeholder="Provide any special instructions for buyers/sellers" class="w-full" [rows]="5"
+        style="border-radius: 1.5rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+    </div>
+  </form>
+  <ng-template #footer>
+    <div class="flex gap-2 pt-5">
+      <button type="submit" (click)="updateAd()"
+        class="flex-1 px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Update
+      </button>
+      <button type="button" (click)="closeEditDialog()"
+        class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
