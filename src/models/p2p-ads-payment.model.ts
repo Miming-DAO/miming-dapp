@@ -1,5 +1,6 @@
 export interface P2pAdsPayment {
   id: string | number;
+  p2p_ad_id: string | number;
   payment_type_id: string | number;
   name: string;
   description: string;
@@ -10,6 +11,7 @@ export interface P2pAdsPayment {
 }
 
 export interface CreateP2pAdsPaymentDto {
+  p2p_ad_id: string | number;
   payment_type_id: string | number;
   name: string;
   description: string;
@@ -20,6 +22,7 @@ export interface CreateP2pAdsPaymentDto {
 }
 
 export interface UpdateP2pAdsPaymentDto {
+  p2p_ad_id?: string | number;
   payment_type_id?: string | number;
   name?: string;
   description?: string;
