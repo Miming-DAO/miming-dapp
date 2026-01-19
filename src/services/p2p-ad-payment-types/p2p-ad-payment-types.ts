@@ -1,0 +1,71 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+import { environment } from '../../environments/environment';
+import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto, UpdateP2pAdPaymentTypeDto } from '../../models/p2p-ad-payment-type.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+@Injectable({
+  providedIn: 'root',
+})
+export class P2pAdPaymentTypesService {
+  private apiUrl = environment.apiUrl;
+  private apiPrefix = 'api/p2p-ad-payment-types';
+
+  constructor(private http: HttpClient) { }
+
+  private getHeaders(): HttpHeaders {
+    const googleUser = localStorage.getItem('google_user');
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    if (googleUser) {
+      const userData = JSON.parse(googleUser);
+      if (userData.token) {
+        headers = headers.set('Authorization', `Bearer ${userData.token}`);
+      }
+    }
+
+    return headers;
+  }
+
+  getAdPaymentTypes(): Observable<P2pAdPaymentType[]> {
+    return this.http.get<P2pAdPaymentType[]>(`${this.apiUrl}${this.apiPrefix}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getAdPaymentTypesByP2pAd(p2p_ad_id: string): Observable<P2pAdPaymentType[]> {
+    return this.http.get<P2pAdPaymentType[]>(`${this.apiUrl}/${this.apiPrefix}/by/p2p-ad/${p2p_ad_id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  createAdPaymentType(createDto: CreateP2pAdPaymentTypeDto): Observable<P2pAdPaymentType> {
+    return this.http.post<P2pAdPaymentType>(`${this.apiUrl}${this.apiPrefix}`, createDto, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getAdPaymentTypeById(id: string): Observable<P2pAdPaymentType> {
+    return this.http.get<P2pAdPaymentType>(`${this.apiUrl}${this.apiPrefix}/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  updateAdPaymentType(id: string, updateDto: UpdateP2pAdPaymentTypeDto): Observable<P2pAdPaymentType> {
+    return this.http.patch<P2pAdPaymentType>(`${this.apiUrl}${this.apiPrefix}/${id}`, updateDto, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteAdPaymentType(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${this.apiPrefix}/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+}

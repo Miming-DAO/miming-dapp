@@ -1,8 +1,10 @@
 export interface P2pPaymentType {
-  id: string | number;
+  id: string;
   name: string;
   type: string;
   logo_url: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface CreateP2pPaymentTypeDto {

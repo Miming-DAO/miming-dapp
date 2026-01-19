@@ -11,9 +11,12 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 
 import { P2pAdsService } from '../../../../services/p2p-ads/p2p-ads.service';
-import { P2pAdsPaymentsService } from '../../../../services/p2p-ads-payments/p2p-ads-payments.service';
+import { P2pPaymentTypesService } from '../../../../services/p2p-payment-types/p2p-payment-types.service';
+import { P2pAdPaymentTypesService } from '../../../../services/p2p-ad-payment-types/p2p-ad-payment-types';
+
 import { P2pAd, CreateP2pAdDto, UpdateP2pAdDto } from '../../../../models/p2p-ad.model';
-import { CreateP2pAdsPaymentDto } from '../../../../models/p2p-ads-payment.model';
+import { P2pPaymentType } from '../../../../models/p2p-payment-type.model'
+import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto } from '../../../../models/p2p-ad-payment-type.model';
 
 @Component({
   selector: 'app-p2p-my-ads',
@@ -32,23 +35,18 @@ import { CreateP2pAdsPaymentDto } from '../../../../models/p2p-ads-payment.model
   providers: [MessageService],
 })
 export class P2pMyAds {
-  showCreateDialog = signal(false);
-  showEditDialog = signal(false);
-  showDeleteDialog = signal(false);
-  isLoading = signal(false);
+
+  constructor(
+    private p2pAdsService: P2pAdsService,
+    private p2pPaymentTypesService: P2pPaymentTypesService,
+    private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
+    private messageService: MessageService
+  ) { }
 
   myAds: P2pAd[] = [];
-  selectedAdForDelete: P2pAd | null = null;
-
-  // Payment methods tracking (separate from ad data)
-  newAdPaymentMethods: string[] = [];
-  editAdPaymentMethods: string[] = [];
-
+  paymentTypes: P2pPaymentType[] = [];
   assetOptions = [
-    { label: 'USDT', value: 1 },
-    { label: 'USDC', value: 2 },
-    { label: 'BTC', value: 3 },
-    { label: 'ETH', value: 4 }
+    { label: 'USDT', value: 1 }
   ];
   statusOptions = [
     { label: 'Active', value: 'active' },
@@ -56,8 +54,10 @@ export class P2pMyAds {
     { label: 'Draft', value: 'draft' }
   ];
 
-  newAd: CreateP2pAdDto = {
-    user_id: 1,
+  showCreateDialog = signal(false);
+  newAd: P2pAd = {
+    id: '',
+    user_id: '',
     type: 'sell',
     p2p_number: '',
     logo_url: '',
@@ -68,45 +68,70 @@ export class P2pMyAds {
     limit_from: 0,
     limit_to: 0,
     payment_instructions: '',
-    status: 'active'
+    status: 'draft',
+    created_at: new Date(),
+    updated_at: new Date()
   };
+  newAdPaymentTypes: P2pAdPaymentType[] = [];
 
-  editAd: UpdateP2pAdDto & { id: number } = {
-    id: 0,
+  showEditDialog = signal(false);
+  editAd: P2pAd = {
+    id: '',
+    user_id: '',
     type: 'sell',
+    p2p_number: '',
+    logo_url: '',
     name: '',
     token_id: 1,
     price: 0,
     available_amount: 0,
     limit_from: 0,
     limit_to: 0,
-    payment_instructions: ''
+    payment_instructions: '',
+    status: 'draft',
+    created_at: new Date(),
+    updated_at: new Date()
   };
+  editAdPaymentTypes: P2pAdPaymentType[] = [];
 
-  constructor(
-    private p2pAdsService: P2pAdsService,
-    private p2pAdsPaymentsService: P2pAdsPaymentsService,
-    private messageService: MessageService
-  ) {
-    this.loadMyAds();
-  }
+  showDeleteDialog = signal(false);
+  selectedAdForDelete: P2pAd | null = null;
+
+  isLoading = signal(false);
 
   loadMyAds(): void {
     this.isLoading.set(true);
 
-    this.p2pAdsService.getAds().subscribe({
+    this.p2pAdsService.getAdsByAuthUser().subscribe({
       next: (ads) => {
         this.myAds = ads;
         this.isLoading.set(false);
+
+        this.loadPaymentTypes();
       },
       error: (error) => {
-        console.error('Error loading ads:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load advertisements. Please try again.'
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load your advertisements. Please try again.'
         });
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadPaymentTypes(): void {
+    this.p2pPaymentTypesService.getPaymentTypes().subscribe({
+      next: (paymentTypes) => {
+        this.paymentTypes = paymentTypes;
+      },
+      error: (error) => {
+        console.log(error);
+        this.messageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load payment types. Please try again.'
+        });
       }
     });
   }
@@ -137,7 +162,8 @@ export class P2pMyAds {
 
   resetForm(): void {
     this.newAd = {
-      user_id: 1,
+      id: '',
+      user_id: '',
       type: 'sell',
       p2p_number: '',
       logo_url: '',
@@ -148,54 +174,49 @@ export class P2pMyAds {
       limit_from: 0,
       limit_to: 0,
       payment_instructions: '',
-      status: 'active'
+      status: 'draft',
+      created_at: new Date(),
+      updated_at: new Date()
     };
-    this.newAdPaymentMethods = [];
-  }
-
-  togglePaymentMethod(method: string): void {
-    const index = this.newAdPaymentMethods.indexOf(method);
-    if (index > -1) {
-      this.newAdPaymentMethods.splice(index, 1);
-    } else {
-      this.newAdPaymentMethods.push(method);
-    }
-  }
-
-  isPaymentMethodSelected(method: string): boolean {
-    return this.newAdPaymentMethods.includes(method);
+    this.newAdPaymentTypes = [];
   }
 
   submitAd(): void {
     this.isLoading.set(true);
 
-    // Generate P2P number before submission
-    this.newAd.p2p_number = `P2P${Date.now()}`;
+    const payload: CreateP2pAdDto = {
+      user_id: this.newAd.user_id,
+      type: this.newAd.type,
+      p2p_number: `P2P${Date.now()}`,
+      logo_url: this.newAd.logo_url,
+      name: this.newAd.name,
+      token_id: this.newAd.token_id,
+      price: this.newAd.price,
+      available_amount: this.newAd.available_amount,
+      limit_from: this.newAd.limit_from,
+      limit_to: this.newAd.limit_to,
+      payment_instructions: this.newAd.payment_instructions,
+      status: this.newAd.status,
+    };
 
-    this.p2pAdsService.createAd(this.newAd).subscribe({
+    this.p2pAdsService.createAd(payload).subscribe({
       next: (createdAd) => {
-        console.log('Ad created successfully:', createdAd);
-
-        // Save payment methods if any selected
-        if (this.newAdPaymentMethods.length > 0 && createdAd.id) {
-          this.saveAdPaymentMethods(createdAd.id, this.newAdPaymentMethods);
-        }
-
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Advertisement created successfully!'
         });
+
         this.loadMyAds();
         this.closeCreateDialog();
+
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error creating ad:', error);
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to create advertisement. Please try again.'
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to create advertisement. Please try again.'
         });
         this.isLoading.set(false);
       }
@@ -203,67 +224,61 @@ export class P2pMyAds {
   }
 
   openEditDialog(ad: P2pAd): void {
-    this.editAd = {
-      id: ad.id as number,
-      type: ad.type,
-      name: ad.name,
-      token_id: ad.token_id,
-      price: ad.price,
-      available_amount: ad.available_amount,
-      limit_from: ad.limit_from,
-      limit_to: ad.limit_to,
-      payment_instructions: ad.payment_instructions
-    };
+    this.editAd = ad;
 
-    // Load existing payment methods for this ad
-    this.loadAdPaymentMethods(ad.id);
-
+    this.loadAdPaymentTypes(ad.id);
     this.showEditDialog.set(true);
+  }
+
+  loadAdPaymentTypes(p2p_ad_id: string): void {
+    this.p2pAdPaymentTypesService.getAdPaymentTypesByP2pAd(p2p_ad_id).subscribe({
+      next: (payments) => {
+        this.editAdPaymentTypes = payments;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load advertisement payment types. Please try again.'
+        });
+      }
+    });
   }
 
   closeEditDialog(): void {
     this.showEditDialog.set(false);
-    this.editAdPaymentMethods = [];
-  }
-
-  toggleEditPaymentMethod(method: string): void {
-    const index = this.editAdPaymentMethods.indexOf(method);
-    if (index > -1) {
-      this.editAdPaymentMethods.splice(index, 1);
-    } else {
-      this.editAdPaymentMethods.push(method);
-    }
-  }
-
-  isEditPaymentMethodSelected(method: string): boolean {
-    return this.editAdPaymentMethods.includes(method);
+    this.editAdPaymentTypes = [];
   }
 
   updateAd(): void {
     this.isLoading.set(true);
 
     const { id, ...updateDto } = this.editAd;
+    const payload: UpdateP2pAdDto = {
+      type: updateDto.type,
+      logo_url: updateDto.logo_url,
+      name: updateDto.name,
+      price: updateDto.price,
+      available_amount: updateDto.available_amount,
+      limit_from: updateDto.limit_from,
+      limit_to: updateDto.limit_to,
+      payment_instructions: updateDto.payment_instructions,
+    };
 
-    this.p2pAdsService.updateAd(id, updateDto).subscribe({
+    this.p2pAdsService.updateAd(id, payload).subscribe({
       next: (updatedAd) => {
-        console.log('Ad updated successfully:', updatedAd);
-
-        // Update payment methods if changed
-        if (this.editAdPaymentMethods.length > 0) {
-          this.saveAdPaymentMethods(id, this.editAdPaymentMethods);
-        }
-
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Advertisement updated successfully!'
         });
+
         this.loadMyAds();
         this.closeEditDialog();
+
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error updating ad:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -291,18 +306,18 @@ export class P2pMyAds {
 
     this.p2pAdsService.deleteAd(this.selectedAdForDelete.id).subscribe({
       next: () => {
-        console.log('Ad deleted successfully');
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Advertisement deleted successfully!'
         });
+
         this.loadMyAds();
         this.closeDeleteDialog();
+
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error deleting ad:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -311,56 +326,6 @@ export class P2pMyAds {
         this.isLoading.set(false);
       }
     });
-  }
-
-  // Helper method to save ad payment methods
-  saveAdPaymentMethods(adId: string | number, paymentMethods: string[]): void {
-    paymentMethods.forEach((method) => {
-      const paymentData: CreateP2pAdsPaymentDto = {
-        p2p_ad_id: adId,
-        payment_type_id: this.getPaymentTypeId(method),
-        name: method,
-        description: '',
-        account_name: '',
-        account_number: '',
-        attachments: [],
-        other_details: ''
-      };
-
-      this.p2pAdsPaymentsService.createAdsPayment(paymentData).subscribe({
-        next: (result) => {
-          console.log('Payment method saved:', result);
-        },
-        error: (error) => {
-          console.error('Error saving payment method:', error);
-        }
-      });
-    });
-  }
-
-  // Helper method to load ad payment methods
-  loadAdPaymentMethods(adId: string | number): void {
-    this.p2pAdsPaymentsService.getAdsPayments().subscribe({
-      next: (payments) => {
-        // Filter payments for this specific ad
-        const adPayments = payments.filter(p => p.p2p_ad_id === adId);
-        this.editAdPaymentMethods = adPayments.map(p => p.name || '');
-      },
-      error: (error) => {
-        console.error('Error loading payment methods:', error);
-      }
-    });
-  }
-
-  // Helper method to map payment method names to IDs
-  getPaymentTypeId(method: string): number {
-    const paymentTypeMap: { [key: string]: number } = {
-      'gcash': 1,
-      'paymaya': 2,
-      'bank': 3,
-      'cash': 4
-    };
-    return paymentTypeMap[method.toLowerCase()] || 0;
   }
 
   ngOnInit(): void {

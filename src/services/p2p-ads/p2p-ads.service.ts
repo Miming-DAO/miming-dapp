@@ -22,7 +22,6 @@ export class P2pAdsService {
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
-      console.log(userData.token)
       if (userData.token) {
         headers = headers.set('Authorization', `Bearer ${userData.token}`);
       }
@@ -37,25 +36,31 @@ export class P2pAdsService {
     });
   }
 
+  getAdsByAuthUser(): Observable<P2pAd[]> {
+    return this.http.get<P2pAd[]>(`${this.apiUrl}/${this.apiPrefix}/by/auth-user`, {
+      headers: this.getHeaders()
+    });
+  }
+
   createAd(createDto: CreateP2pAdDto): Observable<P2pAd> {
     return this.http.post<P2pAd>(`${this.apiUrl}/${this.apiPrefix}`, createDto, {
       headers: this.getHeaders()
     });
   }
 
-  getAdById(id: string | number): Observable<P2pAd> {
+  getAdById(id: string): Observable<P2pAd> {
     return this.http.get<P2pAd>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
-  updateAd(id: string | number, updateDto: UpdateP2pAdDto): Observable<P2pAd> {
+  updateAd(id: string, updateDto: UpdateP2pAdDto): Observable<P2pAd> {
     return this.http.patch<P2pAd>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
       headers: this.getHeaders()
     });
   }
 
-  deleteAd(id: string | number): Observable<void> {
+  deleteAd(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });

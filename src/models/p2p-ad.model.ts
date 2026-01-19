@@ -1,26 +1,28 @@
 export interface P2pAd {
-  id: string | number;
-  user_id: string | number;
+  id: string
+  user_id: string;
   type: 'buy' | 'sell';
   p2p_number: string;
   logo_url: string;
   name: string;
-  token_id: string | number;
+  token_id: number;
   price: number;
   available_amount: number;
   limit_from: number;
   limit_to: number;
   payment_instructions: string;
   status: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface CreateP2pAdDto {
-  user_id: string | number;
+  user_id: string;
   type: 'buy' | 'sell';
   p2p_number: string;
   logo_url: string;
   name: string;
-  token_id: string | number;
+  token_id: number;
   price: number;
   available_amount: number;
   limit_from: number;
@@ -30,16 +32,12 @@ export interface CreateP2pAdDto {
 }
 
 export interface UpdateP2pAdDto {
-  user_id?: string | number;
   type: 'buy' | 'sell';
-  p2p_number?: string;
-  logo_url?: string;
-  name?: string;
-  token_id?: string | number;
-  price?: number;
-  available_amount?: number;
-  limit_from?: number;
-  limit_to?: number;
-  payment_instructions?: string;
-  status?: string;
+  logo_url: string;
+  name: string;
+  price: number;
+  available_amount: number;
+  limit_from: number;
+  limit_to: number;
+  payment_instructions: string;
 }

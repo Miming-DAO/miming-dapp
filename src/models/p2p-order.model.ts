@@ -1,30 +1,32 @@
 export interface P2pOrder {
-  id: string | number;
-  ads_id: string | number;
+  id: string;
+  p2p_ad_id: string;
   order_number: string;
-  user_id: string | number;
+  user_id: string;
   ordered_price: number;
   amount: number;
-  ads_payment_id: string | number;
+  p2p_payment_type_id: string;
   status: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface CreateP2pOrderDto {
-  ads_id: string | number;
+  p2p_ad_id: string;
   order_number: string;
-  user_id: string | number;
+  user_id: string;
   ordered_price: number;
   amount: number;
-  ads_payment_id: string | number;
+  p2p_payment_type_id: string;
   status: string;
 }
 
 export interface UpdateP2pOrderDto {
-  ads_id?: string | number;
+  p2p_ad_id?: string;
   order_number?: string;
-  user_id?: string | number;
+  user_id?: string;
   ordered_price?: number;
   amount?: number;
-  ads_payment_id?: string | number;
+  p2p_payment_type_id?: string;
   status?: string;
 }
