@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -7,6 +7,10 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
+import { MessageService } from 'primeng/api';
+
+import { P2pOrdersService } from '../../../../services/p2p-orders/p2p-orders.service';
+import { P2pOrder } from '../../../../models/p2p-order.model';
 
 @Component({
   selector: 'app-p2p-orders',
@@ -21,140 +25,74 @@ import { SelectModule as PSelectModule } from 'primeng/select';
   ],
   templateUrl: './p2p-orders.html',
   styleUrl: './p2p-orders.css',
+  providers: [MessageService],
 })
-export class P2pOrders {
-  constructor() { }
+export class P2pOrders implements OnInit {
+  showOrderChatDialog = signal(false);
+  isLoading = signal(false);
 
-  showOrderChatDialog: boolean = false;
-  selectedOrder: any = null;
-  chatMessage: string = '';
-  chatMessages: any[] = [];
+  selectedOrder: P2pOrder | null = null;
+  chatMessage = signal('');
+  chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
 
-  orders = [
-    {
-      id: 'ORD-2026-001',
-      type: 'buy' as 'buy' | 'sell',
-      asset: 'USDT',
-      amount: 500,
-      price: 1.02,
-      total: 510,
-      merchant: 'CryptoKing',
-      paymentMethod: 'Bank Transfer',
-      status: 'completed' as 'pending' | 'paid' | 'completed' | 'cancelled' | 'disputed',
-      createdAt: '2026-01-12 14:30',
-      completedAt: '2026-01-12 15:45'
-    },
-    {
-      id: 'ORD-2026-002',
-      type: 'sell' as 'buy' | 'sell',
-      asset: 'USDT',
-      amount: 1000,
-      price: 0.99,
-      total: 990,
-      merchant: 'ProTrader',
-      paymentMethod: 'PayPal',
-      status: 'pending' as 'pending' | 'paid' | 'completed' | 'cancelled' | 'disputed',
-      createdAt: '2026-01-13 10:15',
-      completedAt: null
-    },
-    {
-      id: 'ORD-2026-003',
-      type: 'buy' as 'buy' | 'sell',
-      asset: 'USDT',
-      amount: 2500,
-      price: 1.01,
-      total: 2525,
-      merchant: 'TradeMaster',
-      paymentMethod: 'Wise',
-      status: 'paid' as 'pending' | 'paid' | 'completed' | 'cancelled' | 'disputed',
-      createdAt: '2026-01-13 09:20',
-      completedAt: null
-    },
-    {
-      id: 'ORD-2026-004',
-      type: 'sell' as 'buy' | 'sell',
-      asset: 'USDT',
-      amount: 750,
-      price: 0.98,
-      total: 735,
-      merchant: 'FastCash',
-      paymentMethod: 'Revolut',
-      status: 'completed' as 'pending' | 'paid' | 'completed' | 'cancelled' | 'disputed',
-      createdAt: '2026-01-11 16:00',
-      completedAt: '2026-01-11 17:30'
-    },
-    {
-      id: 'ORD-2026-005',
-      type: 'buy' as 'buy' | 'sell',
-      asset: 'USDT',
-      amount: 3000,
-      price: 1.02,
-      total: 3060,
-      merchant: 'BitExchange',
-      paymentMethod: 'Bank Transfer',
-      status: 'cancelled' as 'pending' | 'paid' | 'completed' | 'cancelled' | 'disputed',
-      createdAt: '2026-01-10 12:00',
-      completedAt: null
-    }
-  ];
+  orders: P2pOrder[] = [];
 
-  openOrderChat(order: any) {
-    console.log('Opening chat for order:', order);
-    this.selectedOrder = order;
-    this.showOrderChatDialog = true;
-    console.log('Dialog should be visible:', this.showOrderChatDialog);
-    // Load existing chat messages for this order
-    this.chatMessages = [
-      {
-        sender: 'merchant',
-        senderName: order.merchant,
-        message: 'Hello! I\'ve received your order. Please proceed with the payment.',
-        timestamp: new Date(Date.now() - 3600000).toISOString()
+  constructor(
+    private p2pOrdersService: P2pOrdersService,
+    private messageService: MessageService
+  ) { }
+
+  ngOnInit(): void {
+    this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.isLoading.set(true);
+
+    this.p2pOrdersService.getOrdersByAuthUser().subscribe({
+      next: (orders: P2pOrder[]) => {
+        this.orders = orders;
+        this.isLoading.set(false);
       },
-      {
-        sender: 'user',
-        senderName: 'You',
-        message: 'Payment sent! Transaction ID: TXN123456789',
-        timestamp: new Date(Date.now() - 1800000).toISOString()
-      },
-      {
-        sender: 'merchant',
-        senderName: order.merchant,
-        message: 'Thank you! Verifying payment now...',
-        timestamp: new Date(Date.now() - 900000).toISOString()
+      error: (error: any) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load orders.'
+        });
+        this.isLoading.set(false);
       }
+    });
+  }
+
+  openOrderChat(order: P2pOrder) {
+    this.selectedOrder = order;
+    this.showOrderChatDialog.set(true);
+    // load placeholder chat messages (use available order fields)
+    this.chatMessages = [
+      { sender: 'merchant', senderName: order.wallet_address || 'User', message: `Hello! Please proceed with payment for ${order.order_number}.`, timestamp: new Date(Date.now() - 3600000).toISOString() },
+      { sender: 'user', senderName: 'You', message: 'Payment sent! TXN123456', timestamp: new Date(Date.now() - 1800000).toISOString() }
     ];
   }
 
+  closeOrderChat() {
+    this.showOrderChatDialog.set(false);
+    this.selectedOrder = null;
+    this.chatMessages = [];
+    this.chatMessage.set('');
+  }
+
   sendChatMessage() {
-    if (this.chatMessage.trim()) {
-      this.chatMessages.push({
-        sender: 'user',
-        senderName: 'You',
-        message: this.chatMessage,
-        timestamp: new Date().toISOString()
-      });
-      this.chatMessage = '';
+    const msg = this.chatMessage();
+    if (msg && msg.trim()) {
+      this.chatMessages.push({ sender: 'user', senderName: 'You', message: msg, timestamp: new Date().toISOString() });
+      this.chatMessage.set('');
     }
   }
 
   formatMessageTime(timestamp: string): string {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  getStatusColor(status: string): string {
-    const colors: any = {
-      'active': 'text-green-400',
-      'paused': 'text-yellow-400',
-      'inactive': 'text-slate-400',
-      'pending': 'text-yellow-400',
-      'paid': 'text-blue-400',
-      'completed': 'text-green-400',
-      'cancelled': 'text-red-400',
-      'disputed': 'text-orange-400'
-    };
-    return colors[status] || 'text-slate-400';
   }
 
   getStatusBadgeClass(status: string): string {
