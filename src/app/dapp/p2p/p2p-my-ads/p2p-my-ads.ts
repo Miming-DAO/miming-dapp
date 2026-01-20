@@ -12,7 +12,7 @@ import { ToastModule } from 'primeng/toast';
 
 import { P2pAdsService } from '../../../../services/p2p-ads/p2p-ads.service';
 import { P2pPaymentTypesService } from '../../../../services/p2p-payment-types/p2p-payment-types.service';
-import { P2pAdPaymentTypesService } from '../../../../services/p2p-ad-payment-types/p2p-ad-payment-types';
+import { P2pAdPaymentTypesService } from '../../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
 
 import { P2pAd, CreateP2pAdDto, UpdateP2pAdDto } from '../../../../models/p2p-ad.model';
 import { P2pPaymentType } from '../../../../models/p2p-payment-type.model'

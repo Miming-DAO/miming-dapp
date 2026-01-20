@@ -14,7 +14,20 @@ import { P2pAdPaymentType } from '../../../../models/p2p-ad-payment-type.model';
 
 import { ChainsService } from '../../../../services/chains/chains.service';
 import { P2pAdsService } from '../../../../services/p2p-ads/p2p-ads.service';
-import { P2pAdPaymentTypesService } from '../../../../services/p2p-ad-payment-types/p2p-ad-payment-types';
+import { P2pAdPaymentTypesService } from '../../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
+
+interface Offer {
+  id: string;
+  merchant: string;
+  orders: number;
+  completion: number;
+  price: number;
+  available: number;
+  asset: string;
+  minLimit: number;
+  maxLimit: number;
+  paymentMethods: string[];
+}
 
 @Component({
   selector: 'app-p2p-marketplace',
@@ -51,8 +64,8 @@ export class P2pMarketplace {
   adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
   isLoading = signal(false);
 
-  buyOffers: P2pAd[] = [];
-  sellOffers: P2pAd[] = [];
+  buyOffers: Offer[] = [];
+  sellOffers: Offer[] = [];
 
   getSourceChains(): void {
     this.chainsService.getChainsByNetworkId(1).subscribe({
@@ -69,7 +82,6 @@ export class P2pMarketplace {
     this.p2pAdsService.getAds().subscribe({
       next: (ads) => {
         this.allAds = ads;
-        console.log('Loaded ads:', ads);
 
         // Load payment types for each ad
         let completedRequests = 0;
@@ -121,20 +133,24 @@ export class P2pMarketplace {
       .map(ad => this.transformAdToOffer(ad));
   }
 
-  transformAdToOffer(ad: P2pAd): any {
+  transformAdToOffer(ad: P2pAd): Offer {
     const paymentTypes = this.adPaymentTypesMap.get(ad.id) || [];
     const paymentMethods = paymentTypes.map(pt =>
       pt.p2p_payment_type?.name || 'Unknown'
     );
 
+    const completionRate = ad.total_orders > 0
+      ? Math.round((ad.completed_orders / ad.total_orders) * 100)
+      : 0;
+
     return {
       id: ad.id,
       merchant: ad.name || 'Unknown Merchant',
       orders: ad.total_orders,
-      completion: ad.completed_orders,
+      completion: completionRate,
       price: ad.price,
       available: ad.available_amount,
-      asset: 'USDT',
+      asset: ad.token_symbol || 'USDT',
       minLimit: ad.min_limit,
       maxLimit: ad.max_limit,
       paymentMethods: paymentMethods
