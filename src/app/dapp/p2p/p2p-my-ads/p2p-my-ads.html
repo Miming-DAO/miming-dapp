@@ -83,13 +83,17 @@
           <!-- Payment Methods -->
           <div class="md:col-span-2">
             <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
-            <!-- <div class="flex flex-wrap gap-1">
-              @for (method of ad.payment_types; track method) {
-              <span class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">
-                {{ method }}
+            <div class="flex flex-wrap gap-1">
+              @if (getAdPaymentTypes(ad.id).length > 0) {
+              @for (paymentType of getAdPaymentTypes(ad.id); track paymentType.id) {
+              <span class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                {{ paymentType.p2p_payment_type?.name || getPaymentTypeName(paymentType.p2p_payment_type_id) }}
               </span>
               }
-            </div> -->
+              } @else {
+              <span class="text-xs text-slate-500">No methods</span>
+              }
+            </div>
           </div>
 
           <!-- Status & Actions -->
@@ -214,37 +218,74 @@
       </div>
     </div>
 
-    <div>
-      <label class="text-xs text-slate-400 mb-2 block">Payment Methods</label>
-      <!-- <div class="flex flex-wrap gap-2">
-        <label (click)="togglePaymentMethod('Bank Transfer')"
-          [class]="isPaymentMethodSelected('Bank Transfer') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isPaymentMethodSelected('Bank Transfer') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          Bank Transfer
-        </label>
-        <label (click)="togglePaymentMethod('PayPal')"
-          [class]="isPaymentMethodSelected('PayPal') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isPaymentMethodSelected('PayPal') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          PayPal
-        </label>
-        <label (click)="togglePaymentMethod('Wise')"
-          [class]="isPaymentMethodSelected('Wise') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isPaymentMethodSelected('Wise') ? 'pi pi-check-square' : 'pi pi-square'" class="mr-2 text-sm"></i>
-          Wise
-        </label>
-        <label (click)="togglePaymentMethod('Revolut')"
-          [class]="isPaymentMethodSelected('Revolut') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isPaymentMethodSelected('Revolut') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          Revolut
-        </label>
-      </div> -->
+    <div
+      class="p-6 rounded-3xl bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <label class="text-sm font-semibold text-white">Payment Methods *</label>
+      </div>
+
+      <!-- Payment Methods List -->
+      @if (newAdPaymentTypes.length > 0) {
+      <div class="space-y-2 mb-4">
+        @for (payment of newAdPaymentTypes; track $index) {
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-1">
+            <div class="text-sm text-white font-semibold">{{ getPaymentTypeName(payment.p2p_payment_type_id) }}</div>
+            <div class="text-xs text-slate-400">{{ payment.account_name }} - {{ payment.account_number }}</div>
+          </div>
+          <button type="button" (click)="removePaymentTypeFromNewAd($index)"
+            class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+            <i class="pi pi-trash text-xs"></i>
+          </button>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 mb-4">
+        <div class="flex items-center gap-2 text-yellow-400">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span class="text-sm">No payment methods added yet. Please add at least one.</span>
+        </div>
+      </div>
+      }
+
+      <!-- Add Payment Method Form -->
+      <div class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Payment Type</label>
+            <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="newPaymentType"
+              placeholder="Select Payment Type" optionLabel="name" class="w-full" styleClass="w-full rounded-full"
+              [style]="{ 'border-radius': '9999px', 'background-color': 'oklch(20.8% 0.042 265.755)' }" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Account Name</label>
+            <input type="text" pInputText [(ngModel)]="newAdPaymentTypeForm.account_name" name="newAccountName"
+              placeholder="Enter account name" class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+              style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Account Number</label>
+          <input type="text" pInputText [(ngModel)]="newAdPaymentTypeForm.account_number" name="newAccountNumber"
+            placeholder="Enter account number" class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Additional Details (optional)</label>
+          <textarea pTextarea [(ngModel)]="newAdPaymentTypeForm.other_details" name="newOtherDetails"
+            placeholder="Any additional payment instructions" class="w-full text-sm" [rows]="2"
+            style="border-radius: 1rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+        </div>
+        <button type="button" (click)="addPaymentTypeToNewAd()"
+          class="w-full px-4 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+          <i class="pi pi-plus mr-2"></i>
+          Add Payment Method
+        </button>
+      </div>
     </div>
 
     <div>
@@ -255,13 +296,15 @@
     </div>
   </form>
   <ng-template #footer>
-    <div class="flex gap-2 pt-5">
+    <div class="flex flex-wrap gap-2 pt-5">
       <button type="submit" (click)="submitAd()"
-        class="flex-1 px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        <i class="pi pi-upload mr-2"></i>
         Publish
       </button>
       <button type="button" (click)="closeCreateDialog()"
-        class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        <i class="pi pi-times mr-2"></i>
         Cancel
       </button>
     </div>
@@ -354,38 +397,104 @@
       </div>
     </div>
 
-    <div>
-      <label class="text-xs text-slate-400 mb-2 block">Payment Methods</label>
-      <!-- <div class="flex flex-wrap gap-2">
-        <label (click)="toggleEditPaymentMethod('Bank Transfer')"
-          [class]="isEditPaymentMethodSelected('Bank Transfer') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isEditPaymentMethodSelected('Bank Transfer') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          Bank Transfer
-        </label>
-        <label (click)="toggleEditPaymentMethod('PayPal')"
-          [class]="isEditPaymentMethodSelected('PayPal') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isEditPaymentMethodSelected('PayPal') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          PayPal
-        </label>
-        <label (click)="toggleEditPaymentMethod('Wise')"
-          [class]="isEditPaymentMethodSelected('Wise') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isEditPaymentMethodSelected('Wise') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          Wise
-        </label>
-        <label (click)="toggleEditPaymentMethod('Revolut')"
-          [class]="isEditPaymentMethodSelected('Revolut') ? 'bg-purple-500/30 border-purple-500/60' : 'bg-slate-700/40 border-slate-600/40'"
-          class="px-3 py-2 rounded-full text-slate-300 border cursor-pointer transition-all hover:border-purple-500/40">
-          <i [class]="isEditPaymentMethodSelected('Revolut') ? 'pi pi-check-square' : 'pi pi-square'"
-            class="mr-2 text-sm"></i>
-          Revolut
-        </label>
-      </div> -->
+    <div
+      class="p-6 rounded-3xl bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <label class="text-sm font-semibold text-white">Payment Methods *</label>
+      </div>
+
+      <!-- Existing Payment Methods List -->
+      @if (editAdPaymentTypes.length > 0) {
+      <div class="space-y-2 mb-4">
+        @for (payment of editAdPaymentTypes; track payment.id; let i = $index) {
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-1">
+            <div class="text-sm text-white font-semibold">{{ getPaymentTypeName(payment.p2p_payment_type_id) }}</div>
+            <div class="text-xs text-slate-400">{{ payment.account_name }} - {{ payment.account_number }}</div>
+            @if (payment.other_details) {
+            <div class="text-xs text-slate-500 mt-1">{{ payment.other_details }}</div>
+            }
+          </div>
+          <div class="flex gap-2">
+            <button type="button" (click)="editPaymentType(payment, i)"
+              class="w-8 h-8 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+              <i class="pi pi-pencil text-xs"></i>
+            </button>
+            <button type="button" (click)="deletePaymentType(payment.id)"
+              class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+              <i class="pi pi-trash text-xs"></i>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 mb-4">
+        <div class="flex items-center gap-2 text-yellow-400">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span class="text-sm">No payment methods added yet. Please add at least one.</span>
+        </div>
+      </div>
+      }
+
+      <!-- Add/Edit Payment Method Form -->
+      <div class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 space-y-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-white">
+            {{ isEditingPaymentType ? 'Edit Payment Method' : 'Add Payment Method' }}
+          </span>
+          @if (isEditingPaymentType) {
+          <button type="button" (click)="resetEditPaymentTypeForm()"
+            class="text-xs px-3 py-1 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 transition cursor-pointer">
+            Cancel Edit
+          </button>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Payment Type</label>
+            <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="editPaymentTypeId"
+              placeholder="Select Payment Type" optionLabel="name" class="w-full" styleClass="w-full rounded-full"
+              [style]="{ 'border-radius': '9999px', 'background-color': 'oklch(20.8% 0.042 265.755)' }" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Account Name</label>
+            <input type="text" pInputText [(ngModel)]="editAdPaymentTypeForm.account_name" name="editPaymentAccountName"
+              placeholder="Enter account name" class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+              style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Account Number</label>
+          <input type="text" pInputText [(ngModel)]="editAdPaymentTypeForm.account_number"
+            name="editPaymentAccountNumber" placeholder="Enter account number"
+            class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Additional Details (optional)</label>
+          <textarea pTextarea [(ngModel)]="editAdPaymentTypeForm.other_details" name="editPaymentOtherDetails"
+            placeholder="Any additional payment instructions" class="w-full text-sm" [rows]="2"
+            style="border-radius: 1rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+        </div>
+        @if (isEditingPaymentType) {
+        <button type="button" (click)="updatePaymentType()"
+          class="w-full px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+          <i class="pi pi-save mr-2"></i>
+          Update Payment Method
+        </button>
+        } @else {
+        <button type="button" (click)="addPaymentTypeToEditAd()"
+          class="w-full px-4 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+          <i class="pi pi-plus mr-2"></i>
+          Add Payment Method
+        </button>
+        }
+      </div>
     </div>
 
     <div>
@@ -396,13 +505,15 @@
     </div>
   </form>
   <ng-template #footer>
-    <div class="flex gap-2 pt-5">
+    <div class="flex flex-wrap gap-2 pt-5">
       <button type="submit" (click)="updateAd()"
-        class="flex-1 px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        <i class="pi pi-save mr-2"></i>
         Update
       </button>
       <button type="button" (click)="closeEditDialog()"
-        class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        <i class="pi pi-times mr-2"></i>
         Cancel
       </button>
     </div>
@@ -450,14 +561,15 @@
   </div>
 
   <ng-template #footer>
-    <div class="flex gap-2 pt-5">
+    <div class="flex flex-wrap gap-2 pt-5">
       <button type="button" (click)="confirmDelete()" [disabled]="isLoading()"
-        class="flex-1 px-4 py-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
+        class="px-4 py-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
         <i class="pi pi-trash mr-2"></i>
         Delete
       </button>
       <button type="button" (click)="closeDeleteDialog()" [disabled]="isLoading()"
-        class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer disabled:cursor-not-allowed">
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer disabled:cursor-not-allowed">
+        <i class="pi pi-times mr-2"></i>
         Cancel
       </button>
     </div>

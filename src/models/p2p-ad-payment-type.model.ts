@@ -1,9 +1,12 @@
+import { P2pAd } from "./p2p-ad.model";
+import { P2pPaymentType } from "./p2p-payment-type.model";
+
 export interface P2pAdPaymentType {
   id: string;
   p2p_ad_id: string;
+  p2p_ad: P2pAd | null;
   p2p_payment_type_id: string;
-  name: string;
-  description: string;
+  p2p_payment_type: P2pPaymentType | null;
   account_name: string;
   account_number: string;
   attachments: string[];
@@ -15,8 +18,6 @@ export interface P2pAdPaymentType {
 export interface CreateP2pAdPaymentTypeDto {
   p2p_ad_id: string;
   p2p_payment_type_id: string;
-  name: string;
-  description: string;
   account_name: string;
   account_number: string;
   attachments: string[];
@@ -26,8 +27,6 @@ export interface CreateP2pAdPaymentTypeDto {
 export interface UpdateP2pAdPaymentTypeDto {
   p2p_ad_id?: string;
   p2p_payment_type_id?: string;
-  name?: string;
-  description?: string;
   account_name?: string;
   account_number?: string;
   attachments?: string[];

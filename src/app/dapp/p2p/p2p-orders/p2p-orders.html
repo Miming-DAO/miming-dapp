@@ -306,17 +306,28 @@
 
   <ng-template #footer>
     <div class="flex flex-wrap gap-2 pt-5">
-      <button *ngIf="selectedOrder?.status === 'pending'"
-        class="flex-1 min-w-[180px] px-4 py-3 rounded-full bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 font-semibold transition-all duration-200 border border-green-500/30 hover:border-green-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"><i
-          class="pi pi-check"></i><span>Mark as Paid</span></button>
-      <button *ngIf="selectedOrder?.status === 'paid'"
-        class="flex-1 min-w-[160px] px-4 py-3 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-semibold transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"><i
-          class="pi pi-verified"></i><span>Confirm Release</span></button>
+      @if (selectedOrder?.status === 'pending') {
       <button
-        class="flex-1 min-w-[120px] px-4 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap"><i
-          class="pi pi-flag"></i><span>Dispute</span></button>
+        class="px-4 py-3 rounded-full bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 font-semibold transition-all duration-200 border border-green-500/30 hover:border-green-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
+        <i class="pi pi-check"></i><span>Mark as Paid</span>
+      </button>
+      }
+
+      @if (selectedOrder?.status === 'paid') {
+      <button
+        class="px-4 py-3 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-semibold transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
+        <i class="pi pi-verified"></i><span>Confirm Release</span>
+      </button>
+      }
+
+      <button
+        class="px-4 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
+        <i class="pi pi-flag"></i><span>Dispute</span>
+      </button>
       <button (click)="closeOrderChat()"
-        class="flex-1 min-w-[100px] px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer whitespace-nowrap">Close</button>
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer whitespace-nowrap">
+        Close
+      </button>
     </div>
   </ng-template>
 </p-dialog>

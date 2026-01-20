@@ -34,7 +34,7 @@ export class P2pAdPaymentTypesService {
   }
 
   getAdPaymentTypes(): Observable<P2pAdPaymentType[]> {
-    return this.http.get<P2pAdPaymentType[]>(`${this.apiUrl}${this.apiPrefix}`, {
+    return this.http.get<P2pAdPaymentType[]>(`${this.apiUrl}/${this.apiPrefix}`, {
       headers: this.getHeaders()
     });
   }
@@ -46,25 +46,31 @@ export class P2pAdPaymentTypesService {
   }
 
   createAdPaymentType(createDto: CreateP2pAdPaymentTypeDto): Observable<P2pAdPaymentType> {
-    return this.http.post<P2pAdPaymentType>(`${this.apiUrl}${this.apiPrefix}`, createDto, {
+    return this.http.post<P2pAdPaymentType>(`${this.apiUrl}/${this.apiPrefix}`, createDto, {
+      headers: this.getHeaders()
+    });
+  }
+
+  createManyAdPaymentTypes(createDto: CreateP2pAdPaymentTypeDto): Observable<P2pAdPaymentType> {
+    return this.http.post<P2pAdPaymentType>(`${this.apiUrl}/${this.apiPrefix}/many`, createDto, {
       headers: this.getHeaders()
     });
   }
 
   getAdPaymentTypeById(id: string): Observable<P2pAdPaymentType> {
-    return this.http.get<P2pAdPaymentType>(`${this.apiUrl}${this.apiPrefix}/${id}`, {
+    return this.http.get<P2pAdPaymentType>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
   updateAdPaymentType(id: string, updateDto: UpdateP2pAdPaymentTypeDto): Observable<P2pAdPaymentType> {
-    return this.http.patch<P2pAdPaymentType>(`${this.apiUrl}${this.apiPrefix}/${id}`, updateDto, {
+    return this.http.patch<P2pAdPaymentType>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
       headers: this.getHeaders()
     });
   }
 
   deleteAdPaymentType(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}${this.apiPrefix}/${id}`, {
+    return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
