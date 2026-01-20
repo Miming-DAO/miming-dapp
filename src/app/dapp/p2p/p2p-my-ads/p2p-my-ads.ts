@@ -35,10 +35,13 @@ import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto, UpdateP2pAdPaymentTypeDto 
   providers: [MessageService],
 })
 export class P2pMyAds {
-  private p2pAdsService = inject(P2pAdsService);
-  private p2pPaymentTypesService = inject(P2pPaymentTypesService);
-  private p2pAdPaymentTypesService = inject(P2pAdPaymentTypesService);
-  private messageService = inject(MessageService);
+
+  constructor(
+    private p2pAdsService: P2pAdsService,
+    private p2pPaymentTypesService: P2pPaymentTypesService,
+    private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
+    private messageService: MessageService
+  ) { }
 
   myAds: P2pAd[] = [];
   adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
@@ -46,7 +49,7 @@ export class P2pMyAds {
   selectedPaymentType: P2pPaymentType | undefined;
 
   assetOptions = [
-    { label: 'USDT', value: 1 }
+    { label: 'USDT', value: 'USDT' }
   ];
   statusOptions = [
     { label: 'Active', value: 'active' },
@@ -62,12 +65,14 @@ export class P2pMyAds {
     p2p_number: '',
     logo_url: '',
     name: '',
-    token_id: 1,
+    token_symbol: 'USDT',
     price: 0,
     available_amount: 0,
-    limit_from: 0,
-    limit_to: 0,
+    min_limit: 0,
+    max_limit: 0,
     payment_instructions: '',
+    total_orders: 0,
+    completed_orders: 0,
     status: 'draft',
     created_at: new Date(),
     updated_at: new Date()
@@ -76,9 +81,9 @@ export class P2pMyAds {
   newAdPaymentTypeForm: P2pAdPaymentType = {
     id: '',
     p2p_ad_id: '',
-    p2p_ad: null,
+    p2p_ad: undefined,
     p2p_payment_type_id: '',
-    p2p_payment_type: null,
+    p2p_payment_type: undefined,
     account_name: '',
     account_number: '',
     attachments: [],
@@ -95,12 +100,14 @@ export class P2pMyAds {
     p2p_number: '',
     logo_url: '',
     name: '',
-    token_id: 1,
+    token_symbol: 'USDT',
     price: 0,
     available_amount: 0,
-    limit_from: 0,
-    limit_to: 0,
+    min_limit: 0,
+    max_limit: 0,
     payment_instructions: '',
+    total_orders: 0,
+    completed_orders: 0,
     status: 'draft',
     created_at: new Date(),
     updated_at: new Date()
@@ -111,9 +118,9 @@ export class P2pMyAds {
   editAdPaymentTypeForm: P2pAdPaymentType = {
     id: '',
     p2p_ad_id: '',
-    p2p_ad: null,
+    p2p_ad: undefined,
     p2p_payment_type_id: '',
-    p2p_payment_type: null,
+    p2p_payment_type: undefined,
     account_name: '',
     account_number: '',
     attachments: [],
@@ -211,12 +218,14 @@ export class P2pMyAds {
       p2p_number: '',
       logo_url: '',
       name: '',
-      token_id: 1,
+      token_symbol: 'USDT',
       price: 0,
       available_amount: 0,
-      limit_from: 0,
-      limit_to: 0,
+      min_limit: 0,
+      max_limit: 0,
       payment_instructions: '',
+      total_orders: 0,
+      completed_orders: 0,
       status: 'draft',
       created_at: new Date(),
       updated_at: new Date()
@@ -229,9 +238,9 @@ export class P2pMyAds {
     this.newAdPaymentTypeForm = {
       id: '',
       p2p_ad_id: '',
-      p2p_ad: null,
+      p2p_ad: undefined,
       p2p_payment_type_id: '',
-      p2p_payment_type: null,
+      p2p_payment_type: undefined,
       account_name: '',
       account_number: '',
       attachments: [],
@@ -270,9 +279,9 @@ export class P2pMyAds {
     const newPaymentType: P2pAdPaymentType = {
       id: `temp_${Date.now()}`,
       p2p_ad_id: '',
-      p2p_ad: null,
+      p2p_ad: undefined,
       p2p_payment_type_id: this.newAdPaymentTypeForm.p2p_payment_type_id,
-      p2p_payment_type: null,
+      p2p_payment_type: undefined,
       account_name: this.newAdPaymentTypeForm.account_name,
       account_number: this.newAdPaymentTypeForm.account_number,
       attachments: [],
@@ -321,18 +330,15 @@ export class P2pMyAds {
     this.isLoading.set(true);
 
     const payload: CreateP2pAdDto = {
-      user_id: this.newAd.user_id,
       type: this.newAd.type,
-      p2p_number: `P2P${Date.now()}`,
       logo_url: this.newAd.logo_url,
       name: this.newAd.name,
-      token_id: this.newAd.token_id,
+      token_symbol: this.newAd.token_symbol,
       price: this.newAd.price,
       available_amount: this.newAd.available_amount,
-      limit_from: this.newAd.limit_from,
-      limit_to: this.newAd.limit_to,
+      min_limit: this.newAd.min_limit,
+      max_limit: this.newAd.max_limit,
       payment_instructions: this.newAd.payment_instructions,
-      status: this.newAd.status,
     };
 
     this.p2pAdsService.createAd(payload).subscribe({
@@ -428,9 +434,9 @@ export class P2pMyAds {
     this.editAdPaymentTypeForm = {
       id: '',
       p2p_ad_id: '',
-      p2p_ad: null,
+      p2p_ad: undefined,
       p2p_payment_type_id: '',
-      p2p_payment_type: null,
+      p2p_payment_type: undefined,
       account_name: '',
       account_number: '',
       attachments: [],
@@ -480,7 +486,7 @@ export class P2pMyAds {
     const newPaymentType: P2pAdPaymentType = {
       id: `temp_${Date.now()}`,
       p2p_ad_id: this.editAd.id,
-      p2p_ad: null,
+      p2p_ad: undefined,
       p2p_payment_type_id: this.editAdPaymentTypeForm.p2p_payment_type_id,
       p2p_payment_type: this.selectedPaymentType,
       account_name: this.editAdPaymentTypeForm.account_name,
@@ -600,8 +606,8 @@ export class P2pMyAds {
       name: updateDto.name,
       price: updateDto.price,
       available_amount: updateDto.available_amount,
-      limit_from: updateDto.limit_from,
-      limit_to: updateDto.limit_to,
+      min_limit: updateDto.min_limit,
+      max_limit: updateDto.max_limit,
       payment_instructions: updateDto.payment_instructions,
     };
 

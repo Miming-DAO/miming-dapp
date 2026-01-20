@@ -31,15 +31,15 @@
               <div class="text-xs md:text-sm text-slate-400 mb-1">Order ID</div>
               <div class="font-bold text-white text-sm md:text-base">{{ order.order_number || order.id }}</div>
               <div class="text-xs text-slate-400 mb-2">
-                <span class="font-semibold text-white">{{ order.p2p_ad.name }}</span>
-                <div class="text-xs text-slate-400 mt-1">Ad #: <span class="font-mono">{{ order.p2p_ad.p2p_number
+                <span class="font-semibold text-white">{{ order.p2p_ad?.name }}</span>
+                <div class="text-xs text-slate-400 mt-1">Ad #: <span class="font-mono">{{ order.p2p_ad?.p2p_number
                     }}</span></div>
               </div>
               <span
-                [class]="order.p2p_ad.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+                [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
                 class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold border uppercase">
-                <i [class]="order.p2p_ad.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
-                {{ order.p2p_ad.type }}
+                <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+                {{ order.p2p_ad?.type }}
               </span>
             </div>
 
@@ -70,7 +70,7 @@
               <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
               <div
                 class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50 inline-block">
-                {{ order.p2p_payment_type.name || order.p2p_payment_type_id }}</div>
+                {{ order.p2p_payment_type?.name || order.p2p_payment_type_id }}</div>
               <div class="text-xs text-slate-400 mt-1">{{ order.created_at | date:'short' }}</div>
             </div>
 
@@ -126,32 +126,33 @@
         <div class="flex items-center justify-between mb-2">
           <div class="text-slate-400 text-xs uppercase tracking-wide">Advertisement</div>
           <span
-            [class]="selectedOrder.p2p_ad.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
             class="px-2.5 py-1 rounded-full text-xs font-bold border uppercase">
-            <i [class]="selectedOrder.p2p_ad.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
+            <i [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
               class="mr-0.5 text-[9px]"></i>
-            {{ selectedOrder.p2p_ad.type }}
+            {{ selectedOrder.p2p_ad?.type }}
           </span>
         </div>
-        <div class="font-bold text-white text-lg mb-1">{{ selectedOrder.p2p_ad.name }}</div>
+        <div class="font-bold text-white text-lg mb-1">{{ selectedOrder.p2p_ad?.name }}</div>
         <div class="text-sm text-slate-400">
-          <div>Ad #: <span class="font-mono text-white">{{ selectedOrder.p2p_ad.p2p_number }}</span></div>
+          <div>Ad #: <span class="font-mono text-white">{{ selectedOrder.p2p_ad?.p2p_number }}</span></div>
         </div>
       </div>
 
       <!-- Action Required -->
       <div class="mb-3 p-3 rounded-xl border-2"
-        [class]="selectedOrder.p2p_ad.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
+        [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
         <div class="flex items-center gap-2 mb-1">
           <i class="pi pi-info-circle text-base"
-            [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
           <div class="font-semibold text-sm"
-            [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
-            {{ selectedOrder.p2p_ad.type === 'buy' ? 'You are sending USDT' : 'You are sending payment' }}
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
+            {{ selectedOrder.p2p_ad?.type === 'buy' ? 'You are sending USDT' : 'You are sending payment' }}
           </div>
         </div>
-        <div class="text-xs" [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-green-200' : 'text-purple-200'">
-          {{ selectedOrder.p2p_ad.type === 'buy' ? 'Send USDT tokens to receive payment' : 'Send payment to receive USDT
+        <div class="text-xs" [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-200' : 'text-purple-200'">
+          {{ selectedOrder.p2p_ad?.type === 'buy' ? 'Send USDT tokens to receive payment' : 'Send payment to receive
+          USDT
           tokens' }}
         </div>
       </div>
@@ -163,18 +164,18 @@
 
           <!-- You Send Section -->
           <div class="p-3 rounded-2xl border-2"
-            [class]="selectedOrder.p2p_ad.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
             <div class="flex items-center gap-1 mb-1">
               <i class="pi pi-arrow-up text-sm"
-                [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
               <div class="text-xs font-semibold"
-                [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
                 YOU SEND
               </div>
             </div>
 
             <!-- For BUY Ad (P2P user sells USDT): Send Quantity -->
-            <div *ngIf="selectedOrder.p2p_ad.type === 'buy'">
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'buy'">
               <div class="text-xs text-green-200 mb-0.5">Quantity (USDT)</div>
               <div class="text-3xl font-bold text-green-300">
                 {{ selectedOrder.quantity >= 1000000 ?
@@ -186,7 +187,7 @@
             </div>
 
             <!-- For SELL Ad (P2P user buys USDT): Send Amount -->
-            <div *ngIf="selectedOrder.p2p_ad.type === 'sell'">
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'sell'">
               <div class="text-xs text-purple-200 mb-0.5">Total Amount (USD)</div>
               <div class="text-3xl font-bold text-purple-300">
                 ${{ selectedOrder.amount >= 1000000000 ? ((selectedOrder.amount/1000000000) | number:'1.1-1') + 'B' :
@@ -202,18 +203,18 @@
 
           <!-- You Receive Section -->
           <div class="p-3 rounded-2xl border-2"
-            [class]="selectedOrder.p2p_ad.type === 'buy' ? 'bg-blue-500/10 border-blue-500/40' : 'bg-yellow-500/10 border-yellow-500/40'">
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-blue-500/10 border-blue-500/40' : 'bg-yellow-500/10 border-yellow-500/40'">
             <div class="flex items-center gap-1 mb-1">
               <i class="pi pi-arrow-down text-sm"
-                [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-blue-400' : 'text-yellow-400'"></i>
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-blue-400' : 'text-yellow-400'"></i>
               <div class="text-xs font-semibold"
-                [class]="selectedOrder.p2p_ad.type === 'buy' ? 'text-blue-300' : 'text-yellow-300'">
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-blue-300' : 'text-yellow-300'">
                 YOU RECEIVE
               </div>
             </div>
 
             <!-- For BUY Ad (P2P user sells USDT): Receive Amount -->
-            <div *ngIf="selectedOrder.p2p_ad.type === 'buy'">
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'buy'">
               <div class="text-xs text-blue-200 mb-0.5">Total Amount (USD)</div>
               <div class="text-2xl font-bold text-blue-300">
                 ${{ selectedOrder.amount >= 1000000000 ? ((selectedOrder.amount/1000000000) | number:'1.1-1') + 'B' :
@@ -227,7 +228,7 @@
             </div>
 
             <!-- For SELL Ad (P2P user buys USDT): Receive Quantity -->
-            <div *ngIf="selectedOrder.p2p_ad.type === 'sell'">
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'sell'">
               <div class="text-xs text-yellow-200 mb-0.5">Quantity (USDT)</div>
               <div class="text-2xl font-bold text-yellow-300">
                 {{ selectedOrder.quantity >= 1000000 ?
@@ -259,7 +260,7 @@
         <div class="space-y-1.5 text-sm">
           <div class="flex justify-between">
             <span class="text-slate-400">Method:</span>
-            <span class="text-white font-semibold">{{ selectedOrder.p2p_payment_type.name ||
+            <span class="text-white font-semibold">{{ selectedOrder.p2p_payment_type?.name ||
               selectedOrder.p2p_payment_type_id }}</span>
           </div>
           <div class="flex justify-between">

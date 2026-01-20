@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,7 +9,12 @@ import { ButtonModule as PButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
 
 import { Chain } from '../../../../models/chain.model';
+import { P2pAd } from '../../../../models/p2p-ad.model';
+import { P2pAdPaymentType } from '../../../../models/p2p-ad-payment-type.model';
+
 import { ChainsService } from '../../../../services/chains/chains.service';
+import { P2pAdsService } from '../../../../services/p2p-ads/p2p-ads.service';
+import { P2pAdPaymentTypesService } from '../../../../services/p2p-ad-payment-types/p2p-ad-payment-types';
 
 @Component({
   selector: 'app-p2p-marketplace',
@@ -29,7 +34,9 @@ export class P2pMarketplace {
   @Input() activeTab: 'buy' | 'sell' = 'buy';
 
   constructor(
-    private chainsService: ChainsService
+    private chainsService: ChainsService,
+    private p2pAdsService: P2pAdsService,
+    private p2pAdPaymentTypesService: P2pAdPaymentTypesService
   ) { }
 
   sourceChains: Chain[] = [];
@@ -40,131 +47,12 @@ export class P2pMarketplace {
 
   searchTerm: string = '';
 
-  buyOffers = [
-    {
-      id: 1,
-      merchant: 'CryptoKing',
-      orders: 1523,
-      completion: 98.5,
-      price: 1.02,
-      available: 50000,
-      asset: 'USDT',
-      minLimit: 100,
-      maxLimit: 10000,
-      paymentMethods: ['Bank Transfer', 'PayPal', 'Wise']
-    },
-    {
-      id: 2,
-      merchant: 'TradeMaster',
-      orders: 892,
-      completion: 99.2,
-      price: 1.01,
-      available: 25000,
-      asset: 'USDT',
-      minLimit: 50,
-      maxLimit: 5000,
-      paymentMethods: ['Bank Transfer', 'Revolut']
-    },
-    {
-      id: 3,
-      merchant: 'BitExchange',
-      orders: 2341,
-      completion: 97.8,
-      price: 1.03,
-      available: 100000,
-      asset: 'USDT',
-      minLimit: 200,
-      maxLimit: 20000,
-      paymentMethods: ['Bank Transfer', 'PayPal', 'Zelle', 'Wise']
-    },
-    {
-      id: 4,
-      merchant: 'QuickTrade',
-      orders: 645,
-      completion: 96.5,
-      price: 1.02,
-      available: 15000,
-      asset: 'USDT',
-      minLimit: 100,
-      maxLimit: 3000,
-      paymentMethods: ['PayPal', 'Venmo']
-    },
-    {
-      id: 5,
-      merchant: 'SafeSwap',
-      orders: 1876,
-      completion: 99.8,
-      price: 1.01,
-      available: 75000,
-      asset: 'USDT',
-      minLimit: 500,
-      maxLimit: 15000,
-      paymentMethods: ['Bank Transfer', 'Wise', 'Revolut']
-    }
-  ];
+  allAds: P2pAd[] = [];
+  adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+  isLoading = signal(false);
 
-  sellOffers = [
-    {
-      id: 6,
-      merchant: 'ProTrader',
-      orders: 1234,
-      completion: 98.9,
-      price: 0.99,
-      available: 40000,
-      asset: 'USDT',
-      minLimit: 100,
-      maxLimit: 8000,
-      paymentMethods: ['Bank Transfer', 'PayPal']
-    },
-    {
-      id: 7,
-      merchant: 'FastCash',
-      orders: 567,
-      completion: 97.2,
-      price: 0.98,
-      available: 20000,
-      asset: 'USDT',
-      minLimit: 50,
-      maxLimit: 4000,
-      paymentMethods: ['Wise', 'Revolut']
-    },
-    {
-      id: 8,
-      merchant: 'TrustExchange',
-      orders: 3421,
-      completion: 99.5,
-      price: 0.99,
-      available: 150000,
-      asset: 'USDT',
-      minLimit: 300,
-      maxLimit: 25000,
-      paymentMethods: ['Bank Transfer', 'PayPal', 'Zelle']
-    },
-    {
-      id: 9,
-      merchant: 'SwiftPay',
-      orders: 789,
-      completion: 96.8,
-      price: 0.98,
-      available: 30000,
-      asset: 'USDT',
-      minLimit: 100,
-      maxLimit: 5000,
-      paymentMethods: ['PayPal', 'Venmo', 'Wise']
-    },
-    {
-      id: 10,
-      merchant: 'SecureMarket',
-      orders: 2156,
-      completion: 99.1,
-      price: 0.99,
-      available: 80000,
-      asset: 'USDT',
-      minLimit: 200,
-      maxLimit: 12000,
-      paymentMethods: ['Bank Transfer', 'Revolut']
-    }
-  ];
+  buyOffers: P2pAd[] = [];
+  sellOffers: P2pAd[] = [];
 
   getSourceChains(): void {
     this.chainsService.getChainsByNetworkId(1).subscribe({
@@ -175,10 +63,86 @@ export class P2pMarketplace {
     });
   }
 
-  ngOnInit(): void {
-    this.getSourceChains();
-    // Show coming soon dialog when component loads
-    // this.showComingSoonDialog = true;
+  loadAds(): void {
+    this.isLoading.set(true);
+
+    this.p2pAdsService.getAds().subscribe({
+      next: (ads) => {
+        this.allAds = ads;
+        console.log('Loaded ads:', ads);
+
+        // Load payment types for each ad
+        let completedRequests = 0;
+        const totalAds = ads.length;
+
+        if (totalAds === 0) {
+          this.transformAds();
+          this.isLoading.set(false);
+          return;
+        }
+
+        ads.forEach(ad => {
+          this.p2pAdPaymentTypesService.getAdPaymentTypesByP2pAd(ad.id).subscribe({
+            next: (paymentTypes) => {
+              this.adPaymentTypesMap.set(ad.id, paymentTypes);
+              completedRequests++;
+
+              if (completedRequests === totalAds) {
+                this.transformAds();
+                this.isLoading.set(false);
+              }
+            },
+            error: (error) => {
+              console.error('Error loading payment types for ad', ad.id, error);
+              completedRequests++;
+
+              if (completedRequests === totalAds) {
+                this.transformAds();
+                this.isLoading.set(false);
+              }
+            }
+          });
+        });
+      },
+      error: (error) => {
+        console.error('Error loading ads:', error);
+        this.isLoading.set(false);
+      }
+    });
   }
 
+  transformAds(): void {
+    this.buyOffers = this.allAds
+      .filter(ad => ad.type === 'buy' && ad.status === 'active')
+      .map(ad => this.transformAdToOffer(ad));
+
+    this.sellOffers = this.allAds
+      .filter(ad => ad.type === 'sell' && ad.status === 'active')
+      .map(ad => this.transformAdToOffer(ad));
+  }
+
+  transformAdToOffer(ad: P2pAd): any {
+    const paymentTypes = this.adPaymentTypesMap.get(ad.id) || [];
+    const paymentMethods = paymentTypes.map(pt =>
+      pt.p2p_payment_type?.name || 'Unknown'
+    );
+
+    return {
+      id: ad.id,
+      merchant: ad.name || 'Unknown Merchant',
+      orders: ad.total_orders,
+      completion: ad.completed_orders,
+      price: ad.price,
+      available: ad.available_amount,
+      asset: 'USDT',
+      minLimit: ad.min_limit,
+      maxLimit: ad.max_limit,
+      paymentMethods: paymentMethods
+    };
+  }
+
+  ngOnInit(): void {
+    this.getSourceChains();
+    this.loadAds();
+  }
 }

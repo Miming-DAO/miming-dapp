@@ -4,13 +4,13 @@ import { P2pPaymentType } from "./p2p-payment-type.model";
 export interface P2pOrder {
   id: string;
   p2p_ad_id: string;
-  p2p_ad: P2pAd | null;
+  p2p_ad: P2pAd | undefined;
   order_number: string;
   ordered_price: number;
   quantity: number;
   amount: number;
   p2p_payment_type_id: string;
-  p2p_payment_type: P2pPaymentType | null;
+  p2p_payment_type: P2pPaymentType | undefined;
   wallet_address: string;
   status: string;
   created_at: Date;

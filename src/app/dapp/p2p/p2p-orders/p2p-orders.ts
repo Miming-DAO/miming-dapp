@@ -1,4 +1,4 @@
-import { Component, Input, signal, OnInit } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -27,7 +27,13 @@ import { P2pOrder } from '../../../../models/p2p-order.model';
   styleUrl: './p2p-orders.css',
   providers: [MessageService],
 })
-export class P2pOrders implements OnInit {
+export class P2pOrders {
+
+  constructor(
+    private p2pOrdersService: P2pOrdersService,
+    private messageService: MessageService
+  ) { }
+
   showOrderChatDialog = signal(false);
   isLoading = signal(false);
 
@@ -36,11 +42,6 @@ export class P2pOrders implements OnInit {
   chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
 
   orders: P2pOrder[] = [];
-
-  constructor(
-    private p2pOrdersService: P2pOrdersService,
-    private messageService: MessageService
-  ) { }
 
   ngOnInit(): void {
     this.loadOrders();
