@@ -1,3 +1,129 @@
+<!-- Coming Soon Modal -->
+<p-dialog [(visible)]="showComingSoonModal" [modal]="true" [closable]="false" [closeOnEscape]="false"
+  [style]="{ 'width': '90%', 'max-width': '32rem', 'border-radius': '1.5rem' }">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-clock text-white text-xl"></i>
+      </div>
+      <span
+        class="font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+        Coming Soon
+      </span>
+    </div>
+  </ng-template>
+
+  <div class="py-6">
+    <div class="text-center space-y-6">
+      <!-- Animated Icon with Glow -->
+      <div class="relative inline-block mb-4">
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 blur-3xl opacity-30 animate-pulse">
+        </div>
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 blur-xl opacity-20 animate-pulse"
+          style="animation-delay: 0.5s;"></div>
+        <div class="relative">
+          <i
+            class="pi pi-shopping-bag text-7xl bg-gradient-to-br from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl"></i>
+        </div>
+      </div>
+
+      <!-- Title with Badge -->
+      <div class="space-y-2">
+        <h3 class="text-2xl font-bold text-slate-100">
+          P2P Marketplace
+        </h3>
+        <div
+          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-pink-500/20 border border-purple-500/30">
+          <div class="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse"></div>
+          <span
+            class="text-sm font-medium bg-gradient-to-r from-purple-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
+            Under Development
+          </span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <p class="text-slate-300 leading-relaxed max-w-md mx-auto px-4">
+        We're crafting the next generation of <span class="font-semibold text-fuchsia-400">decentralized trading</span>.
+        Get ready for a revolutionary P2P experience!
+      </p>
+
+      <!-- Features Preview -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto px-4 mt-6">
+        <div
+          class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-purple-500/10 backdrop-blur-sm">
+          <div class="feature-icon w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="pi pi-shield text-purple-400 text-sm"></i>
+          </div>
+          <div class="text-left">
+            <h4 class="text-sm font-semibold text-slate-200">Secure Escrow</h4>
+            <p class="text-xs text-slate-400 mt-0.5">Protected transactions</p>
+          </div>
+        </div>
+
+        <div
+          class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-fuchsia-500/10 backdrop-blur-sm">
+          <div class="feature-icon w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="pi pi-bolt text-fuchsia-400 text-sm"></i>
+          </div>
+          <div class="text-left">
+            <h4 class="text-sm font-semibold text-slate-200">Instant Trades</h4>
+            <p class="text-xs text-slate-400 mt-0.5">Lightning-fast swaps</p>
+          </div>
+        </div>
+
+        <div class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-pink-500/10 backdrop-blur-sm">
+          <div class="feature-icon w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="pi pi-users text-pink-400 text-sm"></i>
+          </div>
+          <div class="text-left">
+            <h4 class="text-sm font-semibold text-slate-200">P2P Direct</h4>
+            <p class="text-xs text-slate-400 mt-0.5">No intermediaries</p>
+          </div>
+        </div>
+
+        <div
+          class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-purple-500/10 backdrop-blur-sm">
+          <div class="feature-icon w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="pi pi-globe text-purple-400 text-sm"></i>
+          </div>
+          <div class="text-left">
+            <h4 class="text-sm font-semibold text-slate-200">Multi-Chain</h4>
+            <p class="text-xs text-slate-400 mt-0.5">Cross-chain support</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animated Progress Dots -->
+      <div class="flex items-center justify-center gap-2 pt-4">
+        <div class="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-lg shadow-purple-500/50"></div>
+        <div class="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse shadow-lg shadow-fuchsia-500/50"
+          style="animation-delay: 0.2s;"></div>
+        <div class="w-2 h-2 rounded-full bg-pink-500 animate-pulse shadow-lg shadow-pink-500/50"
+          style="animation-delay: 0.4s;"></div>
+      </div>
+
+      <!-- Launch Notification -->
+      <div
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/60 border border-slate-700/50 mt-2">
+        <i class="pi pi-bell text-slate-400 text-sm"></i>
+        <span class="text-xs text-slate-400">Stay tuned for the launch announcement!</span>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <button (click)="navigateToCrossChain()"
+      class="w-full px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-purple-500/50 transform hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-2">
+      <i class="pi pi-arrow-left"></i>
+      <span>Back to Teleport Page</span>
+    </button>
+  </ng-template>
+</p-dialog>
+
 <div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 relative overflow-hidden">
   <!-- Animated Background Elements -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">

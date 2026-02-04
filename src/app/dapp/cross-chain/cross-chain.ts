@@ -162,6 +162,22 @@ export class CrossChain {
     }
   }
 
+  async connectXteriumWallet() {
+    try {
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('xterium');
+      this.polkadotWalletAccounts = results;
+      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+      this.showPolkadotWalletAccountsDialog = true;
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
   connectPolkadotWalletAccount(): void {
     this.isProcessing = true;
 

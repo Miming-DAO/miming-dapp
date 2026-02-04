@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { TabsModule as PTabsModule } from 'primeng/tabs';
 import { DialogModule as PDialogModule } from 'primeng/dialog';
@@ -34,10 +35,11 @@ import { P2pOrders as P2pOrdersComponent } from './p2p-orders/p2p-orders';
   styleUrl: './p2p.css',
 })
 export class P2p {
-  constructor() { }
+  private router = inject(Router);
 
   mobileMenuOpen: boolean = false;
   isP2PUserLoggedIn: boolean = false;
+  showComingSoonModal = signal(true);
 
   activeMenu: 'marketplace' | 'my-ads' | 'orders' = 'marketplace';
   activeTab: 'buy' | 'sell' = 'buy';
@@ -56,5 +58,9 @@ export class P2p {
 
   mobileMenuOpenOnClick(mobileMenuOpen: boolean): void {
     this.mobileMenuOpen = mobileMenuOpen;
+  }
+
+  navigateToCrossChain(): void {
+    this.router.navigate(['/dapp/cross-chain']);
   }
 }
