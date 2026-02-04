@@ -32,6 +32,11 @@ export class Sidebar {
       icon: 'pi pi-shopping-bag',
       routerLink: ['/dapp/p2p'],
     },
+    {
+      label: 'Chart',
+      icon: 'pi pi-chart-line',
+      routerLink: ['/dapp/dex-screener'],
+    },
   ];
 
   closeSidebar() {

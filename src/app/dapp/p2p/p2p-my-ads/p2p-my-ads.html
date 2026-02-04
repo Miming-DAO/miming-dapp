@@ -1,0 +1,577 @@
+<p-toast />
+
+<div class="max-w-7xl mx-auto">
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">My Advertisements</h2>
+        <p class="text-sm md:text-base text-slate-400">Manage your P2P listings</p>
+      </div>
+      <button (click)="openCreateDialog()"
+        class="w-full sm:w-auto px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm text-sm md:text-base cursor-pointer">
+        <i class="pi pi-plus mr-1 md:mr-2"></i>
+        Create New Ad
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <i class="pi pi-spin pi-spinner text-4xl text-purple-400"></i>
+        <p class="text-slate-400">Loading advertisements...</p>
+      </div>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading() && myAds.length === 0) {
+    <div class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+        <i class="pi pi-inbox text-4xl text-purple-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No Advertisements Yet</h3>
+      <p class="text-slate-400 mb-6">Create your first P2P advertisement to get started</p>
+      <button (click)="openCreateDialog()"
+        class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
+        <i class="pi pi-plus mr-2"></i>
+        Create New Ad
+      </button>
+    </div>
+    }
+
+    <!-- Ads List -->
+    @if (!isLoading() && myAds.length > 0) {
+    <div class="space-y-3 md:space-y-4">
+      @for (ad of myAds; track ad.id) {
+      <div
+        class="backdrop-blur-xl bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
+        </div>
+
+        <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
+          <!-- Type Badge -->
+          <div class="md:col-span-2">
+            <div class="flex items-center gap-2">
+              <span
+                [class]="ad.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+                class="px-3 py-1.5 rounded-full text-xs md:text-sm font-bold border uppercase">
+                <i [class]="ad.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+                {{ ad.type }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Price & Asset -->
+          <div class="md:col-span-2">
+            <div class="text-xs md:text-sm text-slate-400 mb-1">Price</div>
+            <div
+              class="font-bold text-xl md:text-2xl bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              ${{ ad.price }}
+            </div>
+            <div class="text-xs text-slate-400">{{ ad.name }}</div>
+          </div>
+
+          <!-- Available & Limits -->
+          <div class="md:col-span-3">
+            <div class="text-xs md:text-sm text-slate-400 mb-1">Available / Limit</div>
+            <div class="text-white font-semibold text-sm md:text-base">{{ ad.available_amount }}</div>
+            <div class="text-xs md:text-sm text-slate-400">${{ ad.min_limit }} - ${{ ad.max_limit }}</div>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="md:col-span-2">
+            <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
+            <div class="flex flex-wrap gap-1">
+              @if (getAdPaymentTypes(ad.id).length > 0) {
+              @for (paymentType of getAdPaymentTypes(ad.id); track paymentType.id) {
+              <span class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                {{ paymentType.p2p_payment_type?.name || getPaymentTypeName(paymentType.p2p_payment_type_id) }}
+              </span>
+              }
+              } @else {
+              <span class="text-xs text-slate-500">No methods</span>
+              }
+            </div>
+          </div>
+
+          <!-- Status & Actions -->
+          <div class="md:col-span-3 flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-end">
+            <span [class]="getStatusBadgeClass(ad.status)"
+              class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase">
+              {{ ad.status }}
+            </span>
+            <div class="flex gap-2">
+              <button (click)="openEditDialog(ad)"
+                class="w-8 h-8 rounded-full bg-slate-700/50 hover:bg-purple-500/30 text-slate-300 hover:text-purple-300 transition-all duration-200 flex items-center justify-center cursor-pointer">
+                <i class="pi pi-pencil text-xs"></i>
+              </button>
+              <button
+                [class]="ad.status === 'active' ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400' : 'bg-green-500/20 hover:bg-green-500/30 text-green-400'"
+                class="w-8 h-8 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer">
+                <i [class]="ad.status === 'active' ? 'pi pi-pause' : 'pi pi-play'" class="text-xs"></i>
+              </button>
+              <button (click)="openDeleteDialog(ad)"
+                class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+                <i class="pi pi-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ad Stats Footer -->
+        <div
+          class="relative z-10 mt-3 pt-3 border-t border-slate-700/50 flex items-center justify-between text-xs md:text-sm text-slate-400">
+          <span><i class="pi pi-hashtag mr-1"></i> {{ ad.p2p_number }}</span>
+          <span class="uppercase"><i class="pi pi-info-circle mr-1"></i> {{ ad.status }}</span>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Create Ad Dialog -->
+<p-dialog [(visible)]="showCreateDialog" [modal]="true"
+  [style]="{ 'width': '900px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-plus text-white text-lg"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Create New Advertisement
+        </span>
+        <div class="text-xs text-slate-400">Fill out the details below to publish a P2P ad</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="submitAd()" class="space-y-6" autocomplete="off">
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Ad Name</label>
+      <input type="text" pInputText [(ngModel)]="newAd.name" name="name" placeholder="Enter advertisement name"
+        class="w-full rounded-full border border-gray-100/30 px-4 py-3"
+        style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-end">
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Type</label>
+        <div class="flex gap-2">
+          <label [class]="newAd.type === 'sell' ? 'bg-purple-500/20 border-purple-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-purple-500/40">
+            <input type="radio" name="type" value="sell" [(ngModel)]="newAd.type" class="accent-purple-500" />
+            <span class="text-white font-semibold text-sm">Sell</span>
+          </label>
+          <label [class]="newAd.type === 'buy' ? 'bg-green-500/20 border-green-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-green-500/40">
+            <input type="radio" name="type" value="buy" [(ngModel)]="newAd.type" class="accent-green-500" />
+            <span class="text-white font-semibold text-sm">Buy</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Asset</label>
+        <p-select [options]="assetOptions" [(ngModel)]="newAd.token_symbol" name="asset" placeholder="Select Asset"
+          class="w-full" size="large" />
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Price (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="newAd.price" name="price" placeholder="0.00" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Available</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="6" [(ngModel)]="newAd.available_amount" name="available"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Min Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="newAd.min_limit" name="minLimit"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Max Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="newAd.max_limit" name="maxLimit"
+          placeholder="0.00" />
+      </div>
+    </div>
+
+    <div
+      class="p-6 rounded-3xl bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <label class="text-sm font-semibold text-white">Payment Methods *</label>
+      </div>
+
+      <!-- Payment Methods List -->
+      @if (newAdPaymentTypes.length > 0) {
+      <div class="space-y-2 mb-4">
+        @for (payment of newAdPaymentTypes; track $index) {
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-1">
+            <div class="text-sm text-white font-semibold">{{ getPaymentTypeName(payment.p2p_payment_type_id) }}</div>
+            <div class="text-xs text-slate-400">{{ payment.account_name }} - {{ payment.account_number }}</div>
+          </div>
+          <button type="button" (click)="removePaymentTypeFromNewAd($index)"
+            class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+            <i class="pi pi-trash text-xs"></i>
+          </button>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 mb-4">
+        <div class="flex items-center gap-2 text-yellow-400">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span class="text-sm">No payment methods added yet. Please add at least one.</span>
+        </div>
+      </div>
+      }
+
+      <!-- Add Payment Method Form -->
+      <div class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Payment Type</label>
+            <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="newPaymentType"
+              placeholder="Select Payment Type" optionLabel="name" class="w-full" styleClass="w-full rounded-full"
+              [style]="{ 'border-radius': '9999px', 'background-color': 'oklch(20.8% 0.042 265.755)' }" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Account Name</label>
+            <input type="text" pInputText [(ngModel)]="newAdPaymentTypeForm.account_name" name="newAccountName"
+              placeholder="Enter account name" class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+              style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Account Number</label>
+          <input type="text" pInputText [(ngModel)]="newAdPaymentTypeForm.account_number" name="newAccountNumber"
+            placeholder="Enter account number" class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Additional Details (optional)</label>
+          <textarea pTextarea [(ngModel)]="newAdPaymentTypeForm.other_details" name="newOtherDetails"
+            placeholder="Any additional payment instructions" class="w-full text-sm" [rows]="2"
+            style="border-radius: 1rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+        </div>
+        <button type="button" (click)="addPaymentTypeToNewAd()"
+          class="w-full px-4 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+          <i class="pi pi-plus mr-2"></i>
+          Add Payment Method
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Payment Instructions (optional)</label>
+      <textarea pTextarea rows="3" [(ngModel)]="newAd.payment_instructions" name="instructions"
+        placeholder="Provide any special instructions for buyers/sellers" class="w-full" [rows]="5"
+        style="border-radius: 1.5rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+    </div>
+  </form>
+  <ng-template #footer>
+    <div class="flex flex-wrap gap-2 pt-5">
+      <button type="submit" (click)="submitAd()"
+        class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        <i class="pi pi-upload mr-2"></i>
+        Publish
+      </button>
+      <button type="button" (click)="closeCreateDialog()"
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        <i class="pi pi-times mr-2"></i>
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Ad Dialog -->
+<p-dialog [(visible)]="showEditDialog" [modal]="true"
+  [style]="{ 'width': '900px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        <i class="pi pi-pencil text-white text-lg"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Edit Advertisement
+        </span>
+        <div class="text-xs text-slate-400">Update the details of your P2P ad</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="updateAd()" class="space-y-6" autocomplete="off">
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Ad Name</label>
+      <input type="text" pInputText [(ngModel)]="editAd.name" name="editName" placeholder="Enter advertisement name"
+        class="w-full rounded-full border border-gray-100/30 px-4 py-3"
+        style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-end">
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Type</label>
+        <div class="flex gap-2">
+          <label [class]="editAd.type === 'sell' ? 'bg-purple-500/20 border-purple-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-purple-500/40">
+            <input type="radio" name="editType" value="sell" [(ngModel)]="editAd.type" class="accent-purple-500" />
+            <span class="text-white font-semibold text-sm">Sell</span>
+          </label>
+          <label [class]="editAd.type === 'buy' ? 'bg-green-500/20 border-green-500' : 'border-slate-700/60'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-full border cursor-pointer transition-all hover:border-green-500/40">
+            <input type="radio" name="editType" value="buy" [(ngModel)]="editAd.type" class="accent-green-500" />
+            <span class="text-white font-semibold text-sm">Buy</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Asset</label>
+        <p-select [options]="assetOptions" [(ngModel)]="editAd.token_symbol" name="editAsset" placeholder="Select Asset"
+          class="w-full" size="large" />
+      </div>
+
+      <div class="md:col-span-1">
+        <label class="text-xs text-slate-400 mb-2 block">Price (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="editAd.price" name="editPrice"
+          placeholder="0.00" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Available</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="6" [(ngModel)]="editAd.available_amount" name="editAvailable"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Min Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="editAd.min_limit" name="editMinLimit"
+          placeholder="0.00" />
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Max Limit (USD)</label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-2 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="editAd.max_limit" name="editMaxLimit"
+          placeholder="0.00" />
+      </div>
+    </div>
+
+    <div
+      class="p-6 rounded-3xl bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <label class="text-sm font-semibold text-white">Payment Methods *</label>
+      </div>
+
+      <!-- Existing Payment Methods List -->
+      @if (editAdPaymentTypes.length > 0) {
+      <div class="space-y-2 mb-4">
+        @for (payment of editAdPaymentTypes; track payment.id; let i = $index) {
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-1">
+            <div class="text-sm text-white font-semibold">{{ getPaymentTypeName(payment.p2p_payment_type_id) }}</div>
+            <div class="text-xs text-slate-400">{{ payment.account_name }} - {{ payment.account_number }}</div>
+            @if (payment.other_details) {
+            <div class="text-xs text-slate-500 mt-1">{{ payment.other_details }}</div>
+            }
+          </div>
+          <div class="flex gap-2">
+            <button type="button" (click)="editPaymentType(payment, i)"
+              class="w-8 h-8 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+              <i class="pi pi-pencil text-xs"></i>
+            </button>
+            <button type="button" (click)="deletePaymentType(payment.id)"
+              class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+              <i class="pi pi-trash text-xs"></i>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 mb-4">
+        <div class="flex items-center gap-2 text-yellow-400">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span class="text-sm">No payment methods added yet. Please add at least one.</span>
+        </div>
+      </div>
+      }
+
+      <!-- Add/Edit Payment Method Form -->
+      <div class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 space-y-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-white">
+            {{ isEditingPaymentType ? 'Edit Payment Method' : 'Add Payment Method' }}
+          </span>
+          @if (isEditingPaymentType) {
+          <button type="button" (click)="resetEditPaymentTypeForm()"
+            class="text-xs px-3 py-1 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 transition cursor-pointer">
+            Cancel Edit
+          </button>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Payment Type</label>
+            <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="editPaymentTypeId"
+              placeholder="Select Payment Type" optionLabel="name" class="w-full" styleClass="w-full rounded-full"
+              [style]="{ 'border-radius': '9999px', 'background-color': 'oklch(20.8% 0.042 265.755)' }" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Account Name</label>
+            <input type="text" pInputText [(ngModel)]="editAdPaymentTypeForm.account_name" name="editPaymentAccountName"
+              placeholder="Enter account name" class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+              style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Account Number</label>
+          <input type="text" pInputText [(ngModel)]="editAdPaymentTypeForm.account_number"
+            name="editPaymentAccountNumber" placeholder="Enter account number"
+            class="w-full rounded-full border border-gray-100/30 px-4 py-2 text-sm"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Additional Details (optional)</label>
+          <textarea pTextarea [(ngModel)]="editAdPaymentTypeForm.other_details" name="editPaymentOtherDetails"
+            placeholder="Any additional payment instructions" class="w-full text-sm" [rows]="2"
+            style="border-radius: 1rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+        </div>
+        @if (isEditingPaymentType) {
+        <button type="button" (click)="updatePaymentType()"
+          class="w-full px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+          <i class="pi pi-save mr-2"></i>
+          Update Payment Method
+        </button>
+        } @else {
+        <button type="button" (click)="addPaymentTypeToEditAd()"
+          class="w-full px-4 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+          <i class="pi pi-plus mr-2"></i>
+          Add Payment Method
+        </button>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Payment Instructions (optional)</label>
+      <textarea pTextarea rows="3" [(ngModel)]="editAd.payment_instructions" name="editInstructions"
+        placeholder="Provide any special instructions for buyers/sellers" class="w-full" [rows]="5"
+        style="border-radius: 1.5rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.5rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+    </div>
+  </form>
+  <ng-template #footer>
+    <div class="flex flex-wrap gap-2 pt-5">
+      <button type="submit" (click)="updateAd()"
+        class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        <i class="pi pi-save mr-2"></i>
+        Update
+      </button>
+      <button type="button" (click)="closeEditDialog()"
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        <i class="pi pi-times mr-2"></i>
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Confirmation Dialog -->
+<p-dialog [(visible)]="showDeleteDialog" [modal]="true"
+  [style]="{ 'width': '500px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+        <i class="pi pi-exclamation-triangle text-white text-lg"></i>
+      </div>
+      <div>
+        <span class="font-bold text-lg bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+          Delete Advertisement
+        </span>
+        <div class="text-xs text-slate-400">This action cannot be undone</div>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="py-4">
+    @if (selectedAdForDelete) {
+    <p class="text-slate-300 mb-4">
+      Are you sure you want to delete this advertisement?
+    </p>
+    <div class="backdrop-blur-lg bg-slate-800/50 rounded-2xl border border-red-500/20 p-4">
+      <div class="flex items-center gap-3 mb-2">
+        <span
+          [class]="selectedAdForDelete.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+          class="px-2 py-1 rounded-full text-xs font-bold border uppercase">
+          {{ selectedAdForDelete.type }}
+        </span>
+        <span class="text-white font-semibold">{{ selectedAdForDelete.name }}</span>
+      </div>
+      <div class="text-sm text-slate-400">
+        <div>Price: <span class="text-yellow-400 font-bold">${{ selectedAdForDelete.price }}</span></div>
+        <div>Available: <span class="text-white">{{ selectedAdForDelete.available_amount }}</span></div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <ng-template #footer>
+    <div class="flex flex-wrap gap-2 pt-5">
+      <button type="button" (click)="confirmDelete()" [disabled]="isLoading()"
+        class="px-4 py-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
+        <i class="pi pi-trash mr-2"></i>
+        Delete
+      </button>
+      <button type="button" (click)="closeDeleteDialog()" [disabled]="isLoading()"
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer disabled:cursor-not-allowed">
+        <i class="pi pi-times mr-2"></i>
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

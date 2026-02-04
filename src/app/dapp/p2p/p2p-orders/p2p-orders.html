@@ -1,0 +1,334 @@
+<div class="max-w-7xl mx-auto">
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
+    <div class="mb-6">
+      <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">Order History</h2>
+      <p class="text-sm md:text-base text-slate-400">Track your P2P transactions</p>
+    </div>
+
+    <div class="space-y-3 md:space-y-4">
+      <ng-container *ngIf="!isLoading(); else loading">
+        <div *ngIf="orders.length === 0" class="text-center py-12">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+            <i class="pi pi-inbox text-4xl text-purple-400"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-2">No Orders Yet</h3>
+          <p class="text-slate-400 mb-6">There are no orders for this advertisement.</p>
+          <button (click)="loadOrders()"
+            class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
+            <i class="pi pi-refresh mr-2"></i>
+            Refresh
+          </button>
+        </div>
+
+        <div *ngFor="let order of orders"
+          class="backdrop-blur-xl bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
+          <div
+            class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
+          </div>
+
+          <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
+            <div class="md:col-span-3">
+              <div class="text-xs md:text-sm text-slate-400 mb-1">Order ID</div>
+              <div class="font-bold text-white text-sm md:text-base">{{ order.order_number || order.id }}</div>
+              <div class="text-xs text-slate-400 mb-2">
+                <span class="font-semibold text-white">{{ order.p2p_ad?.name }}</span>
+                <div class="text-xs text-slate-400 mt-1">Ad #: <span class="font-mono">{{ order.p2p_ad?.p2p_number
+                    }}</span></div>
+              </div>
+              <span
+                [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+                class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold border uppercase">
+                <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+                {{ order.p2p_ad?.type }}
+              </span>
+            </div>
+
+            <div class="md:col-span-2">
+              <div class="text-xs md:text-sm text-slate-400 mb-1">Quantity</div>
+              <div class="font-bold text-lg md:text-xl text-white">
+                {{ order.quantity >= 1000000 ? ((order.quantity / 1000000) | number:'1.1-1') + 'M' : (order.quantity |
+                number) }}
+              </div>
+              <div class="text-xs text-slate-400">Unit price: ${{ order.ordered_price >= 1000000000 ?
+                ((order.ordered_price/1000000000) | number:'1.1-1') + 'B' : (order.ordered_price >= 1000000 ?
+                ((order.ordered_price/1000000) | number:'1.1-1') + 'M' : (order.ordered_price >= 1000 ?
+                ((order.ordered_price/1000) | number:'1.1-1') + 'K' : (order.ordered_price | number:'1.2-2'))) }}</div>
+            </div>
+
+            <div class="md:col-span-3">
+              <div class="text-xs md:text-sm text-slate-400 mb-1">Total / Buyer</div>
+              <div
+                class="font-bold text-base md:text-lg bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+                ${{ order.amount >= 1000000000 ? ((order.amount/1000000000) | number:'1.1-1') + 'B' : (order.amount >=
+                1000000 ? ((order.amount/1000000) | number:'1.1-1') + 'M' : (order.amount >= 1000 ? ((order.amount/1000)
+                | number:'1.1-1') + 'K' : (order.amount | number:'1.2-2'))) }}</div>
+              <div class="text-xs md:text-sm text-slate-300">Buyer: {{ order.wallet_address ? (order.wallet_address |
+                slice:0:6) + '...' + (order.wallet_address | slice:-4) : '' }}</div>
+            </div>
+
+            <div class="md:col-span-2">
+              <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
+              <div
+                class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50 inline-block">
+                {{ order.p2p_payment_type?.name || order.p2p_payment_type_id }}</div>
+              <div class="text-xs text-slate-400 mt-1">{{ order.created_at | date:'short' }}</div>
+            </div>
+
+            <div class="md:col-span-2 flex flex-col gap-2">
+              <span [class]="getStatusBadgeClass(order.status)"
+                class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase text-center">{{ order.status
+                }}</span>
+              <button *ngIf="order.status === 'pending' || order.status === 'paid'" (click)="openOrderChat(order)"
+                class="w-full px-3 py-2 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-200 transition-all duration-200 text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer">
+                <i class="pi pi-comments"></i>
+                <span>Chat</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #loading>
+        <div class="text-slate-400">Loading orders...</div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Order Chat Dialog -->
+<p-dialog [(visible)]="showOrderChatDialog" [modal]="true"
+  [style]="{ 'width': '1200px', 'max-width': '95vw', 'height': '95vh', 'border-radius': '1.25rem' }"
+  [dismissableMask]="true" styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div *ngIf="selectedOrder" class="flex items-center justify-between w-full">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-comments text-white text-lg"></i>
+        </div>
+        <div>
+          <span
+            class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Order
+            Chat</span>
+          <div class="text-xs text-slate-400">Order #: {{ selectedOrder.order_number || selectedOrder.id }}</div>
+        </div>
+      </div>
+      <span [class]="getStatusBadgeClass(selectedOrder.status || '')"
+        class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase">{{ selectedOrder.status }}</span>
+    </div>
+  </ng-template>
+
+  <div *ngIf="selectedOrder" class="h-[calc(90vh-200px)] flex flex-col lg:flex-row gap-3 p-2">
+
+    <!-- Left: Order Details -->
+    <div class="lg:w-5/12 h-full bg-slate-800/50 rounded-2xl border border-purple-500/20 p-3 overflow-y-auto">
+      <!-- Ad Info -->
+      <div class="mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-slate-400 text-xs uppercase tracking-wide">Advertisement</div>
+          <span
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="px-2.5 py-1 rounded-full text-xs font-bold border uppercase">
+            <i [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
+              class="mr-0.5 text-[9px]"></i>
+            {{ selectedOrder.p2p_ad?.type }}
+          </span>
+        </div>
+        <div class="font-bold text-white text-lg mb-1">{{ selectedOrder.p2p_ad?.name }}</div>
+        <div class="text-sm text-slate-400">
+          <div>Ad #: <span class="font-mono text-white">{{ selectedOrder.p2p_ad?.p2p_number }}</span></div>
+        </div>
+      </div>
+
+      <!-- Action Required -->
+      <div class="mb-3 p-3 rounded-xl border-2"
+        [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
+        <div class="flex items-center gap-2 mb-1">
+          <i class="pi pi-info-circle text-base"
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
+          <div class="font-semibold text-sm"
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
+            {{ selectedOrder.p2p_ad?.type === 'buy' ? 'You are sending USDT' : 'You are sending payment' }}
+          </div>
+        </div>
+        <div class="text-xs" [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-200' : 'text-purple-200'">
+          {{ selectedOrder.p2p_ad?.type === 'buy' ? 'Send USDT tokens to receive payment' : 'Send payment to receive
+          USDT
+          tokens' }}
+        </div>
+      </div>
+
+      <!-- Order Details -->
+      <div class="mb-3">
+        <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">Order Details</div>
+        <div class="bg-slate-900/40 rounded-xl p-2.5 space-y-3">
+
+          <!-- You Send Section -->
+          <div class="p-3 rounded-2xl border-2"
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
+            <div class="flex items-center gap-1 mb-1">
+              <i class="pi pi-arrow-up text-sm"
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
+              <div class="text-xs font-semibold"
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
+                YOU SEND
+              </div>
+            </div>
+
+            <!-- For BUY Ad (P2P user sells USDT): Send Quantity -->
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'buy'">
+              <div class="text-xs text-green-200 mb-0.5">Quantity (USDT)</div>
+              <div class="text-3xl font-bold text-green-300">
+                {{ selectedOrder.quantity >= 1000000 ?
+                ((selectedOrder.quantity / 1000000) | number:'1.1-1') + 'M' : (selectedOrder.quantity | number) }}
+              </div>
+              <div class="text-xs text-green-200 font-mono">
+                Exact: <span class="text-white font-bold">{{ selectedOrder.quantity | number }}</span>
+              </div>
+            </div>
+
+            <!-- For SELL Ad (P2P user buys USDT): Send Amount -->
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'sell'">
+              <div class="text-xs text-purple-200 mb-0.5">Total Amount (USD)</div>
+              <div class="text-3xl font-bold text-purple-300">
+                ${{ selectedOrder.amount >= 1000000000 ? ((selectedOrder.amount/1000000000) | number:'1.1-1') + 'B' :
+                (selectedOrder.amount >= 1000000 ? ((selectedOrder.amount/1000000) | number:'1.1-1') + 'M' :
+                (selectedOrder.amount >= 1000 ? ((selectedOrder.amount/1000) | number:'1.1-1') + 'K' :
+                (selectedOrder.amount | number:'1.2-2'))) }}
+              </div>
+              <div class="text-xs text-purple-200 font-mono">
+                Exact: <span class="text-white font-bold">${{ selectedOrder.amount | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- You Receive Section -->
+          <div class="p-3 rounded-2xl border-2"
+            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-blue-500/10 border-blue-500/40' : 'bg-yellow-500/10 border-yellow-500/40'">
+            <div class="flex items-center gap-1 mb-1">
+              <i class="pi pi-arrow-down text-sm"
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-blue-400' : 'text-yellow-400'"></i>
+              <div class="text-xs font-semibold"
+                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-blue-300' : 'text-yellow-300'">
+                YOU RECEIVE
+              </div>
+            </div>
+
+            <!-- For BUY Ad (P2P user sells USDT): Receive Amount -->
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'buy'">
+              <div class="text-xs text-blue-200 mb-0.5">Total Amount (USD)</div>
+              <div class="text-2xl font-bold text-blue-300">
+                ${{ selectedOrder.amount >= 1000000000 ? ((selectedOrder.amount/1000000000) | number:'1.1-1') + 'B' :
+                (selectedOrder.amount >= 1000000 ? ((selectedOrder.amount/1000000) | number:'1.1-1') + 'M' :
+                (selectedOrder.amount >= 1000 ? ((selectedOrder.amount/1000) | number:'1.1-1') + 'K' :
+                (selectedOrder.amount | number:'1.2-2'))) }}
+              </div>
+              <div class="text-xs text-blue-200 font-mono">
+                Exact: <span class="text-white font-bold">${{ selectedOrder.amount | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <!-- For SELL Ad (P2P user buys USDT): Receive Quantity -->
+            <div *ngIf="selectedOrder.p2p_ad?.type === 'sell'">
+              <div class="text-xs text-yellow-200 mb-0.5">Quantity (USDT)</div>
+              <div class="text-2xl font-bold text-yellow-300">
+                {{ selectedOrder.quantity >= 1000000 ?
+                ((selectedOrder.quantity / 1000000) | number:'1.1-1') + 'M' : (selectedOrder.quantity | number) }}
+              </div>
+              <div class="text-xs text-yellow-200 font-mono">
+                Exact: <span class="text-white font-bold">{{ selectedOrder.quantity | number }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Wallet -->
+      <div class="mb-3">
+        <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">
+          User Wallet Address
+        </div>
+        <div class="bg-slate-900/40 rounded-xl p-2">
+          <div class="font-mono text-white text-sm break-all">
+            {{ selectedOrder.wallet_address ? (selectedOrder.wallet_address) : '' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment & Buyer Info -->
+      <div>
+        <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">Payment Information</div>
+        <div class="space-y-1.5 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Method:</span>
+            <span class="text-white font-semibold">{{ selectedOrder.p2p_payment_type?.name ||
+              selectedOrder.p2p_payment_type_id }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Date:</span>
+            <span class="text-white">{{ selectedOrder.created_at | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Chat -->
+    <div class="lg:w-7/12 h-full flex flex-col bg-slate-900/40 rounded-2xl border border-purple-500/10">
+      <div class="flex-1 overflow-y-auto p-3 min-h-0">
+        <div class="space-y-2">
+          <div *ngFor="let msg of chatMessages" [class.justify-end]="msg.sender === 'user'" class="flex">
+            <div [class.bg-purple-500/20]="msg.sender === 'user'" [class.border-purple-500/30]="msg.sender === 'user'"
+              [class.bg-slate-700/50]="msg.sender === 'merchant'"
+              [class.border-slate-600/30]="msg.sender === 'merchant'" class="max-w-[75%] rounded-2xl border p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span [class.text-purple-300]="msg.sender === 'user'" [class.text-slate-300]="msg.sender === 'merchant'"
+                  class="text-xs font-semibold">{{ msg.senderName }}</span>
+                <span class="text-xs text-slate-500">{{ formatMessageTime(msg.timestamp) }}</span>
+              </div>
+              <div class="text-sm text-white">{{ msg.message }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-700/50">
+        <div class="flex gap-2">
+          <input [ngModel]="chatMessage()" (ngModelChange)="chatMessage.set($event)" (keyup.enter)="sendChatMessage()"
+            type="text" placeholder="Type your message..."
+            class="flex-1 px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all" />
+          <button (click)="sendChatMessage()" [disabled]="!chatMessage().trim()"
+            class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2">
+            <i class="pi pi-send"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <div class="flex flex-wrap gap-2 pt-5">
+      @if (selectedOrder?.status === 'pending') {
+      <button
+        class="px-4 py-3 rounded-full bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 font-semibold transition-all duration-200 border border-green-500/30 hover:border-green-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
+        <i class="pi pi-check"></i><span>Mark as Paid</span>
+      </button>
+      }
+
+      @if (selectedOrder?.status === 'paid') {
+      <button
+        class="px-4 py-3 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-semibold transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
+        <i class="pi pi-verified"></i><span>Confirm Release</span>
+      </button>
+      }
+
+      <button
+        class="px-4 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
+        <i class="pi pi-flag"></i><span>Dispute</span>
+      </button>
+      <button (click)="closeOrderChat()"
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer whitespace-nowrap">
+        Close
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

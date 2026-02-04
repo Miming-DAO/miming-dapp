@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, ActivatedRoute } from '@angular/router';
 
 import { Drawer as PDrawer } from 'primeng/drawer'
 import { DialogModule as PDialogModule } from 'primeng/dialog';
@@ -43,10 +43,18 @@ export class Dapp {
   isMobile = false;
 
   isGenerateDialogOpen = false;
+  isXteriumMode = false;
+
+  constructor(private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.checkIfMobile();
     window.addEventListener('resize', this.checkIfMobile.bind(this));
+
+    // Check for xterium URL parameter
+    this.route.queryParams.subscribe(params => {
+      this.isXteriumMode = params['xterium'] === 'true';
+    });
   }
 
   checkIfMobile() {

@@ -7,7 +7,7 @@ import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.
   selector: 'app-polkadot-identicon-util',
   imports: [],
   templateUrl: './polkadot-identicon-util.html',
-  styleUrl: './polkadot-identicon-util.scss'
+  styleUrl: './polkadot-identicon-util.css'
 })
 export class PolkadotIdenticonUtil {
   @Input() address: string = '';

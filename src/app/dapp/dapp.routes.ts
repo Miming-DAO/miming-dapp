@@ -18,5 +18,13 @@ export const routes: Routes = [{
       path: "p2p",
       loadComponent: () => import('./p2p/p2p').then(m => m.P2p)
     },
+    {
+      path: "p2p-admin",
+      loadComponent: () => import('./p2p-admin/p2p-admin').then(m => m.P2pAdmin)
+    },
+    {
+      path: "dex-screener",
+      loadComponent: () => import('./dex-screener/dex-screener').then(m => m.DexScreener)
+    },
   ]
 }];
