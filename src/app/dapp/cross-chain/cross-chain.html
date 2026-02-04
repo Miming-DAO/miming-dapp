@@ -67,9 +67,14 @@
 <!-- Main Content Container -->
 <div class="px-4 -mt-60 md:-mt-70 lg:-mt-70 sm:px-6 lg:px-8 pb-12">
   <div class="max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- <div class="grid grid-cols-1 lg:grid-cols-3 gap-6"> -->
+    <div class="grid grid-cols-7 gap-6">
+
+      <div></div>
+
       <!-- Left Side - Main Form -->
-      <div class="lg:col-span-2">
+      <!-- <div class="lg:col-span-2"> -->
+      <div class="lg:col-span-5">
         <div
           class="backdrop-blur-lg bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border-none p-6 md:p-8">
           <div class="space-y-6">
@@ -232,8 +237,9 @@
         </div>
       </div>
 
+      <div></div>
       <!-- Right Side - Balance Panels -->
-      <div class="lg:col-span-1">
+      <!-- <div class="lg:col-span-1">
         <div class="sticky top-4 space-y-4">
           <div
             class="backdrop-blur-lg bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 p-6">
@@ -246,7 +252,6 @@
             </div>
 
             <div class="space-y-3">
-              <!-- Selected Source Chain First -->
               @if (selectedSourceChain) {
               <div
                 class="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-4 border border-purple-500/30 hover:border-purple-500/50 transition-all">
@@ -273,7 +278,6 @@
                 </div>
               </div>
 
-              <!-- Divider -->
               <div class="flex items-center gap-3 py-2">
                 <div class="flex-1 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
                 <span class="text-xs text-slate-500 uppercase tracking-wider">Other Chains</span>
@@ -281,7 +285,6 @@
               </div>
               }
 
-              <!-- Rest of the Chains -->
               @for (chain of sourceChains; track chain.id) {
               @if (!selectedSourceChain || chain.id !== selectedSourceChain.id) {
               <div
@@ -310,7 +313,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
