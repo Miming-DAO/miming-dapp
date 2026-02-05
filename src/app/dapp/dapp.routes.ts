@@ -23,6 +23,10 @@ export const routes: Routes = [{
       loadComponent: () => import('./p2p-admin/p2p-admin').then(m => m.P2pAdmin)
     },
     {
+      path: "p2p-user",
+      loadComponent: () => import('./p2p-user/p2p-user').then(m => m.P2pUser)
+    },
+    {
       path: "dex-screener",
       loadComponent: () => import('./dex-screener/dex-screener').then(m => m.DexScreener)
     },
