@@ -24,15 +24,16 @@ import { PolkadotIdenticonUtil } from '../../shared/polkadot-identicon-util/polk
 })
 export class CrossChainXteriumAccounts {
 
-  polkadotWalletAccounts: PolkadotWalletAccount[] = [];
-  selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
-  isProcessing: boolean = false;
-
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService
   ) { }
+
+  polkadotWalletAccounts: PolkadotWalletAccount[] = [];
+  selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
+
+  isProcessing: boolean = false;
 
   loadAccounts(): void {
     this.route.queryParams.subscribe(params => {

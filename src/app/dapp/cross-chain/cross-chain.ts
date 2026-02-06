@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 
 import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/extension-inject/types';
 
@@ -29,7 +28,7 @@ import { Token } from '../../../models/token.model';
 import { PolkadotXcm } from '../../../models/polkadot-xcm.model';
 import { ExecuteTransaction } from '../../../models/execute-transactions.model';
 
-import { DeviceDetector } from '../../../services/device-detector/device-detector';
+import { DeviceDetectorService } from '../../../services/device-detector/device-detector.service';
 import { ChainsService } from '../../../services/chains/chains.service';
 import { TokensService } from '../../../services/tokens/tokens.service';
 import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.service';
@@ -37,12 +36,6 @@ import { PolkadotXcmService } from '../../../services/polkadot-xcm/polkadot-xcm.
 import { PolkadotApiService } from '../../../services/polkadot-api/polkadot-api.service';
 
 import { CrossChainHeader } from './cross-chain-header/cross-chain-header';
-
-declare global {
-  interface Window {
-    xterium?: any;
-  }
-}
 
 @Component({
   selector: 'app-cross-chain',
@@ -77,8 +70,7 @@ export class CrossChain {
   isMobileDevice: boolean = false;
 
   constructor(
-    private route: ActivatedRoute,
-    private deviceDetector: DeviceDetector,
+    private deviceDetectorService: DeviceDetectorService,
     private polkadotJsService: PolkadotJsService,
     private chainsService: ChainsService,
     private tokenService: TokensService,
@@ -86,13 +78,13 @@ export class CrossChain {
     private polkadotXcmService: PolkadotXcmService,
     private messageService: MessageService
   ) {
-    this.isMobileDevice = this.deviceDetector.isMobile();
+    this.isMobileDevice = this.deviceDetectorService.isMobile();
   }
 
   menuItems: MenuItem[] | undefined;
 
   showInitializingDialog: boolean = true;
-  selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
+  currentPolkadotWalletAccount: PolkadotWalletAccount | undefined;
 
   isProcessing: boolean = false;
 
@@ -103,15 +95,15 @@ export class CrossChain {
     status: string;
   } = { message: '', details: '', status: '' };
 
+  showXteriumSignDialog: boolean = false;
+  xteriumSignUrl: string = '';
+
   sourceChains: Chain[] = [];
   selectedSourceChain: Chain | undefined;
-
   targetChains: Chain[] = [];
   selectedTargetChain: Chain | undefined;
-
   tokens: Token[] = [];
   selectedToken: Token | undefined;
-
   quantity: number = 0;
   recipientAddress: string = '';
 
@@ -211,8 +203,8 @@ export class CrossChain {
       return false;
     }
 
-    this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
-    if (!this.selectedPolkadotWalletAccount) {
+    this.currentPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
+    if (!this.currentPolkadotWalletAccount) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -239,14 +231,8 @@ export class CrossChain {
       status: "In-Progress"
     };
 
-    this.processingStatus = {
-      message: "Creating transaction...",
-      details: "Please wait while we create your teleport transaction.",
-      status: "In-Progress"
-    };
-
     const data: PolkadotXcm = {
-      user: this.selectedPolkadotWalletAccount?.address || "",
+      user: this.currentPolkadotWalletAccount?.address || "",
       from_chain_id: this.selectedSourceChain?.id || 0,
       to_chain_id: this.selectedTargetChain?.id || 0,
       receiver: this.recipientAddress,
@@ -265,56 +251,42 @@ export class CrossChain {
           status: "In-Progress"
         };
 
-        if (!this.selectedPolkadotWalletAccount) {
-          this.isProcessing = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Please connect and select a wallet account to sign the transaction.'
-          });
-
-          return;
-        }
-
-        if (!this.selectedSourceChain) {
-          this.isProcessing = false;
-          this.processingStatus = {
-            message: "No source chain selected.",
-            details: "Please select a source chain to sign the transaction.",
-            status: "Error"
-          };
-
-          return;
-        }
-
         if (this.isMobileDevice) {
           localStorage.setItem('ledger_id', ledger_id);
 
-          this.isProcessing = false;
-          this.processingStatus = {
-            message: "Transaction ready for signing.",
-            details: "Opening your wallet to sign the transaction. Please sign and approve the transaction in your wallet.",
-            status: "In-Progress"
-          };
-          this.showProcessingDialog = false;
+          const convertedAddress = this.polkadotJsService.encodePublicAddressByChainFormat(
+            this.currentPolkadotWalletAccount!.address,
+            this.selectedSourceChain!.address_prefix
+          );
+          const convertedHex = await this.polkadotJsService.normalizeToExtrinsicHex(extrinsicHex, this.selectedSourceChain!);
 
-          const convertedHex = await this.polkadotJsService.normalizeToExtrinsicHex(extrinsicHex, this.selectedSourceChain);
+          this.showXteriumSignDialog = true;
 
           const signingType = "signTransactionHex";
           const payload = {
-            address: this.selectedPolkadotWalletAccount.address,
-            genesis_hash: this.selectedSourceChain.genesis_hash,
+            address: convertedAddress,
+            genesis_hash: this.selectedSourceChain!.genesis_hash,
             transaction_hex: convertedHex
           }
           const callbackUrl = window.location.origin + '/dapp/cross-chain-sign-transaction';
 
-          window.location.href = 'https://deeplink.xterium.app/web3/sign-transaction?signingType=' + encodeURIComponent(signingType) + '&payload=' + encodeURIComponent(JSON.stringify(payload)) + '&callbackUrl=' + encodeURIComponent(callbackUrl);
+          this.xteriumSignUrl = 'https://deeplink.xterium.app/web3/sign-transaction?signingType=' + encodeURIComponent(signingType) + '&payload=' + encodeURIComponent(JSON.stringify(payload)) + '&callbackUrl=' + encodeURIComponent(callbackUrl);
+
+          this.isProcessing = false;
+
+          this.showProcessingDialog = false;
+          this.processingStatus = {
+            message: "",
+            details: "",
+            status: ""
+          };
+
           return;
         }
 
         const signedExtrinsic = await this.polkadotJsService.signTransaction(
-          this.selectedPolkadotWalletAccount,
-          this.selectedSourceChain,
+          this.currentPolkadotWalletAccount!,
+          this.selectedSourceChain!,
           extrinsicHex
         );
 
@@ -371,13 +343,19 @@ export class CrossChain {
     this.teleport();
   }
 
+  openXteriumSignWallet(): void {
+    if (this.xteriumSignUrl) {
+      window.location.href = this.xteriumSignUrl;
+    }
+  }
+
   ngOnInit() {
     this.menuItems = [
       { label: 'Teleport / Cross-Chain', routerLink: "" },
       { label: 'Staking', routerLink: "" }
     ];
 
-    this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
+    this.currentPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
     this.getSourceChains();
   }
 }

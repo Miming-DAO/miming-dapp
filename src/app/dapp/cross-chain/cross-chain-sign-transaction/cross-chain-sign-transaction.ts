@@ -25,6 +25,13 @@ import { CrossChainHeader } from '../cross-chain-header/cross-chain-header';
 })
 export class CrossChainSignTransaction {
 
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private polkadotApiService: PolkadotApiService,
+    private messageService: MessageService
+  ) { }
+
   signedTransactionHex: string = '';
   isProcessing: boolean = false;
   showSubmitButton: boolean = true;
@@ -34,13 +41,6 @@ export class CrossChainSignTransaction {
     details: string;
     status: string;
   } = { message: '', details: '', status: '' };
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private polkadotApiService: PolkadotApiService,
-    private messageService: MessageService
-  ) { }
 
   loadSignedTransaction(): void {
     this.route.queryParams.subscribe(params => {
@@ -106,11 +106,6 @@ export class CrossChainSignTransaction {
             details: "Your teleport transaction has been submitted.",
             status: "Completed"
           };
-
-          // Navigate back to cross-chain page after 3 seconds
-          setTimeout(() => {
-            this.router.navigate(['/dapp/cross-chain']);
-          }, 3000);
         }
       },
       error: executionError => {
@@ -124,6 +119,10 @@ export class CrossChainSignTransaction {
         };
       }
     });
+  }
+
+  goToTeleport(): void {
+    this.router.navigate(['/dapp/cross-chain']);
   }
 
   retry(): void {

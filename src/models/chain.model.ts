@@ -5,4 +5,5 @@ export class Chain {
   type: string = '';
   rpc_url: string = '';
   genesis_hash: string = '';
+  address_prefix: number = 0;
 }

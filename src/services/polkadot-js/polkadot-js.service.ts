@@ -37,6 +37,10 @@ export class PolkadotJsService {
     return accounts
   }
 
+  encodePublicAddressByChainFormat(publicKey: string, ss58Format: number): string {
+    return encodeAddress(publicKey, ss58Format);
+  }
+
   async signTransaction(account: InjectedAccountWithMeta, chain: Chain, transactionHex: string): Promise<string> {
     const injector = await web3FromSource(account.meta.source);
     if (!injector.signer) {
@@ -60,7 +64,7 @@ export class PolkadotJsService {
     }
   }
 
-  async normalizeToExtrinsicHex(transactionHex: string, chain: Chain): Promise<string> {
+  async normalizeToExtrinsicHex(transactionHex: string, chain: Chain): Promise<any> {
     const wsProvider = new WsProvider(chain.rpc_url);
     const api = await ApiPromise.create({ provider: wsProvider });
 
@@ -69,7 +73,7 @@ export class PolkadotJsService {
       const call = api.registry.createType('Call', txBytes);
       const tx = api.tx(call);
 
-      return tx.toHex();
+      return tx;
     } catch (error) {
       throw error;
     } finally {

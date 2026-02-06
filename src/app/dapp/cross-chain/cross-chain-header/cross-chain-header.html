@@ -15,7 +15,7 @@
     </div>
 
     <div class="flex items-center gap-2 h-11">
-      @if (!selectedPolkadotWalletAccount) {
+      @if (!connectedPolkadotWalletAccount) {
       <button (click)="connectWallet()"
         class="px-6 py-2.5 h-11 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold shadow-sm shadow-purple-500/20 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-purple-500/30 flex items-center gap-2 cursor-pointer">
         <i class="pi pi-wallet text-base"></i>
@@ -23,7 +23,7 @@
       </button>
       }
 
-      @if (selectedPolkadotWalletAccount) {
+      @if (connectedPolkadotWalletAccount) {
       <div
         class="group relative flex items-center gap-3 px-5 py-2 h-14 rounded-full bg-gradient-to-r from-slate-800/80 via-slate-700/80 to-slate-800/80 hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 transition-all duration-300 border border-slate-600/50 hover:border-purple-500/50 cursor-pointer shadow-lg shadow-slate-900/50 hover:shadow-purple-500/20 hover:scale-105"
         (click)="getPolkadotWalletAccount()">
@@ -31,7 +31,7 @@
           <div
             class="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300">
           </div>
-          <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount.address"
+          <app-polkadot-identicon-util [address]="connectedPolkadotWalletAccount.address"
             [size]="28"></app-polkadot-identicon-util>
           <span
             class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-slate-900 rounded-full animate-pulse shadow-sm shadow-green-400/50"></span>
@@ -40,12 +40,12 @@
         <div class="flex flex-col min-w-0">
           <span
             class="text-sm font-bold text-white group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:via-fuchsia-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 leading-tight">
-            {{ selectedPolkadotWalletAccount.meta.name }}
+            {{ connectedPolkadotWalletAccount.meta.name }}
           </span>
           <span
             class="hidden lg:block text-xs font-medium text-slate-400 group-hover:text-purple-300 transition-colors duration-300 leading-tight">
-            {{ selectedPolkadotWalletAccount.address.slice(0, 6) }}...{{
-            selectedPolkadotWalletAccount.address.slice(-4) }}
+            {{ connectedPolkadotWalletAccount.address.slice(0, 6) }}...{{
+            connectedPolkadotWalletAccount.address.slice(-4) }}
           </span>
         </div>
 
@@ -59,7 +59,7 @@
 
 <!-- Available Wallets Dialog -->
 <p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true"
-  [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
+  [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
@@ -108,7 +108,7 @@
 
 <!-- Polkadot Wallet Accounts Dialog -->
 <p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true"
-  [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
+  [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
@@ -161,7 +161,7 @@
 
 <!-- Polkadot Wallet Account Details Dialog -->
 <p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true"
-  [style]="{ 'width': '30rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
+  [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div

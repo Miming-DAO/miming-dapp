@@ -10,7 +10,7 @@ import { DialogModule as PDialogModule } from 'primeng/dialog';
 import { TooltipModule as PTooltipModule } from 'primeng/tooltip';
 
 import { PolkadotIdenticonUtil } from '../../shared/polkadot-identicon-util/polkadot-identicon-util';
-import { DeviceDetector } from '../../../../services/device-detector/device-detector';
+import { DeviceDetectorService } from '../../../../services/device-detector/device-detector.service';
 import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.service';
 
 @Component({
@@ -32,17 +32,18 @@ export class CrossChainHeader {
 
   constructor(
     private router: Router,
-    private deviceDetector: DeviceDetector,
+    private deviceDetectorService: DeviceDetectorService,
     private polkadotJsService: PolkadotJsService,
     private messageService: MessageService
   ) {
-    this.isMobileDevice = this.deviceDetector.isMobile();
+    this.isMobileDevice = this.deviceDetectorService.isMobile();
   }
 
   showAvailableWalletsDialog: boolean = false;
   showPolkadotWalletAccountsDialog: boolean = false;
   polkadotWalletAccounts: PolkadotWalletAccount[] = [];
   selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
+  connectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
   showPolkadotWalletAccountDialog: boolean = false;
 
   isProcessing: boolean = false;
@@ -116,6 +117,7 @@ export class CrossChainHeader {
 
   connectPolkadotWalletAccount(): void {
     this.isProcessing = true;
+    this.connectedPolkadotWalletAccount = this.selectedPolkadotWalletAccount;
 
     setTimeout(() => {
       localStorage.setItem('wallet_address', JSON.stringify(this.selectedPolkadotWalletAccount));
@@ -135,6 +137,7 @@ export class CrossChainHeader {
 
   logoutPolkadotWalletAccount(): void {
     this.isProcessing = true;
+    this.connectedPolkadotWalletAccount = undefined;
 
     setTimeout(() => {
       localStorage.clear();
@@ -174,6 +177,6 @@ export class CrossChainHeader {
   }
 
   ngOnInit() {
-    this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
+    this.connectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
   }
 }
