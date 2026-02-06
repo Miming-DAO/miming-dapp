@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 relative overflow-hidden">
+<div class="h-screen bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 relative overflow-hidden">
   <!-- Animated Background Elements -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -9,21 +9,21 @@
       style="animation-delay: 2s;"></div>
   </div>
 
-  <div class="relative z-10 min-h-screen">
+  <div class="relative z-10 h-screen flex flex-col">
     <app-p2p-user-header
       [mobileMenuOpen]="mobileMenuOpen()"
       [walletAddress]="walletAddress()"
       (mobileMenuOpenOnClick)="mobileMenuOpenOnClick($event)">
     </app-p2p-user-header>
 
-    <div class="flex">
+    <div class="flex flex-1 overflow-hidden">
       <app-p2p-user-sidebar
         [mobileMenuOpen]="mobileMenuOpen()"
         [walletAddress]="walletAddress()"
         (mobileMenuClose)="mobileMenuOpen.set(false)">
       </app-p2p-user-sidebar>
 
-      <div class="flex-1 p-4 md:p-6">
+      <div class="flex-1 p-4 md:p-6 overflow-y-auto">
       @if (activeMenu() === 'orders') {
         <app-p2p-user-orders
           [walletAddress]="walletAddress()"

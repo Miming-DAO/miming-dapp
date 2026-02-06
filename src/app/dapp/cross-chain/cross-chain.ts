@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/extension-inject/types';
 
@@ -28,13 +29,14 @@ import { Token } from '../../../models/token.model';
 import { PolkadotXcm } from '../../../models/polkadot-xcm.model';
 import { ExecuteTransaction } from '../../../models/execute-transactions.model';
 
+import { DeviceDetector } from '../../../services/device-detector/device-detector';
 import { ChainsService } from '../../../services/chains/chains.service';
 import { TokensService } from '../../../services/tokens/tokens.service';
 import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.service';
 import { PolkadotXcmService } from '../../../services/polkadot-xcm/polkadot-xcm.service';
 import { PolkadotApiService } from '../../../services/polkadot-api/polkadot-api.service';
 
-import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkadot-identicon-util';
+import { CrossChainHeader } from './cross-chain-header/cross-chain-header';
 
 declare global {
   interface Window {
@@ -64,39 +66,35 @@ declare global {
     PConfirmDialog,
     PDialogModule,
     PTooltipModule,
-    PolkadotIdenticonUtil
+    CrossChainHeader
   ],
   templateUrl: './cross-chain.html',
   styleUrl: './cross-chain.css',
   providers: [MessageService, ConfirmationService],
 })
 export class CrossChain {
-  constructor(
-    private polkadotJsService: PolkadotJsService,
 
+  isMobileDevice: boolean = false;
+
+  constructor(
+    private route: ActivatedRoute,
+    private deviceDetector: DeviceDetector,
+    private polkadotJsService: PolkadotJsService,
     private chainsService: ChainsService,
     private tokenService: TokensService,
-
     private polkadotApiService: PolkadotApiService,
     private polkadotXcmService: PolkadotXcmService,
-
     private messageService: MessageService
-  ) { }
+  ) {
+    this.isMobileDevice = this.deviceDetector.isMobile();
+  }
 
   menuItems: MenuItem[] | undefined;
 
-  photoUrl: string = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default';
-  walletAddress: string = '';
-
-  showAvailableWalletsDialog: boolean = false;
-  showPolkadotWalletAccountsDialog: boolean = false;
-  polkadotWalletAccounts: PolkadotWalletAccount[] = [];
+  showInitializingDialog: boolean = true;
   selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
-  showPolkadotWalletAccountDialog: boolean = false;
 
   isProcessing: boolean = false;
-
-  showInitializingDialog: boolean = true;
 
   showProcessingDialog: boolean = false;
   processingStatus: {
@@ -126,111 +124,6 @@ export class CrossChain {
     return undefined;
   }
 
-  connectWallet(): void {
-    this.showAvailableWalletsDialog = true;
-  }
-
-  async connectPolkadotJsWallet() {
-    try {
-      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('polkadot-js');
-      this.polkadotWalletAccounts = results;
-      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
-
-      this.showPolkadotWalletAccountsDialog = true;
-    } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to connect: ' + (error as Error).message
-      });
-    }
-  }
-
-  async connectTalismanWallet() {
-    try {
-      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('talisman');
-      this.polkadotWalletAccounts = results;
-      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
-
-      this.showPolkadotWalletAccountsDialog = true;
-    } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to connect: ' + (error as Error).message
-      });
-    }
-  }
-
-  async connectXteriumWallet() {
-    try {
-      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('xterium');
-      this.polkadotWalletAccounts = results;
-      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
-
-      this.showPolkadotWalletAccountsDialog = true;
-    } catch (error) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to connect: ' + (error as Error).message
-      });
-    }
-  }
-
-  connectPolkadotWalletAccount(): void {
-    this.isProcessing = true;
-
-    setTimeout(() => {
-      localStorage.setItem('wallet_address', JSON.stringify(this.selectedPolkadotWalletAccount));
-
-      this.showAvailableWalletsDialog = false;
-      this.showPolkadotWalletAccountsDialog = false;
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Connected',
-        detail: 'Wallet connected successfully'
-      });
-
-      this.isProcessing = false;
-    }, 500);
-  }
-
-  logoutPolkadotWalletAccount(): void {
-    this.isProcessing = true;
-
-    setTimeout(() => {
-      localStorage.clear();
-      this.showPolkadotWalletAccountDialog = false;
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Disconnected',
-        detail: 'Wallet disconnected successfully'
-      });
-
-      this.isProcessing = false;
-      location.reload();
-    }, 500);
-  }
-
-  getPolkadotWalletAccount(): void {
-    this.showPolkadotWalletAccountDialog = true;
-  }
-
-  copyAddressToClipboard(address?: string): void {
-    if (!address) return;
-    navigator.clipboard.writeText(address).then(() => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Copied',
-        detail: 'Address copied to clipboard'
-      });
-    });
-  }
-
-
   getSourceChains(): void {
     this.chainsService.getChainsByNetworkId(1).subscribe({
       next: (chains: Chain[]) => {
@@ -259,13 +152,9 @@ export class CrossChain {
     if (this.selectedSourceChain) {
       this.tokenService.getTokensByChainId(this.selectedSourceChain.id).subscribe({
         next: (sourceChainTokens: Token[]) => {
-          console.log('Source Chain Tokens:', sourceChainTokens);
-
           if (this.selectedTargetChain) {
             this.tokenService.getTokensByChainId(this.selectedTargetChain.id).subscribe({
               next: (targetChainTokens: Token[]) => {
-                console.log('Target Chain Tokens:', targetChainTokens);
-
                 const targetSymbols = new Set(targetChainTokens.map(token => token.symbol));
                 this.tokens = sourceChainTokens.filter(token => targetSymbols.has(token.symbol));
                 this.selectedToken = this.tokens[0];
@@ -322,6 +211,7 @@ export class CrossChain {
       return false;
     }
 
+    this.selectedPolkadotWalletAccount = this.getCurrentPolkadotWalletAccount();
     if (!this.selectedPolkadotWalletAccount) {
       this.messageService.add({
         severity: 'error',
@@ -394,6 +284,29 @@ export class CrossChain {
             status: "Error"
           };
 
+          return;
+        }
+
+        if (this.isMobileDevice) {
+          localStorage.setItem('ledger_id', ledger_id);
+
+          this.isProcessing = false;
+          this.processingStatus = {
+            message: "Transaction ready for signing.",
+            details: "Opening your wallet to sign the transaction. Please sign and approve the transaction in your wallet.",
+            status: "In-Progress"
+          };
+          this.showProcessingDialog = false;
+
+          const signingType = "signTransactionHex";
+          const payload = {
+            address: this.selectedPolkadotWalletAccount.address,
+            genesis_hash: this.selectedSourceChain.genesis_hash,
+            transaction_hex: extrinsicHex
+          }
+          const callbackUrl = window.location.origin + '/dapp/cross-chain-sign-transaction';
+
+          window.location.href = 'https://deeplink.xterium.app/web3/sign-transaction?signingType=' + encodeURIComponent(signingType) + '&payload=' + encodeURIComponent(JSON.stringify(payload)) + '&callbackUrl=' + encodeURIComponent(callbackUrl);
           return;
         }
 
