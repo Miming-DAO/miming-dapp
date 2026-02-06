@@ -34,11 +34,11 @@ export class P2pOrders {
     private messageService: MessageService
   ) { }
 
-  showOrderChatDialog = signal(false);
-  isLoading = signal(false);
+  showOrderChatDialog: boolean = false;
+  isLoading: boolean = false;
 
   selectedOrder: P2pOrder | null = null;
-  chatMessage = signal('');
+  chatMessage: string = '';
   chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
 
   orders: P2pOrder[] = [];
@@ -48,12 +48,12 @@ export class P2pOrders {
   }
 
   loadOrders(): void {
-    this.isLoading.set(true);
+    this.isLoading = true;
 
     this.p2pOrdersService.getOrdersByAuthUser().subscribe({
       next: (orders: P2pOrder[]) => {
         this.orders = orders;
-        this.isLoading.set(false);
+        this.isLoading = false;
       },
       error: (error: any) => {
         this.messageService.add({
@@ -61,14 +61,14 @@ export class P2pOrders {
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load orders.'
         });
-        this.isLoading.set(false);
+        this.isLoading = false;
       }
     });
   }
 
   openOrderChat(order: P2pOrder) {
     this.selectedOrder = order;
-    this.showOrderChatDialog.set(true);
+    this.showOrderChatDialog = true;
     // load placeholder chat messages (use available order fields)
     this.chatMessages = [
       { sender: 'merchant', senderName: order.wallet_address || 'User', message: `Hello! Please proceed with payment for ${order.order_number}.`, timestamp: new Date(Date.now() - 3600000).toISOString() },
@@ -77,17 +77,17 @@ export class P2pOrders {
   }
 
   closeOrderChat() {
-    this.showOrderChatDialog.set(false);
+    this.showOrderChatDialog = false;
     this.selectedOrder = null;
     this.chatMessages = [];
-    this.chatMessage.set('');
+    this.chatMessage = '';
   }
 
   sendChatMessage() {
-    const msg = this.chatMessage();
+    const msg = this.chatMessage;
     if (msg && msg.trim()) {
       this.chatMessages.push({ sender: 'user', senderName: 'You', message: msg, timestamp: new Date().toISOString() });
-      this.chatMessage.set('');
+      this.chatMessage = '';
     }
   }
 

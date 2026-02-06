@@ -204,102 +204,107 @@
     </div>
   </ng-template>
 
-  @if (selectedOffer) {
-  <form class="space-y-6" autocomplete="off">
-    <!-- Ad Summary -->
-    <div
-      [class]="activeTab === 'buy' ? 'bg-gradient-to-br from-green-900/20 via-emerald-900/10 to-green-900/20 border-2 border-green-500/30' : 'bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30'"
-      class="p-6 rounded-3xl shadow-lg">
-      <div class="flex items-center gap-2 mb-3">
-        <div
-          [class]="activeTab === 'buy' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-purple-500 to-pink-500'"
-          class="w-8 h-8 rounded-full flex items-center justify-center">
-          <i class="pi pi-chart-line text-white text-sm"></i>
-        </div>
-        <label class="text-sm font-semibold text-white">Ad Summary</label>
-      </div>
-      <div class="grid grid-cols-2 gap-4 text-sm">
-        <div class="space-y-1">
-          <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Price
+  <div class="py-4">
+    @if (selectedOffer) {
+    <form class="space-y-6" autocomplete="off">
+      <!-- Ad Summary -->
+      <div
+        [class]="activeTab === 'buy' ? 'bg-gradient-to-br from-green-900/20 via-emerald-900/10 to-green-900/20 border-2 border-green-500/30' : 'bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30'"
+        class="p-6 rounded-3xl shadow-lg">
+        <div class="flex items-center gap-2 mb-3">
+          <div
+            [class]="activeTab === 'buy' ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-purple-500 to-pink-500'"
+            class="w-8 h-8 rounded-full flex items-center justify-center">
+            <i class="pi pi-chart-line text-white text-sm"></i>
           </div>
-          <div class="font-bold text-yellow-400 text-lg">${{ selectedOffer.price }}</div>
+          <label class="text-sm font-semibold text-white">Ad Summary</label>
         </div>
-        <div class="space-y-1">
-          <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Available
-          </div>
-          <div class="font-semibold text-white">{{ selectedOffer.available }} {{ selectedOffer.asset }}</div>
-        </div>
-        <div class="space-y-1">
-          <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Min Limit
-          </div>
-          <div class="font-semibold text-white">${{ selectedOffer.minLimit }}</div>
-        </div>
-        <div class="space-y-1">
-          <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Max Limit
-          </div>
-          <div class="font-semibold text-white">${{ selectedOffer.maxLimit }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Amount and Quantity Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-      <!-- Amount Input -->
-      <div>
-        <label class="text-xs text-slate-400 mb-2 block">
-          Amount ({{ activeTab === 'buy' ? 'USD' : 'USDT' }}) <span class="text-red-400">*</span>
-        </label>
-        <p-inputnumber class="w-full" [(ngModel)]="orderAmount" (ngModelChange)="calculateQuantity()" name="amount"
-          inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-3 text-right"
-          style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" mode="decimal"
-          [minFractionDigits]="2" [maxFractionDigits]="2"
-          [placeholder]="'Enter ' + (activeTab === 'buy' ? 'USD' : 'USDT') + ' amount'"
-          [min]="activeTab === 'buy' ? selectedOffer.minLimit : 0"
-          [max]="activeTab === 'buy' ? selectedOffer.maxLimit : selectedOffer.available" />
-        <div class="text-xs text-slate-400 mt-1">
-          @if (activeTab === 'buy') {
-          Min: ${{ selectedOffer.minLimit }} - Max: ${{ selectedOffer.maxLimit }}
-          } @else {
-          Max: {{ selectedOffer.available }} USDT
-          }
-        </div>
-      </div>
-
-      <!-- Quantity Display -->
-      <div>
-        <label class="text-xs text-slate-400 mb-2 block">
-          Quantity ({{ activeTab === 'buy' ? 'USDT' : 'USD' }})
-        </label>
-        <div class="px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-full text-white text-right"
-          style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);">
-          <div class="flex items-center justify-between">
-            <span>{{ orderQuantity | number:'1.2-6' }} {{ activeTab === 'buy' ? 'USDT' : 'USD' }}</span>
-            <i class="pi pi-arrow-right text-purple-400"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Type Selection -->
-    <div>
-      <label class="text-xs text-slate-400 mb-2 block">Payment Method <span class="text-red-400">*</span></label>
-      <p-select [options]="selectedAdPaymentTypes" [(ngModel)]="selectedPaymentTypeId" name="paymentType"
-        optionLabel="p2p_payment_type.name" optionValue="p2p_payment_type_id" placeholder="Select payment method"
-        class="w-full" size="large" styleClass="w-full rounded-full"
-        [style]="{ 'border-radius': '9999px', 'background-color': 'oklch(20.8% 0.042 265.755)' }">
-        <ng-template let-paymentType #item>
-          <div class="flex items-center gap-3 py-2 px-1">
-            <div
-              class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <i class="pi pi-credit-card text-white text-sm"></i>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div class="space-y-1">
+            <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Price
             </div>
-            <span class="font-medium text-white">{{ paymentType.p2p_payment_type?.name }}</span>
+            <div class="font-bold text-yellow-400 text-lg">${{ selectedOffer.price }}</div>
           </div>
-        </ng-template>
-      </p-select>
-    </div>
-  </form>
-  }
+          <div class="space-y-1">
+            <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">
+              Available
+            </div>
+            <div class="font-semibold text-white">{{ selectedOffer.available }} {{ selectedOffer.asset }}</div>
+          </div>
+          <div class="space-y-1">
+            <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Min
+              Limit
+            </div>
+            <div class="font-semibold text-white">${{ selectedOffer.minLimit }}</div>
+          </div>
+          <div class="space-y-1">
+            <div [class]="activeTab === 'buy' ? 'text-green-400' : 'text-slate-400'" class="text-xs font-medium">Max
+              Limit
+            </div>
+            <div class="font-semibold text-white">${{ selectedOffer.maxLimit }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amount and Quantity Row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <!-- Amount Input -->
+        <div>
+          <label class="text-xs text-slate-400 mb-2 block">
+            Amount ({{ activeTab === 'buy' ? 'USD' : 'USDT' }}) <span class="text-red-400">*</span>
+          </label>
+          <p-inputnumber class="w-full" [(ngModel)]="orderAmount" (ngModelChange)="calculateQuantity()" name="amount"
+            inputStyleClass="w-full rounded-full border border-gray-100/30 px-4 py-3 text-right"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" mode="decimal"
+            [minFractionDigits]="2" [maxFractionDigits]="2"
+            [placeholder]="'Enter ' + (activeTab === 'buy' ? 'USD' : 'USDT') + ' amount'"
+            [min]="activeTab === 'buy' ? selectedOffer.minLimit : 0"
+            [max]="activeTab === 'buy' ? selectedOffer.maxLimit : selectedOffer.available" />
+          <div class="text-xs text-slate-400 mt-1">
+            @if (activeTab === 'buy') {
+            Min: ${{ selectedOffer.minLimit }} - Max: ${{ selectedOffer.maxLimit }}
+            } @else {
+            Max: {{ selectedOffer.available }} USDT
+            }
+          </div>
+        </div>
+
+        <!-- Quantity Display -->
+        <div>
+          <label class="text-xs text-slate-400 mb-2 block">
+            Quantity ({{ activeTab === 'buy' ? 'USDT' : 'USD' }})
+          </label>
+          <div class="px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-full text-white text-right"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);">
+            <div class="flex items-center justify-between">
+              <span>{{ orderQuantity | number:'1.2-6' }} {{ activeTab === 'buy' ? 'USDT' : 'USD' }}</span>
+              <i class="pi pi-arrow-right text-purple-400"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Type Selection -->
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Payment Method <span class="text-red-400">*</span></label>
+        <p-select [options]="selectedAdPaymentTypes" [(ngModel)]="selectedPaymentTypeId" name="paymentType"
+          optionLabel="p2p_payment_type.name" optionValue="p2p_payment_type_id" placeholder="Select payment method"
+          class="w-full" size="large" styleClass="w-full rounded-full"
+          [style]="{ 'border-radius': '9999px', 'background-color': 'oklch(20.8% 0.042 265.755)' }">
+          <ng-template let-paymentType #item>
+            <div class="flex items-center gap-3 py-2 px-1">
+              <div
+                class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                <i class="pi pi-credit-card text-white text-sm"></i>
+              </div>
+              <span class="font-medium text-white">{{ paymentType.p2p_payment_type?.name }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+    </form>
+    }
+  </div>
 
   <ng-template #footer>
     <div class="flex flex-wrap gap-3 pt-6">

@@ -22,6 +22,7 @@ import { P2pOrdersService } from '../../../../services/p2p-orders/p2p-orders.ser
 
 interface Offer {
   id: string;
+  type: string;
   merchant: string;
   orders: number;
   completion: number;
@@ -150,6 +151,7 @@ export class P2pMarketplace {
 
     return {
       id: ad.id,
+      type: ad.type,
       merchant: ad.name || 'Unknown Merchant',
       orders: ad.total_orders,
       completion: completionRate,
@@ -282,38 +284,14 @@ export class P2pMarketplace {
 
     this.isCreatingOrder.set(true);
 
-    // Get current user info from localStorage
-    const googleUserStr = localStorage.getItem('google_user');
-    if (!googleUserStr) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Authentication Error',
-        detail: 'Please log in to create an order'
-      });
-      this.isCreatingOrder.set(false);
-      return;
-    }
-
-    const userData = JSON.parse(googleUserStr);
-    if (!userData || !userData.id) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Authentication Error',
-        detail: 'Please log in to create an order'
-      });
-      this.isCreatingOrder.set(false);
-      return;
-    }
-
     const createOrderDto: CreateP2pOrderDto = {
       p2p_ad_id: this.selectedOffer.id,
-      order_number: `ORD-${Date.now()}`,
-      user_id: userData.id,
+      order_type: this.selectedOffer.type,
       ordered_price: this.selectedOffer.price,
+      quantity: this.orderQuantity,
       amount: this.orderAmount,
       p2p_payment_type_id: this.selectedPaymentTypeId,
-      wallet_address: userData.wallet_address || '',
-      status: 'pending'
+      wallet_address: '',
     };
 
     this.p2pOrdersService.createOrder(createOrderDto).subscribe({

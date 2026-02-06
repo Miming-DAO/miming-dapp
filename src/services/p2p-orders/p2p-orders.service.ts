@@ -31,7 +31,7 @@ export class P2pOrdersService {
   }
 
   getOrders(): Observable<P2pOrder[]> {
-    return this.http.get<P2pOrder[]>(`${this.apiUrl}${this.apiPrefix}`, {
+    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}`, {
       headers: this.getHeaders()
     });
   }
@@ -49,25 +49,25 @@ export class P2pOrdersService {
   }
 
   createOrder(createDto: CreateP2pOrderDto): Observable<P2pOrder> {
-    return this.http.post<P2pOrder>(`${this.apiUrl}${this.apiPrefix}`, createDto, {
+    return this.http.post<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}`, createDto, {
       headers: this.getHeaders()
     });
   }
 
   getOrderById(id: string): Observable<P2pOrder> {
-    return this.http.get<P2pOrder>(`${this.apiUrl}${this.apiPrefix}/${id}`, {
+    return this.http.get<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
   updateOrder(id: string, updateDto: UpdateP2pOrderDto): Observable<P2pOrder> {
-    return this.http.patch<P2pOrder>(`${this.apiUrl}${this.apiPrefix}/${id}`, updateDto, {
+    return this.http.patch<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
       headers: this.getHeaders()
     });
   }
 
   deleteOrder(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}${this.apiPrefix}/${id}`, {
+    return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }

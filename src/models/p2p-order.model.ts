@@ -6,6 +6,7 @@ export interface P2pOrder {
   p2p_ad_id: string;
   p2p_ad: P2pAd | undefined;
   order_number: string;
+  order_type: string;
   ordered_price: number;
   quantity: number;
   amount: number;
@@ -19,13 +20,12 @@ export interface P2pOrder {
 
 export interface CreateP2pOrderDto {
   p2p_ad_id: string;
-  order_number: string;
-  user_id: string;
+  order_type: string;
   ordered_price: number;
+  quantity: number;
   amount: number;
   p2p_payment_type_id: string;
   wallet_address: string;
-  status: string;
 }
 
 export interface UpdateP2pOrderDto {

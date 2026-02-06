@@ -39,7 +39,7 @@ export class P2p {
 
   mobileMenuOpen: boolean = false;
   isP2PUserLoggedIn: boolean = false;
-  showComingSoonModal = signal(true);
+  showComingSoonModal: boolean = true;
 
   activeMenu: 'marketplace' | 'my-ads' | 'orders' = 'marketplace';
   activeTab: 'buy' | 'sell' = 'buy';

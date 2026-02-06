@@ -6,7 +6,7 @@
     </div>
 
     <div class="space-y-3 md:space-y-4">
-      <ng-container *ngIf="!isLoading(); else loading">
+      <ng-container *ngIf="!isLoading; else loading">
         <div *ngIf="orders.length === 0" class="text-center py-12">
           <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
             <i class="pi pi-inbox text-4xl text-purple-400"></i>
@@ -293,10 +293,10 @@
 
       <div class="p-3 border-t border-slate-700/50">
         <div class="flex gap-2">
-          <input [ngModel]="chatMessage()" (ngModelChange)="chatMessage.set($event)" (keyup.enter)="sendChatMessage()"
+          <input [ngModel]="chatMessage" (ngModelChange)="chatMessage = $event" (keyup.enter)="sendChatMessage()"
             type="text" placeholder="Type your message..."
             class="flex-1 px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all" />
-          <button (click)="sendChatMessage()" [disabled]="!chatMessage().trim()"
+          <button (click)="sendChatMessage()" [disabled]="!chatMessage.trim()"
             class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2">
             <i class="pi pi-send"></i>
           </button>
@@ -306,7 +306,7 @@
   </div>
 
   <ng-template #footer>
-    <div class="flex flex-wrap gap-2 pt-5">
+    <div class="flex flex-wrap gap-2">
       @if (selectedOrder?.status === 'pending') {
       <button
         class="px-4 py-3 rounded-full bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 font-semibold transition-all duration-200 border border-green-500/30 hover:border-green-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
