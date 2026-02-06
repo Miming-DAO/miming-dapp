@@ -298,11 +298,13 @@ export class CrossChain {
           };
           this.showProcessingDialog = false;
 
+          const convertedHex = await this.polkadotJsService.normalizeToExtrinsicHex(extrinsicHex, this.selectedSourceChain);
+
           const signingType = "signTransactionHex";
           const payload = {
             address: this.selectedPolkadotWalletAccount.address,
             genesis_hash: this.selectedSourceChain.genesis_hash,
-            transaction_hex: extrinsicHex
+            transaction_hex: convertedHex
           }
           const callbackUrl = window.location.origin + '/dapp/cross-chain-sign-transaction';
 

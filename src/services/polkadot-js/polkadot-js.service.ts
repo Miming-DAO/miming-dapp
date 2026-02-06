@@ -60,6 +60,23 @@ export class PolkadotJsService {
     }
   }
 
+  async normalizeToExtrinsicHex(transactionHex: string, chain: Chain): Promise<string> {
+    const wsProvider = new WsProvider(chain.rpc_url);
+    const api = await ApiPromise.create({ provider: wsProvider });
+
+    try {
+      const txBytes = hexToU8a(transactionHex);
+      const call = api.registry.createType('Call', txBytes);
+      const tx = api.tx(call);
+
+      return tx.toHex();
+    } catch (error) {
+      throw error;
+    } finally {
+      await wsProvider.disconnect();
+    }
+  }
+
   generateIdenticon(address: string, size = 32): string {
     const encoded = encodeAddress(address, 0);
     const circles = polkadotIcon(encoded, { isAlternative: false });

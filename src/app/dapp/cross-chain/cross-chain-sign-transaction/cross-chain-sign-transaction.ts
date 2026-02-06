@@ -84,6 +84,7 @@ export class CrossChainSignTransaction {
     const ledger_id = localStorage.getItem('ledger_id') || '';
 
     this.showSubmitButton = false;
+
     this.isProcessing = true;
     this.processingStatus = {
       message: "Submitting transaction...",
