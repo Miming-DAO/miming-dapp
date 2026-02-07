@@ -21,25 +21,6 @@
           <div class="text-xs opacity-70">Browse offers</div>
         </div>
       </button>
-    </div>
-
-    <!-- Merchant Tools -->
-    <div class="space-y-2">
-      <div class="text-xs text-slate-500 uppercase tracking-wider px-2 mb-2 flex items-center gap-2">
-        <i class="pi pi-briefcase text-xs"></i>
-        <span>Merchant Tools</span>
-      </div>
-
-      <button (click)="setActiveMenu('my-ads')" [class.bg-gradient-to-r]="activeMenu === 'my-ads'"
-        [class.from-purple-600]="activeMenu === 'my-ads'" [class.to-pink-600]="activeMenu === 'my-ads'"
-        [class.text-white]="activeMenu === 'my-ads'"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 hover:cursor-pointer hover:bg-slate-800/50 text-slate-300 hover:text-white group">
-        <i class="pi pi-megaphone text-lg" [class.text-white]="activeMenu === 'my-ads'"></i>
-        <div class="text-left">
-          <div class="font-semibold">My Ads</div>
-          <div class="text-xs opacity-70">Manage listings</div>
-        </div>
-      </button>
 
       <button (click)="setActiveMenu('orders')" [class.bg-gradient-to-r]="activeMenu === 'orders'"
         [class.from-purple-600]="activeMenu === 'orders'" [class.to-pink-600]="activeMenu === 'orders'"
@@ -49,6 +30,28 @@
         <div class="text-left">
           <div class="font-semibold">Orders</div>
           <div class="text-xs opacity-70">Track transactions</div>
+        </div>
+      </button>
+
+      <button (click)="setActiveMenu('messages')" [class.bg-gradient-to-r]="activeMenu === 'messages'"
+        [class.from-purple-600]="activeMenu === 'messages'" [class.to-pink-600]="activeMenu === 'messages'"
+        [class.text-white]="activeMenu === 'messages'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 hover:cursor-pointer hover:bg-slate-800/50 text-slate-300 hover:text-white group">
+        <i class="pi pi-comments text-lg" [class.text-white]="activeMenu === 'messages'"></i>
+        <div class="text-left">
+          <div class="font-semibold">Messages</div>
+          <div class="text-xs opacity-70">Chat history</div>
+        </div>
+      </button>
+
+      <button (click)="setActiveMenu('my-ads')" [class.bg-gradient-to-r]="activeMenu === 'my-ads'"
+        [class.from-purple-600]="activeMenu === 'my-ads'" [class.to-pink-600]="activeMenu === 'my-ads'"
+        [class.text-white]="activeMenu === 'my-ads'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 hover:cursor-pointer hover:bg-slate-800/50 text-slate-300 hover:text-white group">
+        <i class="pi pi-megaphone text-lg" [class.text-white]="activeMenu === 'my-ads'"></i>
+        <div class="text-left">
+          <div class="font-semibold">My Ads</div>
+          <div class="text-xs opacity-70">Manage listings</div>
         </div>
       </button>
     </div>

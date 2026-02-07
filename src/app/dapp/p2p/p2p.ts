@@ -14,6 +14,7 @@ import { P2pSidebar as P2pSidebarComponent } from './p2p-sidebar/p2p-sidebar';
 import { P2pMarketplace as P2pMarketplaceComponent } from './p2p-marketplace/p2p-marketplace';
 import { P2pMyAds as P2pMyAdsComponent } from './p2p-my-ads/p2p-my-ads';
 import { P2pOrders as P2pOrdersComponent } from './p2p-orders/p2p-orders';
+import { P2pMessages as P2pMessagesComponent } from './p2p-messages/p2p-messages';
 
 @Component({
   selector: 'app-p2p',
@@ -30,6 +31,7 @@ import { P2pOrders as P2pOrdersComponent } from './p2p-orders/p2p-orders';
     P2pMarketplaceComponent,
     P2pMyAdsComponent,
     P2pOrdersComponent,
+    P2pMessagesComponent,
   ],
   templateUrl: './p2p.html',
   styleUrl: './p2p.css',
@@ -39,9 +41,9 @@ export class P2p {
 
   mobileMenuOpen: boolean = false;
   isP2PUserLoggedIn: boolean = false;
-  showComingSoonModal: boolean = true;
+  showComingSoonModal: boolean = false;
 
-  activeMenu: 'marketplace' | 'my-ads' | 'orders' = 'marketplace';
+  activeMenu: 'marketplace' | 'my-ads' | 'orders' | 'messages' = 'marketplace';
   activeTab: 'buy' | 'sell' = 'buy';
 
   ngOnInit() {

@@ -14,16 +14,16 @@ import { Router } from '@angular/router';
 })
 export class P2pSidebar {
   @Input() mobileMenuOpen: boolean = false;
-  @Output() activeMenuOnClick = new EventEmitter<'marketplace' | 'my-ads' | 'orders'>();
+  @Output() activeMenuOnClick = new EventEmitter<'marketplace' | 'my-ads' | 'orders' | 'messages'>();
 
   constructor(
     private router: Router
   ) { }
 
-  activeMenu: 'marketplace' | 'my-ads' | 'orders' = 'marketplace';
+  activeMenu: 'marketplace' | 'my-ads' | 'orders' | 'messages' = 'marketplace';
   isAdmin: boolean = true;
 
-  setActiveMenu(menu: 'marketplace' | 'my-ads' | 'orders'): void {
+  setActiveMenu(menu: 'marketplace' | 'my-ads' | 'orders' | 'messages'): void {
     this.activeMenu = menu;
     this.activeMenuOnClick.emit(this.activeMenu);
   }
