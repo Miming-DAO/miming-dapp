@@ -33,17 +33,6 @@
         </div>
       </button>
 
-      <button (click)="setActiveMenu('messages')" [class.bg-gradient-to-r]="activeMenu === 'messages'"
-        [class.from-purple-600]="activeMenu === 'messages'" [class.to-pink-600]="activeMenu === 'messages'"
-        [class.text-white]="activeMenu === 'messages'"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 hover:cursor-pointer hover:bg-slate-800/50 text-slate-300 hover:text-white group">
-        <i class="pi pi-comments text-lg" [class.text-white]="activeMenu === 'messages'"></i>
-        <div class="text-left">
-          <div class="font-semibold">Messages</div>
-          <div class="text-xs opacity-70">Chat history</div>
-        </div>
-      </button>
-
       <button (click)="setActiveMenu('my-ads')" [class.bg-gradient-to-r]="activeMenu === 'my-ads'"
         [class.from-purple-600]="activeMenu === 'my-ads'" [class.to-pink-600]="activeMenu === 'my-ads'"
         [class.text-white]="activeMenu === 'my-ads'"
@@ -52,6 +41,17 @@
         <div class="text-left">
           <div class="font-semibold">My Ads</div>
           <div class="text-xs opacity-70">Manage listings</div>
+        </div>
+      </button>
+
+      <button (click)="setActiveMenu('messages')" [class.bg-gradient-to-r]="activeMenu === 'messages'"
+        [class.from-purple-600]="activeMenu === 'messages'" [class.to-pink-600]="activeMenu === 'messages'"
+        [class.text-white]="activeMenu === 'messages'"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 hover:cursor-pointer hover:bg-slate-800/50 text-slate-300 hover:text-white group">
+        <i class="pi pi-comments text-lg" [class.text-white]="activeMenu === 'messages'"></i>
+        <div class="text-left">
+          <div class="font-semibold">Messages</div>
+          <div class="text-xs opacity-70">Chat history</div>
         </div>
       </button>
     </div>
