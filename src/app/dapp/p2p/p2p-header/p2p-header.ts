@@ -67,15 +67,14 @@ export class P2pHeader {
         this.isP2PUserLoggedIn = true;
 
         this.currentUser.set({
-          id: userData.user.userId,
+          id: userData.user._id,
           email: userData.user.email,
-          full_name: `${userData.user.firstName} ${userData.user.lastName}`,
+          full_name: userData.user.full_name,
           username: userData.user.email,
           type: 'User',
           is_disabled: false,
-          photo_url: userData.user.picture,
-          google_account_id: userData.user.providerId,
-          session_id: userData.token
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
         });
       } catch (error) {
         console.error('Failed to parse google_user data:', error);

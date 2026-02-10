@@ -7,7 +7,6 @@ export interface User {
   is_disabled: boolean;
   photo_url: string;
   google_account_id: string;
-  session_id: string;
 }
 
 export interface CreateUserDto {
@@ -19,5 +18,4 @@ export interface CreateUserDto {
   is_disabled: boolean;
   photo_url: string;
   google_account_id: string;
-  session_id: string;
 }

@@ -22,8 +22,8 @@ export class P2pAdsService {
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
-      if (userData.token) {
-        headers = headers.set('Authorization', `Bearer ${userData.token}`);
+      if (userData.accessToken) {
+        headers = headers.set('Authorization', `Bearer ${userData.accessToken}`);
       }
     }
 

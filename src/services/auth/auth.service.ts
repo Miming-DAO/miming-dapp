@@ -27,7 +27,7 @@ export class AuthService {
    * Get Google OAuth URL
    */
   getGoogleAuthUrl(): string {
-    return `${this.apiUrl}${this.apiPrefix}/google`;
+    return `${this.apiUrl}${this.apiPrefix}-google`;
   }
 
   /**
