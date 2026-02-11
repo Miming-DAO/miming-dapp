@@ -12,7 +12,9 @@ export class P2pPaymentTypesService {
   private apiUrl = environment.apiUrl;
   private apiPrefix = 'api/p2p-payment-types';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   private getHeaders(): HttpHeaders {
     const googleUser = localStorage.getItem('google_user');
@@ -22,8 +24,8 @@ export class P2pPaymentTypesService {
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
-      if (userData.token) {
-        headers = headers.set('Authorization', `Bearer ${userData.token}`);
+      if (userData.access_token) {
+        headers = headers.set('Authorization', `Bearer ${userData.access_token}`);
       }
     }
 

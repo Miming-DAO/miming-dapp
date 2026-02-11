@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { P2pAdPaymentTypesService } from './p2p-ad-payment-types.service';
 
-describe('P2pAdPaymentTypes', () => {
+describe('P2pAdPaymentTypesService', () => {
   let service: P2pAdPaymentTypesService;
 
   beforeEach(() => {

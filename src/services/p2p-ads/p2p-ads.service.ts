@@ -12,7 +12,9 @@ export class P2pAdsService {
   private apiUrl = environment.apiUrl;
   private apiPrefix = 'api/p2p-ads';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   private getHeaders(): HttpHeaders {
     const googleUser = localStorage.getItem('google_user');
@@ -22,8 +24,8 @@ export class P2pAdsService {
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
-      if (userData.accessToken) {
-        headers = headers.set('Authorization', `Bearer ${userData.accessToken}`);
+      if (userData.access_token) {
+        headers = headers.set('Authorization', `Bearer ${userData.access_token}`);
       }
     }
 

@@ -8,14 +8,13 @@ import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto, UpdateP2pAdPaymentTypeDto 
 @Injectable({
   providedIn: 'root'
 })
-@Injectable({
-  providedIn: 'root',
-})
 export class P2pAdPaymentTypesService {
   private apiUrl = environment.apiUrl;
   private apiPrefix = 'api/p2p-ad-payment-types';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   private getHeaders(): HttpHeaders {
     const googleUser = localStorage.getItem('google_user');
@@ -25,8 +24,8 @@ export class P2pAdPaymentTypesService {
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
-      if (userData.token) {
-        headers = headers.set('Authorization', `Bearer ${userData.token}`);
+      if (userData.access_token) {
+        headers = headers.set('Authorization', `Bearer ${userData.access_token}`);
       }
     }
 
