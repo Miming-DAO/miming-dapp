@@ -1,0 +1,235 @@
+:host {
+  display: block;
+  height: 100vh;
+
+  --sidebar-bg-image: url('/images/backgrounds/miming-bg.png');
+}
+
+/* primeng - drawer */
+::ng-deep .p-drawer-header {
+  display: none !important;
+  padding: 0 !important;
+}
+
+::ng-deep .p-drawer-content {
+  padding: 0 !important;
+}
+
+/* primeng - select */
+::ng-deep .p-select-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 27, 75, 0.98) 0%,
+    rgba(88, 28, 135, 0.98) 100%
+  ) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25) !important;
+}
+
+::ng-deep .p-select {
+  border-radius: 9999px !important;
+  background-color: oklch(20.8% 0.042 265.755) !important;
+}
+
+::ng-deep .p-select .p-select-label {
+  border-radius: 9999px !important;
+}
+
+::ng-deep .p-select-list {
+  padding: 0.5rem !important;
+}
+
+::ng-deep .p-select-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2) !important;
+  padding: 0.75rem 1rem !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep .p-select-option {
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+  color: rgb(203, 213, 225) !important;
+  transition: all 0.2s !important;
+}
+
+::ng-deep .p-select-option:hover {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .p-select-option.p-select-option-selected {
+  background: linear-gradient(
+    to right,
+    rgba(168, 85, 247, 0.2),
+    rgba(236, 72, 153, 0.2)
+  ) !important;
+  color: white !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+::ng-deep .p-select-option.p-select-option-selected:hover {
+  background: linear-gradient(
+    to right,
+    rgba(168, 85, 247, 0.3),
+    rgba(236, 72, 153, 0.3)
+  ) !important;
+}
+
+/* primeng - input number */
+::ng-deep .p-inputnumber-input {
+  background-color: oklch(20.8% 0.042 265.755) !important;
+  color: white !important;
+  border-radius: 9999px !important;
+  font-size: 20px !important;
+}
+
+/* Coming Soon Modal Styling */
+/* Strong backdrop blur to obscure background */
+::ng-deep .p-dialog-mask {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+::ng-deep .p-dialog {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 27, 75, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  box-shadow:
+    0 25px 50px -12px rgba(139, 92, 246, 0.3),
+    0 0 100px rgba(168, 85, 247, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+::ng-deep .p-dialog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5) 50%, transparent);
+  animation: shimmer 3s infinite;
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+  padding: 1.5rem;
+}
+
+::ng-deep .p-dialog .p-dialog-content {
+  background: transparent;
+  color: #e2e8f0;
+  padding: 0 1.5rem;
+}
+
+::ng-deep .p-dialog .p-dialog-footer {
+  background: transparent;
+  border-top: 1px solid rgba(168, 85, 247, 0.1);
+  padding: 1.5rem;
+}
+
+/* Shimmer animation for border */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Pulse animation for dots with glow */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Float animation for feature cards */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Gradient animation for text */
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Enhanced hover effect for feature cards */
+::ng-deep .p-dialog-content .feature-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+::ng-deep .p-dialog-content .feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, transparent);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+::ng-deep .p-dialog-content .feature-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  box-shadow:
+    0 20px 40px -10px rgba(168, 85, 247, 0.4),
+    0 0 0 1px rgba(168, 85, 247, 0.2),
+    0 0 30px rgba(168, 85, 247, 0.3);
+}
+
+::ng-deep .p-dialog-content .feature-card:hover::before {
+  opacity: 1;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.6), rgba(236, 72, 153, 0.6));
+}
+
+::ng-deep .p-dialog-content .feature-card:hover .feature-icon {
+  transform: scale(1.1) rotate(5deg);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::ng-deep .p-dialog-content .feature-icon {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}

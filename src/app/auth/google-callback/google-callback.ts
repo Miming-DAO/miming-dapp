@@ -25,7 +25,7 @@ export class GoogleCallback implements OnInit {
       } else {
         this.errorMessage = 'No authentication data received';
         setTimeout(() => {
-          this.router.navigate(['/dapp/p2p']);
+          this.router.navigate(['/p2p']);
         }, 2000);
       }
     });
@@ -45,14 +45,14 @@ export class GoogleCallback implements OnInit {
 
       // Redirect to P2P page after a short delay
       setTimeout(() => {
-        this.router.navigate(['/dapp/p2p']);
+        this.router.navigate(['/p2p']);
       }, 1500);
     } catch (error) {
       this.errorMessage = 'Failed to process authentication data';
       console.error('Failed to parse authentication data:', error);
 
       setTimeout(() => {
-        this.router.navigate(['/dapp/p2p']);
+        this.router.navigate(['/p2p']);
       }, 2000);
     }
   }
