@@ -108,7 +108,7 @@ export class Teleport {
   recipientAddress: string = '';
 
   getCurrentPolkadotWalletAccount(): PolkadotWalletAccount | undefined {
-    const storedAccount = localStorage.getItem('wallet_address');
+    const storedAccount = localStorage.getItem('auth_wallet');
     if (storedAccount) {
       return JSON.parse(storedAccount) as PolkadotWalletAccount;
     }

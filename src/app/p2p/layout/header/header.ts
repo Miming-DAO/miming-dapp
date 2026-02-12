@@ -18,10 +18,8 @@ import { ToastModule as PToastModule } from 'primeng/toast';
 import { TooltipModule as PTooltipModule } from 'primeng/tooltip';
 
 import { DeviceDetectorService } from '../../../../services/device-detector/device-detector.service';
-import { AuthService } from '../../../../services/auth/auth.service';
 import { AuthGoogleService } from '../../../../services/auth-google/auth-google.service';
 import { AuthWalletService } from '../../../../services/auth-wallet/auth-wallet.service';
-import { UsersService } from '../../../../services/users/users.service';
 import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.service';
 
 import { User } from '../../../../models/user.model';
@@ -58,10 +56,8 @@ export class Header {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService,
     private authGoogleService: AuthGoogleService,
     private authWalletService: AuthWalletService,
-    private usersService: UsersService,
     private polkadotJsService: PolkadotJsService,
     private deviceDetectorService: DeviceDetectorService,
     private messageService: MessageService
@@ -199,6 +195,7 @@ export class Header {
       }
 
       localStorage.setItem('auth_user', JSON.stringify(verifyResponse));
+      localStorage.setItem('auth_wallet', JSON.stringify(this.selectedPolkadotWalletAccount));
 
       this.isLoggedIn = true;
       this.currentUser = {
@@ -255,7 +252,7 @@ export class Header {
 
     setTimeout(() => {
       localStorage.removeItem('auth_user');
-      localStorage.removeItem('wallet_address');
+      localStorage.removeItem('auth_wallet');
 
       this.showPolkadotWalletAccountDialog = false;
 
@@ -286,7 +283,7 @@ export class Header {
           id: userData.user._id,
           email: userData.user.email,
           full_name: userData.user.full_name,
-          username: userData.user.email,
+          username: userData.user.username,
           type: userData.user.type,
           auth_type: userData.user.auth_type,
           is_disabled: false,
