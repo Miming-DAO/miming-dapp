@@ -21,6 +21,7 @@ import { Header } from '../layout/header/header';
   ],
   templateUrl: './sign-transaction.html',
   styleUrl: './sign-transaction.css',
+  providers: [MessageService],
 })
 export class SignTransaction {
 

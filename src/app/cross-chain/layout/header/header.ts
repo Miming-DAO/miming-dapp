@@ -24,6 +24,7 @@ import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.
   ],
   templateUrl: './header.html',
   styleUrl: './header.css',
+  providers: [MessageService],
 })
 export class Header {
 
@@ -116,9 +117,9 @@ export class Header {
 
   connectPolkadotWalletAccount(): void {
     this.isProcessing = true;
-    this.connectedPolkadotWalletAccount = this.selectedPolkadotWalletAccount;
 
     setTimeout(() => {
+      this.connectedPolkadotWalletAccount = this.selectedPolkadotWalletAccount;
       localStorage.setItem('wallet_address', JSON.stringify(this.selectedPolkadotWalletAccount));
 
       this.showAvailableWalletsDialog = false;
@@ -136,11 +137,11 @@ export class Header {
 
   logoutPolkadotWalletAccount(): void {
     this.isProcessing = true;
-    this.connectedPolkadotWalletAccount = undefined;
 
     setTimeout(() => {
       localStorage.clear();
       this.showPolkadotWalletAccountDialog = false;
+      this.connectedPolkadotWalletAccount = undefined;
 
       this.messageService.add({
         severity: 'success',

@@ -20,6 +20,7 @@ import { Header } from '../layout/header/header';
   ],
   templateUrl: './xterium-accounts.html',
   styleUrl: './xterium-accounts.css',
+  providers: [MessageService],
 })
 export class XteriumAccounts {
 
