@@ -7,7 +7,7 @@ import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/exte
 import { MessageService } from 'primeng/api';
 import { ToastModule as PToastModule } from 'primeng/toast';
 
-import { PolkadotIdenticonUtil } from '../shared/polkadot-identicon-util/polkadot-identicon-util';
+import { PolkadotIdenticonUtil } from './../../shared/polkadot-identicon-util/polkadot-identicon-util';
 import { Header } from '../layout/header/header';
 
 @Component({

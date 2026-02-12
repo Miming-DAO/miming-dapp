@@ -10,6 +10,7 @@ import { ButtonModule as PButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
 
 import { AuthService } from '../../../../services/auth/auth.service';
+import { AuthGoogleService } from '../../../../services/auth-google/auth-google.service';
 import { UsersService } from '../../../../services/users/users.service';
 import { User } from '../../../../models/user.model';
 
@@ -48,6 +49,7 @@ export class Header {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
+    private authGoogleService: AuthGoogleService,
     private usersService: UsersService,
   ) { }
 
@@ -147,7 +149,7 @@ export class Header {
 
   handleGoogleLogin(): void {
     // Directly redirect to Google OAuth endpoint
-    window.location.href = this.authService.getGoogleAuthUrl();
+    window.location.href = this.authGoogleService.getGoogleAuthUrl();
   }
 
   logoutP2PUser(): void {

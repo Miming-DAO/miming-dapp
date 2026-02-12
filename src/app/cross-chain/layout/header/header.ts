@@ -9,7 +9,7 @@ import { ToastModule as PToastModule } from 'primeng/toast';
 import { DialogModule as PDialogModule } from 'primeng/dialog';
 import { TooltipModule as PTooltipModule } from 'primeng/tooltip';
 
-import { PolkadotIdenticonUtil } from '../../shared/polkadot-identicon-util/polkadot-identicon-util';
+import { PolkadotIdenticonUtil } from '../../../shared/polkadot-identicon-util/polkadot-identicon-util';
 import { DeviceDetectorService } from '../../../../services/device-detector/device-detector.service';
 import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.service';
 

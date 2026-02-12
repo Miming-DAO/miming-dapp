@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.service';
+import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.service';
 
 @Component({
   selector: 'app-polkadot-identicon-util',

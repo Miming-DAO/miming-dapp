@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { LoginDto, TokenResponse } from '../../models/auth.model';
+import { Login, TokenResponse } from '../../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,17 +16,7 @@ export class AuthService {
     private http: HttpClient
   ) { }
 
-  login(loginDto: LoginDto): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.apiUrl}${this.apiPrefix}/token`, loginDto);
-  }
-
-  getGoogleAuthUrl(): string {
-    return `${this.apiUrl}${this.apiPrefix}-google`;
-  }
-
-  handleGoogleCallback(code: string): Observable<TokenResponse> {
-    return this.http.get<TokenResponse>(`${this.apiUrl}${this.apiPrefix}/google/callback`, {
-      params: { code }
-    });
+  login(login: Login): Observable<TokenResponse> {
+    return this.http.post<TokenResponse>(`${this.apiUrl}${this.apiPrefix}/token`, login);
   }
 }
