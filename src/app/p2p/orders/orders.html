@@ -1,3 +1,5 @@
+<p-toast />
+
 <div class="max-w-7xl mx-auto">
   <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
     <div class="mb-6">
@@ -5,14 +7,42 @@
       <p class="text-sm md:text-base text-slate-400">Track your P2P transactions</p>
     </div>
 
+    <!-- Status Tabs -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <button (click)="activeStatusTab = 'pending'"
+        [class]="activeStatusTab === 'pending' ? 'bg-linear-to-r from-yellow-500 to-yellow-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
+        <i class="pi pi-clock mr-2"></i>
+        Pending
+      </button>
+      <button (click)="activeStatusTab = 'paid'"
+        [class]="activeStatusTab === 'paid' ? 'bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
+        <i class="pi pi-check-circle mr-2"></i>
+        Paid
+      </button>
+      <button (click)="activeStatusTab = 'completed'"
+        [class]="activeStatusTab === 'completed' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
+        <i class="pi pi-check mr-2"></i>
+        Completed
+      </button>
+      <button (click)="activeStatusTab = 'cancelled'"
+        [class]="activeStatusTab === 'cancelled' ? 'bg-linear-to-r from-red-500 to-red-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
+        <i class="pi pi-times-circle mr-2"></i>
+        Cancelled
+      </button>
+    </div>
+
     <div class="space-y-3 md:space-y-4">
       <ng-container *ngIf="!isLoading; else loading">
-        <div *ngIf="orders.length === 0" class="text-center py-12">
+        <div *ngIf="filteredOrders.length === 0" class="text-center py-12">
           <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
             <i class="pi pi-inbox text-4xl text-purple-400"></i>
           </div>
-          <h3 class="text-xl font-semibold text-white mb-2">No Orders Yet</h3>
-          <p class="text-slate-400 mb-6">There are no orders for this advertisement.</p>
+          <h3 class="text-xl font-semibold text-white mb-2">No {{ activeStatusTab }} Orders</h3>
+          <p class="text-slate-400 mb-6">You don't have any {{ activeStatusTab }} orders at the moment.</p>
           <button (click)="loadOrders()"
             class="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
             <i class="pi pi-refresh mr-2"></i>
@@ -20,8 +50,9 @@
           </button>
         </div>
 
-        <div *ngFor="let order of orders"
-          class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
+        <div *ngFor="let order of filteredOrders"
+          class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden cursor-pointer"
+          (click)="openOrderDetails(order)">
           <div
             class="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
           </div>
@@ -32,8 +63,6 @@
               <div class="font-bold text-white text-sm md:text-base">{{ order.order_number || order.id }}</div>
               <div class="text-xs text-slate-400 mb-2">
                 <span class="font-semibold text-white">{{ order.p2p_ad?.name }}</span>
-                <div class="text-xs text-slate-400 mt-1">Ad #: <span class="font-mono">{{ order.p2p_ad?.p2p_number
-                    }}</span></div>
               </div>
               <span
                 [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
@@ -46,52 +75,305 @@
             <div class="md:col-span-2">
               <div class="text-xs md:text-sm text-slate-400 mb-1">Quantity</div>
               <div class="font-bold text-lg md:text-xl text-white">
-                {{ order.quantity >= 1000000 ? ((order.quantity / 1000000) | number:'1.1-1') + 'M' : (order.quantity |
-                number) }}
+                {{ order.quantity | number:'1.2-6' }}
               </div>
-              <div class="text-xs text-slate-400">Unit price: ${{ order.ordered_price >= 1000000000 ?
-                ((order.ordered_price/1000000000) | number:'1.1-1') + 'B' : (order.ordered_price >= 1000000 ?
-                ((order.ordered_price/1000000) | number:'1.1-1') + 'M' : (order.ordered_price >= 1000 ?
-                ((order.ordered_price/1000) | number:'1.1-1') + 'K' : (order.ordered_price | number:'1.2-2'))) }}</div>
+              <div class="text-xs text-slate-400">Unit: ${{ order.ordered_price | number:'1.2-2' }}</div>
             </div>
 
             <div class="md:col-span-3">
-              <div class="text-xs md:text-sm text-slate-400 mb-1">Total / Buyer</div>
+              <div class="text-xs md:text-sm text-slate-400 mb-1">Total Amount</div>
               <div
                 class="font-bold text-base md:text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-                ${{ order.amount >= 1000000000 ? ((order.amount/1000000000) | number:'1.1-1') + 'B' : (order.amount >=
-                1000000 ? ((order.amount/1000000) | number:'1.1-1') + 'M' : (order.amount >= 1000 ? ((order.amount/1000)
-                | number:'1.1-1') + 'K' : (order.amount | number:'1.2-2'))) }}</div>
-              <div class="text-xs md:text-sm text-slate-300">Buyer: {{ order.ordered_by_user?.full_name }}</div>
+                ${{ order.amount | number:'1.2-2' }}
+              </div>
+              <div class="text-xs md:text-sm text-slate-300">{{ order.ordered_by_user?.full_name }}</div>
             </div>
 
             <div class="md:col-span-2">
               <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
               <div
                 class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50 inline-block">
-                {{ order.p2p_payment_type?.name || order.p2p_payment_type_id }}</div>
+                {{ order.p2p_payment_type?.name || 'N/A' }}
+              </div>
               <div class="text-xs text-slate-400 mt-1">{{ order.created_at | date:'short' }}</div>
             </div>
 
-            <div class="md:col-span-2 flex flex-col gap-2">
+            <div class="md:col-span-2 flex items-center justify-end">
               <span [class]="getStatusBadgeClass(order.status)"
-                class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase text-center">{{ order.status
-                }}</span>
-              <button *ngIf="order.status === 'pending' || order.status === 'paid'" (click)="openOrderChat(order)"
-                class="w-full px-3 py-2 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-200 transition-all duration-200 text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer">
-                <i class="pi pi-comments"></i>
-                <span>Chat</span>
-              </button>
+                class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase text-center">
+                {{ order.status }}
+              </span>
             </div>
           </div>
         </div>
       </ng-container>
       <ng-template #loading>
-        <div class="text-slate-400">Loading orders...</div>
+        <div class="text-slate-400 text-center py-12">
+          <i class="pi pi-spin pi-spinner text-4xl text-purple-400 mb-4"></i>
+          <p>Loading orders...</p>
+        </div>
       </ng-template>
     </div>
   </div>
 </div>
+
+<!-- Order Details Dialog with Stepper (OKX Style) -->
+<p-dialog [(visible)]="showOrderDetailsDialog" [modal]="true"
+  [style]="{ 'width': '800px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div *ngIf="selectedOrder" class="flex items-center justify-between w-full">
+      <div class="flex items-center gap-3">
+        <div
+          [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500'"
+          class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+          <i class="pi pi-file-check text-white text-xl"></i>
+        </div>
+        <div>
+          <span
+            class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+            Order Details
+          </span>
+          <div class="text-sm text-slate-400">{{ selectedOrder.order_number || selectedOrder.id }}</div>
+        </div>
+      </div>
+      <span [class]="getStatusBadgeClass(selectedOrder.status)"
+        class="px-4 py-2 rounded-full text-xs font-semibold border uppercase">
+        {{ selectedOrder.status }}
+      </span>
+    </div>
+  </ng-template>
+
+  <div *ngIf="selectedOrder" class="py-4">
+    <!-- Status Stepper (OKX Style - Bars Only) -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-sm font-semibold text-white">Order Progress</div>
+        <div class="text-xs text-slate-400">{{ selectedOrder.created_at | date:'medium' }}</div>
+      </div>
+
+      <!-- Progress Bars -->
+      <div class="space-y-3">
+        <!-- Step 1: Created -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span [class]="getCurrentStepIndex() >= 0 ? 'text-white font-semibold' : 'text-slate-500'"
+              class="text-xs">1. Created</span>
+            <span [class]="getCurrentStepIndex() >= 0 ? 'text-white' : 'text-slate-500'"
+              class="text-xs">{{ selectedOrder.created_at | date:'short' }}</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-slate-700 overflow-hidden">
+            <div [class]="getCurrentStepIndex() >= 0 ? 'bg-linear-to-r from-purple-500 to-pink-500' : 'bg-slate-700'"
+              class="h-full rounded-full transition-all duration-500"
+              [style.width]="getCurrentStepIndex() >= 0 ? '100%' : '0%'"></div>
+          </div>
+        </div>
+
+        <!-- Step 2: Paid -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span [class]="getCurrentStepIndex() >= 1 ? 'text-white font-semibold' : 'text-slate-500'"
+              class="text-xs">2. Paid</span>
+            <span [class]="getCurrentStepIndex() >= 1 ? 'text-white' : 'text-slate-500'"
+              class="text-xs">{{ getCurrentStepIndex() >= 1 ? (selectedOrder.updated_at | date:'short') : '--' }}</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-slate-700 overflow-hidden">
+            <div [class]="getCurrentStepIndex() >= 1 ? 'bg-linear-to-r from-blue-500 to-blue-600' : 'bg-slate-700'"
+              class="h-full rounded-full transition-all duration-500"
+              [style.width]="getCurrentStepIndex() >= 1 ? '100%' : '0%'"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Completed -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span [class]="getCurrentStepIndex() >= 2 ? 'text-white font-semibold' : 'text-slate-500'"
+              class="text-xs">3. Completed</span>
+            <span [class]="getCurrentStepIndex() >= 2 ? 'text-white' : 'text-slate-500'"
+              class="text-xs">{{ getCurrentStepIndex() >= 2 ? (selectedOrder.updated_at | date:'short') : '--' }}</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-slate-700 overflow-hidden">
+            <div [class]="getCurrentStepIndex() >= 2 ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-slate-700'"
+              class="h-full rounded-full transition-all duration-500"
+              [style.width]="getCurrentStepIndex() >= 2 ? '100%' : '0%'"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Merchant/User Information -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <label class="text-sm font-semibold text-white">{{ selectedOrder.p2p_ad?.type === 'buy' ? 'Buyer' : 'Seller' }} Information</label>
+        <button (click)="goToMessages(selectedOrder.id)"
+          class="px-4 py-2 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-200 transition-all text-xs font-semibold flex items-center gap-2 cursor-pointer">
+          <i class="pi pi-comments"></i>
+          <span>Message</span>
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <div
+          [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-500 to-pink-500'"
+          class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg">
+          {{ (selectedOrder.ordered_by_user?.full_name || 'U').substring(0, 2).toUpperCase() }}
+        </div>
+        <div class="flex-1">
+          <div class="font-bold text-white text-lg">{{ selectedOrder.ordered_by_user?.full_name || 'Unknown User' }}</div>
+          <div class="text-sm text-slate-400">{{ selectedOrder.ordered_by_user?.email || 'No email provided' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
+      <label class="text-sm font-semibold text-white mb-3 block">Order Summary</label>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">Order Type</div>
+          <div class="flex items-center gap-2">
+            <span
+              [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+              class="px-2 py-1 rounded-full text-xs font-bold border uppercase">
+              <i [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+              {{ selectedOrder.p2p_ad?.type }}
+            </span>
+          </div>
+        </div>
+        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">Unit Price</div>
+          <div class="text-base font-bold text-yellow-400">${{ selectedOrder.ordered_price | number:'1.2-2' }}</div>
+        </div>
+        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">Quantity</div>
+          <div class="text-base font-bold text-white">{{ selectedOrder.quantity | number:'1.2-6' }} USDT</div>
+        </div>
+        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">Total Amount</div>
+          <div class="text-base font-bold text-green-400">${{ selectedOrder.amount | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Information -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
+      <label class="text-sm font-semibold text-white mb-3 block">Payment Information</label>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-400">Payment Method</span>
+          <div class="flex items-center gap-2">
+            <img [src]="'/images/payment-types/' + (selectedOrder.p2p_payment_type?.name || 'default').toLowerCase().replace(/\s+/g, '-') + '.png'"
+                 [alt]="selectedOrder.p2p_payment_type?.name"
+                 class="w-6 h-6 rounded-full object-cover"
+                 (error)="$event.target.src='/images/payment-types/default.png'" />
+            <span class="text-sm font-semibold text-white">{{ selectedOrder.p2p_payment_type?.name || 'N/A' }}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-400">Advertisement</span>
+          <span class="text-sm font-semibold text-white">{{ selectedOrder.p2p_ad?.name }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-400">Ad Number</span>
+          <span class="text-sm font-mono font-semibold text-white">{{ selectedOrder.p2p_ad?.p2p_number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Account Details -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-6 h-6 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+          <i class="pi pi-credit-card text-white text-xs"></i>
+        </div>
+        <label class="text-sm font-semibold text-white">Payment Account Details</label>
+      </div>
+      <div class="space-y-3">
+        <div class="bg-slate-900/50 rounded-xl p-3">
+          <div class="text-xs text-slate-400 mb-1">Account Name</div>
+          <div class="text-sm font-semibold text-white">{{ getPaymentAccountName() || 'N/A' }}</div>
+        </div>
+        <div class="bg-slate-900/50 rounded-xl p-3">
+          <div class="text-xs text-slate-400 mb-1">Account Number / ID</div>
+          <div class="text-sm font-mono font-semibold text-white">{{ getPaymentAccountNumber() || 'N/A' }}</div>
+        </div>
+        @if (getPaymentOtherDetails()) {
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-info-circle text-blue-400 text-sm mt-0.5"></i>
+            <div class="flex-1">
+              <div class="text-xs text-blue-300 font-semibold mb-1">Additional Instructions</div>
+              <div class="text-xs text-blue-200">{{ getPaymentOtherDetails() }}</div>
+            </div>
+          </div>
+        </div>
+        }
+        @if (selectedOrder.p2p_ad?.payment_instructions) {
+        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-file-edit text-purple-400 text-sm mt-0.5"></i>
+            <div class="flex-1">
+              <div class="text-xs text-purple-300 font-semibold mb-1">Merchant Instructions</div>
+              <div class="text-xs text-purple-200">{{ selectedOrder.p2p_ad?.payment_instructions }}</div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Transaction Timeline -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4">
+      <label class="text-sm font-semibold text-white mb-3 block">Timeline</label>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+            <i class="pi pi-file-plus text-purple-400 text-xs"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-semibold text-white">Order Created</div>
+            <div class="text-xs text-slate-400">{{ selectedOrder.created_at | date:'medium' }}</div>
+          </div>
+        </div>
+        @if (selectedOrder.status === 'paid' || selectedOrder.status === 'completed') {
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+            <i class="pi pi-check-circle text-blue-400 text-xs"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-semibold text-white">Payment Confirmed</div>
+            <div class="text-xs text-slate-400">{{ selectedOrder.updated_at | date:'medium' }}</div>
+          </div>
+        </div>
+        }
+        @if (selectedOrder.status === 'completed') {
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+            <i class="pi pi-check text-green-400 text-xs"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-semibold text-white">Order Completed</div>
+            <div class="text-xs text-slate-400">{{ selectedOrder.updated_at | date:'medium' }}</div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <ng-template #footer>
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
+      <button (click)="goToMessages(selectedOrder!.id)"
+        class="flex-1 px-6 py-3 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-200 font-semibold transition-all duration-300 border border-purple-500/30 cursor-pointer flex items-center justify-center gap-2">
+        <i class="pi pi-comments"></i>
+        <span>Open Chat</span>
+      </button>
+      <button (click)="closeOrderDetails()"
+        class="flex-1 px-6 py-3 rounded-full bg-slate-700/60 hover:bg-slate-600/60 text-slate-200 hover:text-white font-medium transition-all duration-300 border border-slate-600/40 cursor-pointer">
+        Close
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
 
 <!-- Order Chat Dialog -->
 <p-dialog [(visible)]="showOrderChatDialog" [modal]="true"

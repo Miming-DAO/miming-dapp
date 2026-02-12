@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { TabsModule } from 'primeng/tabs';
 import { DialogModule } from 'primeng/dialog';
@@ -8,6 +9,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { StepperModule } from 'primeng/stepper';
 
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { P2pOrder } from '../../../models/p2p-order.model';
@@ -22,6 +25,8 @@ import { P2pOrder } from '../../../models/p2p-order.model';
     InputTextModule,
     ButtonModule,
     PSelectModule,
+    ToastModule,
+    StepperModule,
   ],
   templateUrl: './orders.html',
   styleUrl: './orders.css',
@@ -30,10 +35,13 @@ import { P2pOrder } from '../../../models/p2p-order.model';
 export class Orders {
 
   constructor(
+    private router: Router,
     private p2pOrdersService: P2pOrdersService,
     private messageService: MessageService
   ) { }
 
+  activeStatusTab: 'pending' | 'paid' | 'completed' | 'cancelled' = 'pending';
+  showOrderDetailsDialog: boolean = false;
   showOrderChatDialog: boolean = false;
   isLoading: boolean = false;
 
@@ -42,6 +50,10 @@ export class Orders {
   chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
 
   orders: P2pOrder[] = [];
+
+  get filteredOrders(): P2pOrder[] {
+    return this.orders.filter(order => order.status === this.activeStatusTab);
+  }
 
   loadOrders(): void {
     this.isLoading = true;
@@ -70,6 +82,53 @@ export class Orders {
       { sender: 'merchant', senderName: order.ordered_by_user?.full_name || 'User', message: `Hello! Please proceed with payment for ${order.order_number}.`, timestamp: new Date(Date.now() - 3600000).toISOString() },
       { sender: 'user', senderName: 'You', message: 'Payment sent! TXN123456', timestamp: new Date(Date.now() - 1800000).toISOString() }
     ];
+  }
+
+  openOrderDetails(order: P2pOrder) {
+    this.selectedOrder = order;
+    this.showOrderDetailsDialog = true;
+  }
+
+  closeOrderDetails() {
+    this.showOrderDetailsDialog = false;
+    this.selectedOrder = null;
+  }
+
+  goToMessages(orderId: string) {
+    this.router.navigate(['/p2p/messages'], { queryParams: { orderId } });
+  }
+
+  getCurrentStepIndex(): number {
+    if (!this.selectedOrder) return 0;
+    const statusMap: any = {
+      'pending': 0,
+      'paid': 1,
+      'completed': 2,
+      'cancelled': 0,
+      'disputed': 1
+    };
+    return statusMap[this.selectedOrder.status] || 0;
+  }
+
+  getPaymentAccountName(): string {
+    if (!this.selectedOrder?.p2p_ad?.id) return '';
+    // In a real scenario, you'd need to fetch the ad payment types from the API
+    // For now, we return a placeholder
+    return 'Account Name from Ad Payment Types';
+  }
+
+  getPaymentAccountNumber(): string {
+    if (!this.selectedOrder?.p2p_ad?.id) return '';
+    // In a real scenario, you'd need to fetch the ad payment types from the API
+    // For now, we return a placeholder
+    return 'Account Number from Ad Payment Types';
+  }
+
+  getPaymentOtherDetails(): string {
+    if (!this.selectedOrder?.p2p_ad?.id) return '';
+    // In a real scenario, you'd need to fetch the ad payment types from the API
+    // For now, we return a placeholder
+    return '';
   }
 
   closeOrderChat() {

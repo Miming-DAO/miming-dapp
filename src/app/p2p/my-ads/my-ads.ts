@@ -137,6 +137,9 @@ export class MyAds {
   showDeleteDialog = signal(false);
   selectedAdForDelete: P2pAd | null = null;
 
+  showPaymentMethodDialog = false;
+  paymentMethodDialogMode: 'create' | 'edit' = 'create';
+
   isLoading = signal(false);
 
   loadMyAds(): void {
@@ -817,6 +820,66 @@ export class MyAds {
         localStorage.removeItem('auth_user');
       }
     }
+  }
+
+  openPaymentMethodDialog(mode: 'create' | 'edit'): void {
+    this.paymentMethodDialogMode = mode;
+    this.showPaymentMethodDialog = true;
+  }
+
+  closePaymentMethodDialog(): void {
+    this.showPaymentMethodDialog = false;
+    this.resetPaymentMethodForm();
+  }
+
+  resetPaymentMethodForm(): void {
+    if (this.paymentMethodDialogMode === 'create') {
+      this.newAdPaymentTypeForm = {
+        id: '',
+        p2p_ad_id: '',
+        p2p_ad: undefined,
+        p2p_payment_type_id: '',
+        p2p_payment_type: undefined,
+        account_name: '',
+        account_number: '',
+        attachments: [],
+        other_details: '',
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+    } else {
+      this.editAdPaymentTypeForm = {
+        id: '',
+        p2p_ad_id: '',
+        p2p_ad: undefined,
+        p2p_payment_type_id: '',
+        p2p_payment_type: undefined,
+        account_name: '',
+        account_number: '',
+        attachments: [],
+        other_details: '',
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+    }
+    this.selectedPaymentType = undefined;
+    this.isEditingPaymentType = false;
+    this.editingPaymentTypeIndex = -1;
+  }
+
+  savePaymentMethod(): void {
+    if (this.isEditingPaymentType) {
+      if (this.paymentMethodDialogMode === 'edit') {
+        this.updatePaymentType();
+      }
+    } else {
+      if (this.paymentMethodDialogMode === 'create') {
+        this.addPaymentTypeToNewAd();
+      } else {
+        this.addPaymentTypeToEditAd();
+      }
+    }
+    this.closePaymentMethodDialog();
   }
 
   ngOnInit(): void {

@@ -81,9 +81,11 @@ export class Marketplace {
   selectedOffer: Offer | null = null;
   orderAmount: number = 0;
   orderQuantity: number = 0;
+  inputMode: 'amount' | 'quantity' = 'amount';
   selectedPaymentTypeId: string = '';
   selectedAdPaymentTypes: P2pAdPaymentType[] = [];
   isCreatingOrder = signal(false);
+  tradingTerms: string = 'By proceeding with this trade, you agree to complete the transaction within the specified time frame. Ensure all payment details are accurate before confirmation. Disputes should be resolved through the platform\'s resolution center. Cancel or modify orders only if permitted by the advertiser. Both parties must comply with local regulations and platform policies.';
 
   loadAds(): void {
     this.isLoading.set(true);
@@ -169,8 +171,10 @@ export class Marketplace {
 
   openCreateOrderDialog(offer: Offer): void {
     this.selectedOffer = offer;
+    this.inputMode = 'amount';
     this.orderAmount = offer.minLimit;
     this.orderQuantity = 0;
+    this.calculateQuantity();
     this.selectedPaymentTypeId = '';
 
     // Load payment types for this ad
@@ -189,6 +193,7 @@ export class Marketplace {
     this.selectedOffer = null;
     this.orderAmount = 0;
     this.orderQuantity = 0;
+    this.inputMode = 'amount';
     this.selectedPaymentTypeId = '';
     this.selectedAdPaymentTypes = [];
   }
