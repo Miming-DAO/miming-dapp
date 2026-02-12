@@ -9,6 +9,7 @@ export class GenerateNonceResponse {
 }
 
 export class VerifySignature {
+  wallet_name: string = "";
   wallet_address: string = "";
   nonce: string = "";
   signature: string = "";
@@ -22,6 +23,7 @@ export class VerifySignatureResponse {
     email: string;
     username: string;
     type: string;
+    auth_type: string;
     google_account_id: string;
     photo_url: string;
     created_at: Date;
@@ -32,6 +34,7 @@ export class VerifySignatureResponse {
       email: "",
       username: "",
       type: "",
+      auth_type: "",
       google_account_id: "",
       photo_url: "",
       created_at: new Date(),

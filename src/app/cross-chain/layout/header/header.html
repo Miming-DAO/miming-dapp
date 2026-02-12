@@ -48,9 +48,8 @@
           </span>
           <span
             class="hidden lg:block text-xs font-medium text-slate-400 group-hover:text-purple-300 transition-colors duration-300 leading-tight">
-            {{ connectedPolkadotWalletAccount.address.slice(0, 6) }}...{{
-            connectedPolkadotWalletAccount.address.slice(-4)
-            }}
+            {{ connectedPolkadotWalletAccount.address.slice(0, 6) }}...
+            {{ connectedPolkadotWalletAccount.address.slice(-4) }}
           </span>
         </div>
 
@@ -117,7 +116,7 @@
 <!-- Polkadot Wallet Accounts Dialog -->
 <!-- ******************************* -->
 <p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true"
-  [style]="{ width: '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
+  [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
@@ -137,7 +136,7 @@
       [class.hover:bg-slate-700/50]="selectedPolkadotWalletAccount?.address !== account.address"
       [class.border-slate-600/30]="selectedPolkadotWalletAccount?.address !== account.address"
       [class.hover:border-purple-500/50]="selectedPolkadotWalletAccount?.address !== account.address"
-      [class.bg-gradient-to-r]="selectedPolkadotWalletAccount?.address === account.address"
+      [class.bg-linear-to-r]="selectedPolkadotWalletAccount?.address === account.address"
       [class.from-purple-500/20]="selectedPolkadotWalletAccount?.address === account.address"
       [class.via-fuchsia-500/20]="selectedPolkadotWalletAccount?.address === account.address"
       [class.to-pink-500/20]="selectedPolkadotWalletAccount?.address === account.address"
@@ -189,9 +188,9 @@
       <app-polkadot-identicon-util [address]="connectedPolkadotWalletAccount?.address || ''" [size]="48">
       </app-polkadot-identicon-util>
       <div class="flex flex-col flex-1">
-        <span class="font-bold text-lg text-white">{{
-          connectedPolkadotWalletAccount?.meta?.name
-          }}</span>
+        <span class="font-bold text-lg text-white">
+          {{ connectedPolkadotWalletAccount?.meta?.name }}
+        </span>
         <div class="flex items-center gap-2">
           <span class="text-sm text-slate-400">
             {{ connectedPolkadotWalletAccount?.address?.slice(0, 5) }}...

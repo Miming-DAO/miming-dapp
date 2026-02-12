@@ -40,12 +40,11 @@ export class P2p {
   activeTab: 'buy' | 'sell' = 'buy';
 
   ngOnInit() {
-    // Check if user is logged in by checking google_user in localStorage
     this.checkAuthStatus();
   }
 
   checkAuthStatus(): void {
-    const googleUser = localStorage.getItem('google_user');
+    const googleUser = localStorage.getItem('auth_user');
     if (googleUser) {
       this.isP2PUserLoggedIn = true;
     }

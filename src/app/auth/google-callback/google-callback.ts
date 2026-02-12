@@ -33,17 +33,12 @@ export class GoogleCallback implements OnInit {
 
   handleGoogleCallback(authData: string): void {
     try {
-      // Parse the authentication data JSON
       const data = JSON.parse(authData);
 
       this.loginStatus = 'Saving your credentials...';
-
-      // Store everything in one google_user object
-      localStorage.setItem('google_user', JSON.stringify(data));
+      localStorage.setItem('auth_user', JSON.stringify(data));
 
       this.loginStatus = 'Login successful! Redirecting...';
-
-      // Redirect to P2P page after a short delay
       setTimeout(() => {
         this.router.navigate(['/p2p']);
       }, 1500);

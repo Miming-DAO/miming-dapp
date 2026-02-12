@@ -1,85 +1,93 @@
-<p-toast></p-toast>
-
 <div class="backdrop-blur-md bg-slate-900/50 border-b border-purple-500/20">
   <div class="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between">
     <div class="flex items-center gap-2 md:gap-4">
-      @if (isP2PUserLoggedIn) {
+      @if (isLoggedIn) {
       <button (click)="toggleMobileMenu()"
         class="lg:hidden w-8 h-8 flex items-center justify-center text-white hover:bg-slate-800 rounded-full cursor-pointer">
         <i [class]="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'" class="text-lg"></i>
       </button>
       }
 
+      <!-- ********** -->
+      <!-- Page Title -->
+      <!-- ********** -->
       <div
-        class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+        class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center">
         <i class="pi pi-shopping-bag text-white text-lg md:text-xl"></i>
       </div>
       <div>
-        <h1 class="text-lg md:text-2xl font-bold text-white bg-clip-text text-transparent">
+        <h1 class="text-lg md:text-2xl font-bold text-white bg-clip-text">
           P2P Trading Portal
         </h1>
         <p class="text-xs text-slate-400 hidden sm:block">Peer-to-Peer Marketplace</p>
       </div>
     </div>
 
-    <!-- User Info -->
+    <!-- ************************** -->
+    <!-- Wallet & User Info Section -->
+    <!-- ************************** -->
     <div class="flex items-center gap-2 h-11">
-      @if (!isP2PUserLoggedIn && !isXteriumMode) {
-      <button (click)="loginP2PUser()"
-        class="px-6 py-2.5 h-11 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold shadow-sm shadow-purple-500/20 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-purple-500/30 flex items-center gap-2 cursor-pointer">
+      @if (!isLoggedIn && !isXteriumMode) {
+      <button (click)="login()"
+        class="px-6 py-2.5 h-11 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold shadow-sm shadow-purple-500/20 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-purple-500/30 flex items-center gap-2 cursor-pointer">
         <i class="pi pi-sign-in text-base"></i>
         <span>Login</span>
       </button>
       }
 
-      @if (isP2PUserLoggedIn && loginType === 'wallet' && connectedPolkadotWalletAccount) {
+      <!-- ************************** -->
+      <!-- User Info for Wallet Login -->
+      <!-- ************************** -->
+      @if (isLoggedIn && currentUser?.auth_type === 'wallet') {
       <div
-        class="group relative flex items-center gap-3 px-5 py-2 h-14 rounded-full bg-gradient-to-r from-slate-800/80 via-slate-700/80 to-slate-800/80 hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 transition-all duration-300 border border-slate-600/50 hover:border-purple-500/50 cursor-pointer shadow-lg shadow-slate-900/50 hover:shadow-purple-500/20 hover:scale-105"
+        class="group relative flex items-center gap-3 px-5 py-2 h-14 rounded-full bg-linear-to-r from-slate-800/80 via-slate-700/80 to-slate-800/80 hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 transition-all duration-300 border border-slate-600/50 hover:border-purple-500/50 cursor-pointer shadow-lg shadow-slate-900/50 hover:shadow-purple-500/20 hover:scale-105"
         (click)="getPolkadotWalletAccount()">
-        <div class="relative flex-shrink-0">
+        <div class="relative shrink-0">
           <div
-            class="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300">
+            class="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300">
           </div>
-          <app-polkadot-identicon-util [address]="connectedPolkadotWalletAccount.address"
+          <app-polkadot-identicon-util [address]="currentUser?.username || ''"
             [size]="28"></app-polkadot-identicon-util>
           <span
             class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-slate-900 rounded-full animate-pulse shadow-sm shadow-green-400/50"></span>
         </div>
-
         <div class="flex flex-col min-w-0">
           <span
-            class="text-sm font-bold text-white group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:via-fuchsia-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 leading-tight">
-            {{ connectedPolkadotWalletAccount.meta.name }}
+            class="text-sm font-bold text-white group-hover:bg-linear-to-r group-hover:from-purple-400 group-hover:via-fuchsia-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 leading-tight">
+            {{ currentUser?.full_name || currentUser?.username || 'User' }}
           </span>
           <span
             class="hidden lg:block text-xs font-medium text-slate-400 group-hover:text-purple-300 transition-colors duration-300 leading-tight">
-            {{ connectedPolkadotWalletAccount.address.slice(0, 6) }}...{{
-            connectedPolkadotWalletAccount.address.slice(-4) }}
+            {{ (currentUser?.username || '').slice(0, 6) }}...{{
+            (currentUser?.username || '').slice(-4) }}
           </span>
         </div>
 
         <i
-          class="pi pi-chevron-down text-xs text-slate-400 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-y-0.5 flex-shrink-0"></i>
+          class="pi pi-chevron-down text-xs text-slate-400 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-y-0.5 shrink-0"></i>
       </div>
       }
 
-      @if (isP2PUserLoggedIn && loginType === 'google') {
+      <!-- ************************** -->
+      <!-- User Info for Google Login -->
+      <!-- ************************** -->
+      @if (isLoggedIn && currentUser?.auth_type === 'google') {
       <div class="flex items-center gap-2 md:gap-3">
         <div class="text-right hidden md:block">
-          <div class="text-sm font-semibold text-white">{{ currentUser()?.full_name || currentUser()?.username || 'User'
+          <div class="text-sm font-semibold text-white">{{ currentUser?.full_name || currentUser?.username || 'User'
             }}</div>
-          <div class="text-xs text-slate-400">{{ currentUser()?.type || 'Verified Merchant' }}</div>
+          <div class="text-xs text-slate-400">{{ currentUser?.type || 'Verified Merchant' }}</div>
         </div>
-        @if (currentUser()?.photo_url) {
-        <img [src]="currentUser()?.photo_url" alt="User Profile"
+        @if (currentUser?.photo_url) {
+        <img [src]="currentUser?.photo_url" alt="User Profile"
           class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-purple-500/50" />
         } @else {
         <div
-          class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm md:text-base">
-          {{ (currentUser()?.full_name || currentUser()?.username || 'U').substring(0, 2).toUpperCase() }}
+          class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm md:text-base">
+          {{ (currentUser?.full_name || currentUser?.username || 'U').substring(0, 2).toUpperCase() }}
         </div>
         }
-        <button (click)="logoutP2PUser()" title="Logout"
+        <button (click)="logout()" title="Logout"
           class="px-3 py-2 rounded-full bg-slate-800/50 hover:bg-red-500/20 border border-slate-600/30 hover:border-red-500/50 text-slate-300 hover:text-red-400 transition-all duration-200 cursor-pointer">
           <i class="pi pi-sign-out"></i>
           <span class="hidden sm:inline ml-2">Logout</span>
@@ -90,32 +98,36 @@
   </div>
 </div>
 
+<!-- ***************************** -->
 <!-- Login Method Selection Dialog -->
-<p-dialog [(visible)]="showLoginMethodDialog" [modal]="true"
+<!-- ***************************** -->
+<p-dialog [(visible)]="showAuthMethodDialog" [modal]="true"
   [style]="{ 'width': '500px', 'max-width': '90vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
   [closable]="true">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-sign-in text-white text-xl"></i>
       </div>
       <div>
         <span
-          class="font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          class="font-bold text-2xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
           Choose Login Method
         </span>
         <div class="text-sm text-slate-400">Select how you want to sign in</div>
       </div>
     </div>
   </ng-template>
-
   <div class="py-4 flex flex-col gap-3">
+
+    <!-- ***************** -->
     <!-- Web3 Wallet Login -->
-    <button (click)="selectLoginMethod('wallet')"
-      class="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-800/50 hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 border border-slate-600/30 hover:border-purple-500/50 transition-all duration-200 cursor-pointer group">
+    <!-- ***************** -->
+    <button (click)="selectAuthMethod('wallet')"
+      class="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-800/50 hover:bg-linear-to-r hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 border border-slate-600/30 hover:border-purple-500/50 transition-all duration-200 cursor-pointer group">
       <div
-        class="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+        class="w-14 h-14 rounded-full bg-linear-to-br from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200">
         <i class="pi pi-wallet text-white text-2xl"></i>
       </div>
       <div class="flex-1 text-left">
@@ -125,11 +137,13 @@
       <i class="pi pi-chevron-right text-slate-400 group-hover:text-purple-400 transition-colors"></i>
     </button>
 
+    <!-- ************ -->
     <!-- Google Login -->
-    <button (click)="selectLoginMethod('google')"
-      class="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-800/50 hover:bg-gradient-to-r hover:from-blue-500/20 hover:via-red-500/20 hover:to-yellow-500/20 border border-slate-600/30 hover:border-blue-500/50 transition-all duration-200 cursor-pointer group">
+    <!-- ************ -->
+    <button (click)="selectAuthMethod('google')"
+      class="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-800/50 hover:bg-linear-to-r hover:from-blue-500/20 hover:via-red-500/20 hover:to-yellow-500/20 border border-slate-600/30 hover:border-blue-500/50 transition-all duration-200 cursor-pointer group">
       <div
-        class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+        class="w-14 h-14 rounded-full bg-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200">
         <svg class="w-8 h-8" viewBox="0 0 24 24">
           <path fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -147,104 +161,22 @@
       </div>
       <i class="pi pi-chevron-right text-slate-400 group-hover:text-blue-400 transition-colors"></i>
     </button>
-
-    <!-- Traditional Login (kept for backward compatibility) -->
-    <button (click)="selectLoginMethod('traditional')"
-      class="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-800/50 hover:bg-gradient-to-r hover:from-slate-700/50 hover:to-slate-600/50 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200 cursor-pointer group">
-      <div
-        class="w-14 h-14 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
-        <i class="pi pi-user text-slate-300 text-2xl"></i>
-      </div>
-      <div class="flex-1 text-left">
-        <div class="font-bold text-lg text-white group-hover:text-slate-300 transition-colors">Email / Username</div>
-        <div class="text-sm text-slate-400">Sign in with email or username</div>
-      </div>
-      <i class="pi pi-chevron-right text-slate-400 group-hover:text-slate-300 transition-colors"></i>
-    </button>
   </div>
 </p-dialog>
 
-<!-- Traditional Login Dialog -->
-<p-dialog [(visible)]="showLoginDialog" [modal]="true"
-  [style]="{ 'width': '500px', 'max-width': '90vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
-  [closable]="true">
-  <ng-template #header>
-    <div class="flex items-center gap-3">
-      <div
-        class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
-        <i class="pi pi-sign-in text-white text-xl"></i>
-      </div>
-      <div>
-        <span
-          class="font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-          Welcome Back
-        </span>
-        <div class="text-sm text-slate-400">Sign in to your P2P account</div>
-      </div>
-    </div>
-  </ng-template>
-
-  <div class="py-4">
-    @if (errorMessage()) {
-    <div class="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-      <i class="pi pi-exclamation-triangle mr-2"></i>
-      {{ errorMessage() }}
-    </div>
-    }
-
-    <div class="mb-4">
-      <label class="block text-sm font-semibold text-slate-300 mb-2">
-        <i class="pi pi-envelope mr-2"></i>
-        Email or Username
-      </label>
-      <input [(ngModel)]="loginEmail" type="text" placeholder="Enter your email or username"
-        (keyup.enter)="handleLogin()" [disabled]="isLoading()"
-        class="w-full px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
-    </div>
-
-    <div class="mb-6">
-      <label class="block text-sm font-semibold text-slate-300 mb-2">
-        <i class="pi pi-lock mr-2"></i>
-        Password
-      </label>
-      <input [(ngModel)]="loginPassword" type="password" placeholder="Enter your password" (keyup.enter)="handleLogin()"
-        [disabled]="isLoading()"
-        class="w-full px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
-    </div>
-
-    <button (click)="handleLogin()" [disabled]="!loginEmail || !loginPassword || isLoading()"
-      class="w-full px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-pink-700 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 disabled:cursor-not-allowed cursor-pointer">
-      @if (isLoading()) {
-      <i class="pi pi-spin pi-spinner mr-2"></i>
-      Signing in...
-      } @else {
-      <i class="pi pi-sign-in mr-2"></i>
-      Sign In
-      }
-    </button>
-
-    <!-- Footer Links -->
-    <div class="mt-6 text-center">
-      <a href="#" class="text-sm text-purple-400 hover:text-purple-300 transition-colors">Forgot password?</a>
-      <div class="mt-2 text-sm text-slate-400">
-        Don't have an account?
-        <a href="#" class="text-purple-400 hover:text-purple-300 transition-colors ml-1">Sign up</a>
-      </div>
-    </div>
-  </div>
-</p-dialog>
-
+<!-- ************************ -->
 <!-- Available Wallets Dialog -->
+<!-- ************************ -->
 <p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true"
-  [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
+  [style]="{ width: '25rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-wallet text-white text-lg"></i>
       </div>
       <span
-        class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+        class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
         Choose Wallet
       </span>
     </div>
@@ -283,17 +215,19 @@
   </ng-template>
 </p-dialog>
 
+<!-- ******************************* -->
 <!-- Polkadot Wallet Accounts Dialog -->
+<!-- ******************************* -->
 <p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true"
   [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-user text-white text-lg"></i>
       </div>
       <span
-        class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+        class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
         Choose Account
       </span>
     </div>
@@ -305,7 +239,7 @@
       [class.hover:bg-slate-700/50]="selectedPolkadotWalletAccount?.address !== account.address"
       [class.border-slate-600/30]="selectedPolkadotWalletAccount?.address !== account.address"
       [class.hover:border-purple-500/50]="selectedPolkadotWalletAccount?.address !== account.address"
-      [class.bg-gradient-to-r]="selectedPolkadotWalletAccount?.address === account.address"
+      [class.bg-linear-to-r]="selectedPolkadotWalletAccount?.address === account.address"
       [class.from-purple-500/20]="selectedPolkadotWalletAccount?.address === account.address"
       [class.via-fuchsia-500/20]="selectedPolkadotWalletAccount?.address === account.address"
       [class.to-pink-500/20]="selectedPolkadotWalletAccount?.address === account.address"
@@ -324,7 +258,7 @@
   <ng-template #footer>
     <div class="flex gap-2 pt-5">
       <button [disabled]="!selectedPolkadotWalletAccount || isProcessing" (click)="connectPolkadotWalletAccount()"
-        class="flex-1 px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 border-0 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        class="flex-1 px-4 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 border-0 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
         @if (isProcessing) {
         <i class="pi pi-spin pi-spinner"></i>
         <span>Authenticating...</span>
@@ -341,32 +275,37 @@
   </ng-template>
 </p-dialog>
 
+<!-- ************************************** -->
 <!-- Polkadot Wallet Account Details Dialog -->
+<!-- ************************************** -->
 <p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true"
   [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-id-card text-white text-lg"></i>
       </div>
       <span
-        class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Account
-        Details</span>
+        class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+        Account Details
+      </span>
     </div>
   </ng-template>
   <div class="flex flex-col gap-3 py-4">
     <div class="p-4 rounded-3xl flex items-center gap-3 bg-slate-800/50 border border-slate-600/30">
-      <app-polkadot-identicon-util [address]="selectedPolkadotWalletAccount?.address || ''" [size]="48">
+      <app-polkadot-identicon-util [address]="currentUser?.username || ''" [size]="48">
       </app-polkadot-identicon-util>
       <div class="flex flex-col flex-1">
-        <span class="font-bold text-lg text-white">{{ selectedPolkadotWalletAccount?.meta?.name }}</span>
+        <span class="font-bold text-lg text-white">
+          {{ currentUser?.full_name || currentUser?.username || 'User' }}
+        </span>
         <div class="flex items-center gap-2">
           <span class="text-sm text-slate-400">
-            {{ selectedPolkadotWalletAccount?.address?.slice(0, 5) }}...
-            {{ selectedPolkadotWalletAccount?.address?.slice(-5) }}
+            {{ (currentUser?.username || '').slice(0, 5) }}...
+            {{ (currentUser?.username || '').slice(-5) }}
           </span>
-          <button (click)="copyAddressToClipboard(selectedPolkadotWalletAccount?.address)"
+          <button (click)="copyAddressToClipboard(currentUser?.username)"
             class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-purple-400 transition-all duration-200 cursor-pointer"
             pTooltip="Copy Address" tooltipPosition="bottom">
             <i class="pi pi-copy text-sm"></i>
@@ -377,10 +316,10 @@
   </div>
   <ng-template #footer>
     <div class="flex gap-2 pt-5">
-      <button (click)="logoutPolkadotWalletAccount()" [disabled]="isProcessing"
+      <button (click)="logout()" [disabled]="isProcessing"
         class="flex-1 px-4 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 disabled:bg-slate-600/20 text-red-400 hover:text-red-300 disabled:text-slate-500 font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/50 disabled:border-slate-600/20 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
         <i class="pi pi-sign-out"></i>
-        <span>Disconnect</span>
+        <span>Logout</span>
       </button>
       <button (click)="showPolkadotWalletAccountDialog = false"
         class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
@@ -389,3 +328,8 @@
     </div>
   </ng-template>
 </p-dialog>
+
+<!-- ***** -->
+<!-- Toast -->
+<!-- ***** -->
+<p-toast />

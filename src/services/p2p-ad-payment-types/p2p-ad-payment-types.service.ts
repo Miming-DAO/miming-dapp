@@ -17,7 +17,7 @@ export class P2pAdPaymentTypesService {
   ) { }
 
   private getHeaders(): HttpHeaders {
-    const googleUser = localStorage.getItem('google_user');
+    const googleUser = localStorage.getItem('auth_user');
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });

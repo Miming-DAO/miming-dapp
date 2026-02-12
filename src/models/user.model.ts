@@ -4,6 +4,7 @@ export class User {
   email: string = "";
   username: string = "";
   type: string = "";
+  auth_type: string = "";
   is_disabled: boolean = false;
   photo_url: string = "";
   google_account_id: string = "";
