@@ -43,10 +43,6 @@ export class Orders {
 
   orders: P2pOrder[] = [];
 
-  ngOnInit(): void {
-    this.loadOrders();
-  }
-
   loadOrders(): void {
     this.isLoading = true;
 
@@ -71,7 +67,7 @@ export class Orders {
     this.showOrderChatDialog = true;
     // load placeholder chat messages (use available order fields)
     this.chatMessages = [
-      { sender: 'merchant', senderName: order.wallet_address || 'User', message: `Hello! Please proceed with payment for ${order.order_number}.`, timestamp: new Date(Date.now() - 3600000).toISOString() },
+      { sender: 'merchant', senderName: order.ordered_by_user?.full_name || 'User', message: `Hello! Please proceed with payment for ${order.order_number}.`, timestamp: new Date(Date.now() - 3600000).toISOString() },
       { sender: 'user', senderName: 'You', message: 'Payment sent! TXN123456', timestamp: new Date(Date.now() - 1800000).toISOString() }
     ];
   }
@@ -109,5 +105,9 @@ export class Orders {
     };
 
     return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  }
+
+  ngOnInit(): void {
+    this.loadOrders();
   }
 }

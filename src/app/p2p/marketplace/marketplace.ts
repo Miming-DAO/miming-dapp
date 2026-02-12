@@ -19,6 +19,7 @@ import { CreateP2pOrderDto } from '../../../models/p2p-order.model';
 import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
 import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
+import { User } from '../../../models/user.model';
 
 interface Offer {
   id: string;
@@ -60,6 +61,8 @@ export class Marketplace {
     private p2pOrdersService: P2pOrdersService,
     private messageService: MessageService
   ) { }
+
+  currentUser: User | null = null;
 
   paymentTypes: string[] = ['GCash', 'Bank Transfer'];
   selectedPaymentType: string | undefined;
@@ -291,7 +294,7 @@ export class Marketplace {
       quantity: this.orderQuantity,
       amount: this.orderAmount,
       p2p_payment_type_id: this.selectedPaymentTypeId,
-      wallet_address: '',
+      ordered_by_user_id: this.currentUser?.id || ''
     };
 
     this.p2pOrdersService.createOrder(createOrderDto).subscribe({
@@ -315,7 +318,32 @@ export class Marketplace {
     });
   }
 
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+        };
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
+    }
+  }
+
   ngOnInit(): void {
+    this.checkAuthStatus();
     this.loadAds();
   }
 }

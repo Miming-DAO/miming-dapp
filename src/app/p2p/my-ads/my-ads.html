@@ -8,7 +8,7 @@
         <p class="text-sm md:text-base text-slate-400">Manage your P2P listings</p>
       </div>
       <button (click)="openCreateDialog()"
-        class="w-full sm:w-auto px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm text-sm md:text-base cursor-pointer">
+        class="w-full sm:w-auto px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm text-sm md:text-base cursor-pointer">
         <i class="pi pi-plus mr-1 md:mr-2"></i>
         Create New Ad
       </button>
@@ -33,7 +33,7 @@
       <h3 class="text-xl font-semibold text-white mb-2">No Advertisements Yet</h3>
       <p class="text-slate-400 mb-6">Create your first P2P advertisement to get started</p>
       <button (click)="openCreateDialog()"
-        class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
+        class="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
         <i class="pi pi-plus mr-2"></i>
         Create New Ad
       </button>
@@ -45,9 +45,9 @@
     <div class="space-y-3 md:space-y-4">
       @for (ad of myAds; track ad.id) {
       <div
-        class="backdrop-blur-xl bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
+        class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
         <div
-          class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
+          class="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
         </div>
 
         <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
@@ -67,7 +67,7 @@
           <div class="md:col-span-2">
             <div class="text-xs md:text-sm text-slate-400 mb-1">Price</div>
             <div
-              class="font-bold text-xl md:text-2xl bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              class="font-bold text-xl md:text-2xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
               ${{ ad.price }}
             </div>
             <div class="text-xs text-slate-400">{{ ad.name }}</div>
@@ -140,12 +140,12 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-plus text-white text-lg"></i>
       </div>
       <div>
         <span
-          class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
           Create New Advertisement
         </span>
         <div class="text-xs text-slate-400">Fill out the details below to publish a P2P ad</div>
@@ -220,10 +220,9 @@
       </div>
 
       <div
-        class="p-6 rounded-3xl bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
+        class="p-6 rounded-3xl bg-linear-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
         <div class="flex items-center gap-2 mb-3">
-          <div
-            class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
             <i class="pi pi-credit-card text-white text-sm"></i>
           </div>
           <label class="text-sm font-semibold text-white">Payment Methods *</label>
@@ -301,7 +300,7 @@
   <ng-template #footer>
     <div class="flex flex-wrap gap-2">
       <button type="submit" (click)="submitAd()"
-        class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        class="px-4 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
         <i class="pi pi-upload mr-2"></i>
         Publish
       </button>
@@ -321,12 +320,12 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-pencil text-white text-lg"></i>
       </div>
       <div>
         <span
-          class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
           Edit Advertisement
         </span>
         <div class="text-xs text-slate-400">Update the details of your P2P ad</div>
@@ -402,10 +401,9 @@
       </div>
 
       <div
-        class="p-6 rounded-3xl bg-gradient-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
+        class="p-6 rounded-3xl bg-linear-to-br from-purple-900/20 via-fuchsia-900/10 to-pink-900/20 border-2 border-purple-500/30 shadow-lg">
         <div class="flex items-center gap-2 mb-3">
-          <div
-            class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
             <i class="pi pi-credit-card text-white text-sm"></i>
           </div>
           <label class="text-sm font-semibold text-white">Payment Methods *</label>
@@ -489,7 +487,7 @@
           </div>
           @if (isEditingPaymentType) {
           <button type="button" (click)="updatePaymentType()"
-            class="w-full px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+            class="w-full px-4 py-2 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
             <i class="pi pi-save mr-2"></i>
             Update Payment Method
           </button>
@@ -514,7 +512,7 @@
   <ng-template #footer>
     <div class="flex flex-wrap gap-2">
       <button type="submit" (click)="updateAd()"
-        class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
+        class="px-4 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 cursor-pointer">
         <i class="pi pi-save mr-2"></i>
         Update
       </button>
@@ -533,11 +531,11 @@
   styleClass="cosmic-dialog">
   <ng-template #header>
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center">
         <i class="pi pi-exclamation-triangle text-white text-lg"></i>
       </div>
       <div>
-        <span class="font-bold text-lg bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+        <span class="font-bold text-lg bg-linear-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
           Delete Advertisement
         </span>
         <div class="text-xs text-slate-400">This action cannot be undone</div>
@@ -570,7 +568,7 @@
   <ng-template #footer>
     <div class="flex flex-wrap gap-2">
       <button type="button" (click)="confirmDelete()" [disabled]="isLoading()"
-        class="px-4 py-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
+        class="px-4 py-3 rounded-full bg-linear-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
         <i class="pi pi-trash mr-2"></i>
         Delete
       </button>

@@ -19,6 +19,7 @@ export class P2pAd {
 }
 
 export class CreateP2pAdDto {
+  user_id: string = "";
   type: 'buy' | 'sell' = 'buy';
   logo_url: string = "";
   name: string = "";
@@ -31,6 +32,7 @@ export class CreateP2pAdDto {
 }
 
 export class UpdateP2pAdDto {
+  user_id?: string = "";
   type?: 'buy' | 'sell' = 'buy';
   logo_url?: string = "";
   name?: string = "";

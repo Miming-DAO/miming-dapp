@@ -17,6 +17,7 @@ import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types
 import { P2pAd, CreateP2pAdDto, UpdateP2pAdDto } from '../../../models/p2p-ad.model';
 import { P2pPaymentType } from '../../../models/p2p-payment-type.model'
 import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto, UpdateP2pAdPaymentTypeDto } from '../../../models/p2p-ad-payment-type.model';
+import { User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-my-ads',
@@ -42,6 +43,8 @@ export class MyAds {
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
     private messageService: MessageService
   ) { }
+
+  currentUser: User | null = null;
 
   myAds: P2pAd[] = [];
   adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
@@ -330,6 +333,7 @@ export class MyAds {
     this.isLoading.set(true);
 
     const payload: CreateP2pAdDto = {
+      user_id: this.currentUser?.id || '',
       type: this.newAd.type,
       logo_url: this.newAd.logo_url,
       name: this.newAd.name,
@@ -791,7 +795,32 @@ export class MyAds {
     });
   }
 
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+        };
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
+    }
+  }
+
   ngOnInit(): void {
+    this.checkAuthStatus();
     this.loadMyAds();
   }
 }

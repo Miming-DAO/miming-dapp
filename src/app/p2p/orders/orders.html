@@ -14,16 +14,16 @@
           <h3 class="text-xl font-semibold text-white mb-2">No Orders Yet</h3>
           <p class="text-slate-400 mb-6">There are no orders for this advertisement.</p>
           <button (click)="loadOrders()"
-            class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
+            class="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
             <i class="pi pi-refresh mr-2"></i>
             Refresh
           </button>
         </div>
 
         <div *ngFor="let order of orders"
-          class="backdrop-blur-xl bg-gradient-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
+          class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden">
           <div
-            class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
+            class="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
           </div>
 
           <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
@@ -58,12 +58,11 @@
             <div class="md:col-span-3">
               <div class="text-xs md:text-sm text-slate-400 mb-1">Total / Buyer</div>
               <div
-                class="font-bold text-base md:text-lg bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+                class="font-bold text-base md:text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
                 ${{ order.amount >= 1000000000 ? ((order.amount/1000000000) | number:'1.1-1') + 'B' : (order.amount >=
                 1000000 ? ((order.amount/1000000) | number:'1.1-1') + 'M' : (order.amount >= 1000 ? ((order.amount/1000)
                 | number:'1.1-1') + 'K' : (order.amount | number:'1.2-2'))) }}</div>
-              <div class="text-xs md:text-sm text-slate-300">Buyer: {{ order.wallet_address ? (order.wallet_address |
-                slice:0:6) + '...' + (order.wallet_address | slice:-4) : '' }}</div>
+              <div class="text-xs md:text-sm text-slate-300">Buyer: {{ order.ordered_by_user?.full_name }}</div>
             </div>
 
             <div class="md:col-span-2">
@@ -102,12 +101,12 @@
     <div *ngIf="selectedOrder" class="flex items-center justify-between w-full">
       <div class="flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+          class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
           <i class="pi pi-comments text-white text-lg"></i>
         </div>
         <div>
           <span
-            class="font-bold text-lg bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Order
+            class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Order
             Chat</span>
           <div class="text-xs text-slate-400">Order #: {{ selectedOrder.order_number || selectedOrder.id }}</div>
         </div>
@@ -242,18 +241,6 @@
         </div>
       </div>
 
-      <!-- User Wallet -->
-      <div class="mb-3">
-        <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">
-          User Wallet Address
-        </div>
-        <div class="bg-slate-900/40 rounded-xl p-2">
-          <div class="font-mono text-white text-sm break-all">
-            {{ selectedOrder.wallet_address ? (selectedOrder.wallet_address) : '' }}
-          </div>
-        </div>
-      </div>
-
       <!-- Payment & Buyer Info -->
       <div>
         <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">Payment Information</div>
@@ -297,7 +284,7 @@
             type="text" placeholder="Type your message..."
             class="flex-1 px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all" />
           <button (click)="sendChatMessage()" [disabled]="!chatMessage.trim()"
-            class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2">
+            class="px-6 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2">
             <i class="pi pi-send"></i>
           </button>
         </div>
