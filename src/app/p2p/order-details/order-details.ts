@@ -28,9 +28,10 @@ interface ChatMessage {
   ],
   templateUrl: './order-details.html',
   styleUrl: './order-details.css',
+  providers: [MessageService],
 })
 export class OrderDetails {
-  @Input() orderId: string = '';
+  @Input() orderId: string = '698d217f980d5ab34a066879';
   @Output() backToOrders = new EventEmitter<void>();
 
   order: P2pOrder | null = null;

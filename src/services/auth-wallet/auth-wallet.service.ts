@@ -22,7 +22,7 @@ export class AuthWalletService {
   ) { }
 
   generateNonce(generateNonce: GenerateNonce): Observable<GenerateNonceResponse> {
-    return this.http.post<GenerateNonceResponse>(`${this.apiUrl}${this.apiPrefix}/request-nonce`, generateNonce);
+    return this.http.post<GenerateNonceResponse>(`${this.apiUrl}${this.apiPrefix}/generate-nonce`, generateNonce);
   }
 
   verifySignature(verifySignature: VerifySignature): Observable<VerifySignatureResponse> {
