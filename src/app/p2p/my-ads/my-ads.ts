@@ -49,8 +49,8 @@ export class MyAds {
 
   currentUser: User | null = null;
 
-  myAds: P2pAd[] = [];
-  myAdPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+  p2pAds: P2pAd[] = [];
+  p2pAdPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
 
   paymentTypes: P2pPaymentType[] = [];
   selectedPaymentType: P2pPaymentType | undefined;
@@ -58,8 +58,9 @@ export class MyAds {
   tokens: Token[] = [];
   selectedToken: Token | undefined;
 
-  showCreateDialog: boolean = false;
-  newAd: P2pAd = {
+  showP2pAdDetailsDialog: boolean = false;
+  p2pAdDetailsDialogMode: 'create' | 'edit' = 'create';
+  p2pAdForm: P2pAd = {
     id: '',
     user_id: '',
     type: 'sell',
@@ -78,8 +79,10 @@ export class MyAds {
     created_at: new Date(),
     updated_at: new Date()
   };
-  newAdPaymentTypes: P2pAdPaymentType[] = [];
-  newAdPaymentTypeForm: P2pAdPaymentType = {
+
+  showP2pAdPaymentTypeDetailsDialog: boolean = false;
+  p2pAdPaymentTypeDetailsDialogMode: 'create' | 'edit' = 'create';
+  p2pAdPaymentTypeForm: P2pAdPaymentType = {
     id: '',
     p2p_ad_id: '',
     p2p_ad: undefined,
@@ -92,74 +95,32 @@ export class MyAds {
     created_at: new Date(),
     updated_at: new Date()
   };
+  p2pAdPaymentTypes: P2pAdPaymentType[] = [];
 
-  showEditDialog: boolean = false;
-  editAd: P2pAd = {
-    id: '',
-    user_id: '',
-    type: 'sell',
-    p2p_number: '',
-    logo_url: '',
-    name: '',
-    token_symbol: 'USDT',
-    price: 0,
-    available_amount: 0,
-    min_limit: 0,
-    max_limit: 0,
-    payment_instructions: '',
-    total_orders: 0,
-    completed_orders: 0,
-    status: 'draft',
-    created_at: new Date(),
-    updated_at: new Date()
-  };
-  editAdPaymentTypes: P2pAdPaymentType[] = [];
-  editAdPaymentTypeForm: P2pAdPaymentType = {
-    id: '',
-    p2p_ad_id: '',
-    p2p_ad: undefined,
-    p2p_payment_type_id: '',
-    p2p_payment_type: undefined,
-    account_name: '',
-    account_number: '',
-    attachments: [],
-    other_details: '',
-    created_at: new Date(),
-    updated_at: new Date()
-  };
-  editAdPaymentTypeIndex: number = -1;
-
-  originalAdPaymentTypes: P2pAdPaymentType[] = [];
-  paymentTypesToDelete: string[] = [];
-
-  showPaymentMethodDialog: boolean = false;
-  paymentMethodDialogMode: 'create' | 'edit' = 'create';
-
-  showDeleteDialog: boolean = false;
-  selectedAdForDelete: P2pAd | null = null;
+  showDeleteP2pAdDialog: boolean = false;
+  selectedP2pAdToDelete: P2pAd | null = null;
 
   isLoading: boolean = false;
 
-  loadMyAds(): void {
+  loadP2pAds(): void {
     this.isLoading = true;
 
-    this.p2pAdsService.getAdsByAuthUser().subscribe({
-      next: (ads) => {
-        this.myAds = ads;
-
-        this.loadTokens();
-        this.loadPaymentTypes();
-
-        ads.forEach(ad => {
-          this.p2pAdPaymentTypesService.getAdPaymentTypesByP2pAd(ad.id).subscribe({
+    this.p2pAdsService.getP2pAds().subscribe({
+      next: (p2pAds) => {
+        this.p2pAds = p2pAds;
+        p2pAds.forEach(p2pAd => {
+          this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAd.id).subscribe({
             next: (paymentTypes) => {
-              this.myAdPaymentTypesMap.set(ad.id, paymentTypes);
+              this.p2pAdPaymentTypesMap.set(p2pAd.id, paymentTypes);
             },
             error: (error) => {
-              console.error('Error loading payment types for ad', ad.id, error);
+              console.error('Error loading payment types for ad', p2pAd.id, error);
             }
           });
         });
+
+        this.loadP2pPaymentTypes();
+        this.loadTokens();
 
         this.isLoading = false;
       },
@@ -172,6 +133,19 @@ export class MyAds {
         this.isLoading = false;
       }
     });
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'AD';
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  }
+
+  getAdPaymentTypes(p2pAdId: string): P2pAdPaymentType[] {
+    return this.p2pAdPaymentTypesMap.get(p2pAdId) || [];
   }
 
   loadTokens(): void {
@@ -192,12 +166,11 @@ export class MyAds {
     });
   }
 
-  loadPaymentTypes(): void {
-    this.p2pPaymentTypesService.getPaymentTypes().subscribe({
-      next: (paymentTypes) => {
-        this.paymentTypes = paymentTypes;
-        this.selectedPaymentType = paymentTypes.length > 0 ? paymentTypes[0] : undefined;
-
+  loadP2pPaymentTypes(): void {
+    this.p2pPaymentTypesService.getP2pPaymentTypes().subscribe({
+      next: (p2pPaymentTypes) => {
+        this.paymentTypes = p2pPaymentTypes;
+        this.selectedPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
       },
       error: (error) => {
         this.messageService.add({
@@ -207,10 +180,6 @@ export class MyAds {
         });
       }
     });
-  }
-
-  getAdPaymentTypes(adId: string): P2pAdPaymentType[] {
-    return this.myAdPaymentTypesMap.get(adId) || [];
   }
 
   getStatusBadgeClass(status: string): string {
@@ -228,48 +197,8 @@ export class MyAds {
     return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
   }
 
-  openCreateDialog(): void {
-    this.showCreateDialog = true;
-  }
-
-  closeCreateDialog(): void {
-    this.showCreateDialog = false;
-
-    this.resetAdForm();
-
-    this.newAdPaymentTypes = [];
-    this.resetNewPaymentTypeForm();
-  }
-
-  onImageUpload(event: Event, mode: 'create' | 'edit'): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const imageUrl = e.target?.result as string;
-        if (mode === 'create') {
-          this.newAd.logo_url = imageUrl;
-        } else {
-          this.editAd.logo_url = imageUrl;
-        }
-      };
-
-      reader.readAsDataURL(file);
-    }
-  }
-
-  removeImage(mode: 'create' | 'edit'): void {
-    if (mode === 'create') {
-      this.newAd.logo_url = '';
-    } else {
-      this.editAd.logo_url = '';
-    }
-  }
-
-  resetAdForm(): void {
-    this.newAd = {
+  resetP2pAdForm(): void {
+    this.p2pAdForm = {
       id: '',
       user_id: '',
       type: 'sell',
@@ -290,8 +219,12 @@ export class MyAds {
     };
   }
 
-  resetNewPaymentTypeForm(): void {
-    this.newAdPaymentTypeForm = {
+  resetP2pAdPaymentTypes(): void {
+    this.p2pAdPaymentTypes = [];
+  }
+
+  resetP2pAdFormPaymentTypeForm(): void {
+    this.p2pAdPaymentTypeForm = {
       id: '',
       p2p_ad_id: '',
       p2p_ad: undefined,
@@ -303,32 +236,57 @@ export class MyAds {
       other_details: '',
       created_at: new Date(),
       updated_at: new Date()
-    };
-
-    this.selectedPaymentType = undefined;
+    }
   }
 
-  resetEditPaymentTypeForm(): void {
-    this.editAdPaymentTypeForm = {
-      id: '',
-      p2p_ad_id: '',
-      p2p_ad: undefined,
-      p2p_payment_type_id: '',
-      p2p_payment_type: undefined,
-      account_name: '',
-      account_number: '',
-      attachments: [],
-      other_details: '',
-      created_at: new Date(),
-      updated_at: new Date()
-    };
+  createP2pAd(): void {
+    this.resetP2pAdForm();
+    this.resetP2pAdPaymentTypes();
 
-    this.editAdPaymentTypeIndex = -1;
-    this.selectedPaymentType = undefined;
+    this.showP2pAdDetailsDialog = true;
+    this.p2pAdDetailsDialogMode = 'create';
   }
 
-  addPaymentTypeToNewAd(): void {
-    if (!this.selectedPaymentType?.id || !this.newAdPaymentTypeForm.account_name || !this.newAdPaymentTypeForm.account_number) {
+  onImageUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const imageUrl = e.target?.result as string;
+        this.p2pAdForm.logo_url = imageUrl;
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage(): void {
+    this.p2pAdForm.logo_url = '';
+  }
+
+  createP2pPaymentType(): void {
+    this.resetP2pAdFormPaymentTypeForm();
+
+    this.showP2pAdPaymentTypeDetailsDialog = true;
+    this.p2pAdPaymentTypeDetailsDialogMode = 'create';
+  }
+
+  editP2pPaymentType(p2pAdPaymentType: P2pAdPaymentType): void {
+    this.resetP2pAdFormPaymentTypeForm();
+    this.p2pAdPaymentTypeForm = { ...p2pAdPaymentType };
+
+    if (this.selectedPaymentType?.id !== p2pAdPaymentType.p2p_payment_type_id) {
+      this.selectedPaymentType = this.paymentTypes.find(pt => pt.id === p2pAdPaymentType.p2p_payment_type_id);
+    }
+
+    this.showP2pAdPaymentTypeDetailsDialog = true;
+    this.p2pAdPaymentTypeDetailsDialogMode = 'edit';
+  }
+
+  saveP2pPaymentType(): void {
+    if (!this.selectedPaymentType?.id || !this.p2pAdPaymentTypeForm.account_name || !this.p2pAdPaymentTypeForm.account_number) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Validation Error',
@@ -337,166 +295,119 @@ export class MyAds {
       return;
     }
 
-    const isDuplicate = this.newAdPaymentTypes.some(
-      pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
-    );
+    if (this.p2pAdPaymentTypeDetailsDialogMode === 'create') {
+      const isDuplicate = this.p2pAdPaymentTypes.some(
+        pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
+      );
 
-    if (isDuplicate) {
+      if (isDuplicate) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Duplicate Payment Type',
+          detail: 'This payment type has already been added. Each payment type can only be added once.'
+        });
+        return;
+      }
+
+      const newPaymentType: P2pAdPaymentType = {
+        id: `temp_${Date.now()}`,
+        p2p_ad_id: this.p2pAdForm.id,
+        p2p_ad: undefined,
+        p2p_payment_type_id: this.selectedPaymentType.id,
+        p2p_payment_type: this.selectedPaymentType,
+        account_name: this.p2pAdPaymentTypeForm.account_name,
+        account_number: this.p2pAdPaymentTypeForm.account_number,
+        attachments: [],
+        other_details: this.p2pAdPaymentTypeForm.other_details,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      this.p2pAdPaymentTypes.push(newPaymentType);
+
       this.messageService.add({
-        severity: 'warn',
-        summary: 'Duplicate Payment Type',
-        detail: 'This payment type has already been added. Each payment type can only be added once.'
+        severity: 'info',
+        summary: 'Draft',
+        detail: 'Payment method added. Click Update to save changes.'
       });
-      return;
+    } else {
+      const id = this.p2pAdPaymentTypeForm.id;
+
+      const otherP2pAdPaymentTypes = this.p2pAdPaymentTypes.filter(
+        pt => pt.id !== id
+      );
+
+      if (otherP2pAdPaymentTypes.length > 0) {
+        const isDuplicate = otherP2pAdPaymentTypes.some(
+          pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
+        );
+
+        if (isDuplicate) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Duplicate Payment Type',
+            detail: 'This payment type has already been added. Each payment type can only be added once.'
+          });
+          return;
+        }
+      }
+
+      this.p2pAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
+      this.p2pAdPaymentTypeForm.p2p_payment_type = this.selectedPaymentType;
+      this.p2pAdPaymentTypeForm.updated_at = new Date();
+
+      const index = this.p2pAdPaymentTypes.findIndex(pt => pt.id === id);
+      if (index !== -1) {
+        this.p2pAdPaymentTypes[index] = this.p2pAdPaymentTypeForm;
+      }
+
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Draft',
+        detail: 'Payment method updated. Click Update to save changes.'
+      });
     }
 
-    this.newAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
-
-    const newPaymentType: P2pAdPaymentType = {
-      id: `temp_${Date.now()}`,
-      p2p_ad_id: '',
-      p2p_ad: undefined,
-      p2p_payment_type_id: this.newAdPaymentTypeForm.p2p_payment_type_id,
-      p2p_payment_type: undefined,
-      account_name: this.newAdPaymentTypeForm.account_name,
-      account_number: this.newAdPaymentTypeForm.account_number,
-      attachments: [],
-      other_details: this.newAdPaymentTypeForm.other_details,
-      created_at: new Date(),
-      updated_at: new Date()
-    };
-
-    this.newAdPaymentTypes.push(newPaymentType);
-    this.resetNewPaymentTypeForm();
-
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Payment method added!'
-    });
-
-    this.closePaymentMethodDialog();
+    this.closeP2pPaymentTypeDialog();
   }
 
-  removePaymentTypeFromNewAd(index: number): void {
-    this.newAdPaymentTypes.splice(index, 1);
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Removed',
-      detail: 'Payment method removed.'
-    });
+  closeP2pPaymentTypeDialog(): void {
+    this.resetP2pAdFormPaymentTypeForm();
+    this.showP2pAdPaymentTypeDetailsDialog = false;
   }
 
   getPaymentTypeName(id: string): string {
     return this.paymentTypes.find(pt => pt.id === id)?.name || 'Unknown';
   }
 
-  submitAd(): void {
-    if (this.newAdPaymentTypes.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please add at least one payment method.'
-      });
-      return;
-    }
-
-    this.isLoading = true;
-
-    const payload: CreateP2pAdDto = {
-      user_id: this.currentUser?.id || '',
-      type: this.newAd.type,
-      logo_url: this.newAd.logo_url,
-      name: this.newAd.name,
-      token_symbol: this.newAd.token_symbol,
-      price: this.newAd.price,
-      available_amount: this.newAd.available_amount,
-      min_limit: this.newAd.min_limit,
-      max_limit: this.newAd.max_limit,
-      payment_instructions: this.newAd.payment_instructions,
-    };
-
-    this.p2pAdsService.createAd(payload).subscribe({
-      next: (createdAd) => {
-
-        const paymentTypeObservables = this.newAdPaymentTypes.map(pt => {
-          const paymentPayload: CreateP2pAdPaymentTypeDto = {
-            p2p_ad_id: createdAd.id,
-            p2p_payment_type_id: pt.p2p_payment_type_id,
-            account_name: pt.account_name,
-            account_number: pt.account_number,
-            attachments: [],
-            other_details: pt.other_details
-          };
-
-          return this.p2pAdPaymentTypesService.createAdPaymentType(paymentPayload);
-        });
-
-        if (paymentTypeObservables.length > 0) {
-          let completed = 0;
-
-          paymentTypeObservables.forEach(obs => {
-            obs.subscribe({
-              next: () => {
-                completed++;
-
-                if (completed === paymentTypeObservables.length) {
-                  this.loadMyAds();
-                  this.closeCreateDialog();
-
-                  this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Advertisement created successfully!'
-                  });
-                  this.isLoading = false;
-                }
-              },
-              error: (error) => {
-                this.messageService.add({
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: 'Failed to create payment method: ' + (error.error?.message || 'Unknown error')
-                });
-                this.isLoading = false;
-              }
-            });
-          });
-        } else {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Advertisement created successfully!'
-          });
-          this.loadMyAds();
-          this.closeCreateDialog();
-          this.isLoading = false;
-        }
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: error.error.error || 'Error',
-          detail: error.error.message || 'Failed to create advertisement. Please try again.'
-        });
-        this.isLoading = false;
-      }
+  deleteP2pPaymentType(id: string): void {
+    this.p2pAdPaymentTypes = this.p2pAdPaymentTypes.filter(pt => pt.id !== id);
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Draft',
+      detail: 'Payment method marked for deletion. Click Update to save changes.'
     });
   }
 
-  openEditDialog(ad: P2pAd): void {
-    this.editAd = ad;
+  editP2pAd(p2pAd: P2pAd): void {
+    this.resetP2pAdForm();
+    this.resetP2pAdPaymentTypes();
 
-    this.loadAdPaymentTypes(ad.id);
-    this.showEditDialog = true;
+    this.p2pAdForm = { ...p2pAd };
+    this.loadAdPaymentTypes(p2pAd.id);
+
+    if (this.selectedToken?.symbol.toLocaleUpperCase() !== p2pAd.token_symbol.toLocaleUpperCase()) {
+      this.selectedToken = this.tokens.find(t => t.symbol.toLocaleUpperCase() === p2pAd.token_symbol.toLocaleUpperCase());
+    }
+
+    this.showP2pAdDetailsDialog = true;
+    this.p2pAdDetailsDialogMode = 'edit';
   }
 
-  loadAdPaymentTypes(p2p_ad_id: string): void {
-    this.p2pAdPaymentTypesService.getAdPaymentTypesByP2pAd(p2p_ad_id).subscribe({
+  loadAdPaymentTypes(p2pAdId: string): void {
+    this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAdId).subscribe({
       next: (payments) => {
-        this.editAdPaymentTypes = JSON.parse(JSON.stringify(payments));
-        this.originalAdPaymentTypes = JSON.parse(JSON.stringify(payments));
-        this.paymentTypesToDelete = [];
+        this.p2pAdPaymentTypes = JSON.parse(JSON.stringify(payments));
       },
       error: (error) => {
         this.messageService.add({
@@ -508,136 +419,8 @@ export class MyAds {
     });
   }
 
-  editPaymentType(paymentType: P2pAdPaymentType, index: number): void {
-    this.editAdPaymentTypeIndex = index;
-    this.paymentMethodDialogMode = 'edit';
-
-    this.editAdPaymentTypeForm = paymentType;
-
-    if (this.selectedPaymentType?.id !== paymentType.p2p_payment_type_id) {
-      this.selectedPaymentType = this.paymentTypes.find(pt => pt.id === paymentType.p2p_payment_type_id);
-    }
-
-    this.showPaymentMethodDialog = true;
-  }
-
-  updatePaymentType(): void {
-    if (!this.editAdPaymentTypeForm.id || this.editAdPaymentTypeIndex === -1) return;
-
-    if (!this.selectedPaymentType?.id || !this.editAdPaymentTypeForm.account_name || !this.editAdPaymentTypeForm.account_number) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in payment type, account name, and account number.'
-      });
-      return;
-    }
-
-    const isDuplicate = this.editAdPaymentTypes.some(
-      (pt, index) => pt.p2p_payment_type_id === this.selectedPaymentType?.id && index !== this.editAdPaymentTypeIndex
-    );
-
-    if (isDuplicate) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Duplicate Payment Type',
-        detail: 'This payment type has already been added. Each payment type can only be added once.'
-      });
-      return;
-    }
-
-    this.editAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
-    this.editAdPaymentTypeForm.p2p_payment_type = this.selectedPaymentType;
-    this.editAdPaymentTypeForm.updated_at = new Date();
-
-    this.editAdPaymentTypes[this.editAdPaymentTypeIndex] = { ...this.editAdPaymentTypeForm };
-
-    this.resetEditPaymentTypeForm();
-
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Draft',
-      detail: 'Payment method updated. Click Update to save changes.'
-    });
-
-    this.closePaymentMethodDialog();
-  }
-
-  deletePaymentType(paymentTypeId: string): void {
-    const paymentType = this.editAdPaymentTypes.find(pt => pt.id === paymentTypeId);
-
-    if (paymentType && !paymentTypeId.startsWith('temp_')) {
-      this.paymentTypesToDelete.push(paymentTypeId);
-    }
-
-    this.editAdPaymentTypes = this.editAdPaymentTypes.filter(pt => pt.id !== paymentTypeId);
-
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Draft',
-      detail: 'Payment method marked for deletion. Click Update to save changes.'
-    });
-  }
-
-  addPaymentTypeToEditAd(): void {
-    if (!this.selectedPaymentType?.id || !this.editAdPaymentTypeForm.account_name || !this.editAdPaymentTypeForm.account_number) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in payment type, account name, and account number.'
-      });
-      return;
-    }
-
-    const isDuplicate = this.editAdPaymentTypes.some(
-      pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
-    );
-
-    if (isDuplicate) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Duplicate Payment Type',
-        detail: 'This payment type has already been added. Each payment type can only be added once.'
-      });
-      return;
-    }
-
-    this.editAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
-
-    const newPaymentType: P2pAdPaymentType = {
-      id: `temp_${Date.now()}`,
-      p2p_ad_id: this.editAd.id,
-      p2p_ad: undefined,
-      p2p_payment_type_id: this.editAdPaymentTypeForm.p2p_payment_type_id,
-      p2p_payment_type: this.selectedPaymentType,
-      account_name: this.editAdPaymentTypeForm.account_name,
-      account_number: this.editAdPaymentTypeForm.account_number,
-      attachments: [],
-      other_details: this.editAdPaymentTypeForm.other_details,
-      created_at: new Date(),
-      updated_at: new Date()
-    };
-
-    this.editAdPaymentTypes.push(newPaymentType);
-    this.resetEditPaymentTypeForm();
-
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Draft',
-      detail: 'Payment method added. Click Update to save changes.'
-    });
-  }
-
-  closeEditDialog(): void {
-    this.showEditDialog = false;
-    this.editAdPaymentTypes = [];
-    this.originalAdPaymentTypes = [];
-    this.paymentTypesToDelete = [];
-    this.resetEditPaymentTypeForm();
-  }
-
-  updateAd(): void {
-    if (this.editAdPaymentTypes.length === 0) {
+  saveP2pAd(): void {
+    if (this.p2pAdPaymentTypes.length === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Validation Error',
@@ -648,234 +431,143 @@ export class MyAds {
 
     this.isLoading = true;
 
-    const { id, ...updateDto } = this.editAd;
-    const payload: UpdateP2pAdDto = {
-      type: updateDto.type,
-      logo_url: updateDto.logo_url,
-      name: updateDto.name,
-      price: updateDto.price,
-      available_amount: updateDto.available_amount,
-      min_limit: updateDto.min_limit,
-      max_limit: updateDto.max_limit,
-      payment_instructions: updateDto.payment_instructions,
-    };
+    if (this.p2pAdDetailsDialogMode === 'create') {
+      const payload: CreateP2pAdDto = {
+        user_id: this.currentUser?.id || '',
+        type: this.p2pAdForm.type,
+        logo_url: this.p2pAdForm.logo_url,
+        name: this.p2pAdForm.name,
+        token_symbol: this.p2pAdForm.token_symbol,
+        price: this.p2pAdForm.price,
+        available_amount: this.p2pAdForm.available_amount,
+        min_limit: this.p2pAdForm.min_limit,
+        max_limit: this.p2pAdForm.max_limit,
+        payment_instructions: this.p2pAdForm.payment_instructions,
+      };
 
-    this.p2pAdsService.updateAd(id, payload).subscribe({
-      next: (updatedAd) => {
-        this.processPaymentTypeChanges();
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update advertisement. Please try again.'
-        });
-        this.isLoading = false;
-      }
-    });
-  }
+      this.p2pAdsService.createP2pAd(payload).subscribe({
+        next: (createdP2pAd) => {
+          const paymentTypeObservables = this.p2pAdPaymentTypes.map(pt => {
+            const paymentPayload: CreateP2pAdPaymentTypeDto = {
+              p2p_ad_id: createdP2pAd.id,
+              p2p_payment_type_id: pt.p2p_payment_type_id,
+              account_name: pt.account_name,
+              account_number: pt.account_number,
+              attachments: [],
+              other_details: pt.other_details
+            };
 
-  processPaymentTypeChanges(): void {
-    let pendingOperations = 0;
-    let completedOperations = 0;
-    let hasErrors = false;
+            return this.p2pAdPaymentTypesService.createP2pAdPaymentType(paymentPayload);
+          });
 
-    const deleteOps = this.paymentTypesToDelete.map(id => {
-      pendingOperations++;
-      return this.p2pAdPaymentTypesService.deleteAdPaymentType(id);
-    });
+          if (paymentTypeObservables.length > 0) {
+            let completed = 0;
 
-    const createOps = this.editAdPaymentTypes
-      .filter(pt => pt.id.startsWith('temp_'))
-      .map(pt => {
-        pendingOperations++;
-        const payload: CreateP2pAdPaymentTypeDto = {
-          p2p_ad_id: this.editAd.id,
-          p2p_payment_type_id: pt.p2p_payment_type_id,
-          account_name: pt.account_name,
-          account_number: pt.account_number,
-          attachments: [],
-          other_details: pt.other_details
-        };
-        return this.p2pAdPaymentTypesService.createAdPaymentType(payload);
+            paymentTypeObservables.forEach(obs => {
+              obs.subscribe({
+                next: () => {
+                  completed++;
+
+                  if (completed === paymentTypeObservables.length) {
+                    this.loadP2pAds();
+                    this.closeP2pAdDetailsDialog();
+
+                    this.messageService.add({
+                      severity: 'success',
+                      summary: 'Success',
+                      detail: 'Advertisement created successfully!'
+                    });
+                    this.isLoading = false;
+                  }
+                },
+                error: (error) => {
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to create payment method: ' + (error.error?.message || 'Unknown error')
+                  });
+                  this.isLoading = false;
+                }
+              });
+            });
+          } else {
+            this.loadP2pAds();
+            this.closeP2pAdDetailsDialog();
+
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Advertisement created successfully!'
+            });
+            this.isLoading = false;
+          }
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: error.error.error || 'Error',
+            detail: error.error.message || 'Failed to create advertisement. Please try again.'
+          });
+          this.isLoading = false;
+        }
       });
+    } else {
+      const payload: UpdateP2pAdDto = {
+        type: this.p2pAdForm.type,
+        logo_url: this.p2pAdForm.logo_url,
+        name: this.p2pAdForm.name,
+        token_symbol: this.p2pAdForm.token_symbol,
+        price: this.p2pAdForm.price,
+        available_amount: this.p2pAdForm.available_amount,
+        min_limit: this.p2pAdForm.min_limit,
+        max_limit: this.p2pAdForm.max_limit,
+        payment_instructions: this.p2pAdForm.payment_instructions,
+      };
 
-    const updateOps = this.editAdPaymentTypes
-      .filter(pt => !pt.id.startsWith('temp_'))
-      .filter(pt => {
-        const original = this.originalAdPaymentTypes.find(opt => opt.id === pt.id);
-        return original && (
-          original.p2p_payment_type_id !== pt.p2p_payment_type_id ||
-          original.account_name !== pt.account_name ||
-          original.account_number !== pt.account_number ||
-          original.other_details !== pt.other_details
-        );
-      })
-      .map(pt => {
-        pendingOperations++;
-        const payload: UpdateP2pAdPaymentTypeDto = {
-          p2p_payment_type_id: pt.p2p_payment_type_id,
-          account_name: pt.account_name,
-          account_number: pt.account_number,
-          other_details: pt.other_details
-        };
-        return this.p2pAdPaymentTypesService.updateAdPaymentType(pt.id, payload);
-      });
+      this.p2pAdsService.updateP2pAd(this.p2pAdForm.id, payload).subscribe({
+        next: (updatedP2pAd) => {
+          // For simplicity, we'll just reload all ads after update. In a real app, you might want to update the local state more efficiently.
 
-    const checkCompletion = () => {
-      completedOperations++;
-      if (completedOperations === pendingOperations) {
-        if (!hasErrors) {
+          this.loadP2pAds();
+          this.closeP2pAdDetailsDialog();
+
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'Advertisement and payment methods updated successfully!'
+            detail: 'Advertisement updated successfully!'
           });
-        }
-
-        this.loadMyAds();
-        this.closeEditDialog();
-
-        this.isLoading = false;
-      }
-    };
-
-    if (pendingOperations === 0) {
-      this.loadMyAds();
-      this.closeEditDialog();
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Advertisement updated successfully!'
-      });
-      this.isLoading = false;
-
-      return;
-    }
-
-    deleteOps.forEach(obs => {
-      obs.subscribe({
-        next: () => checkCompletion(),
-        error: (error: any) => {
-          hasErrors = true;
+          this.isLoading = false;
+        },
+        error: (error) => {
           this.messageService.add({
             severity: 'error',
-            summary: 'Error',
-            detail: error.error?.message || 'Failed to delete payment method.'
+            summary: error.error.error || 'Error',
+            detail: error.error.message || 'Failed to update advertisement. Please try again.'
           });
-
-          checkCompletion();
+          this.isLoading = false;
         }
       });
-    });
-
-    createOps.forEach(obs => {
-      obs.subscribe({
-        next: () => checkCompletion(),
-        error: (error: any) => {
-          hasErrors = true;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: error.error?.message || 'Failed to create payment method.'
-          });
-
-          checkCompletion();
-        }
-      });
-    });
-
-    updateOps.forEach(obs => {
-      obs.subscribe({
-        next: () => checkCompletion(),
-        error: (error: any) => {
-          hasErrors = true;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: error.error?.message || 'Failed to update payment method.'
-          });
-
-          checkCompletion();
-        }
-      });
-    });
-  }
-
-  openPaymentMethodDialog(mode: 'create' | 'edit'): void {
-    this.paymentMethodDialogMode = mode;
-    this.showPaymentMethodDialog = true;
-  }
-
-  closePaymentMethodDialog(): void {
-    this.showPaymentMethodDialog = false;
-    this.resetPaymentMethodForm();
-  }
-
-  resetPaymentMethodForm(): void {
-    if (this.paymentMethodDialogMode === 'create') {
-      this.newAdPaymentTypeForm = {
-        id: '',
-        p2p_ad_id: '',
-        p2p_ad: undefined,
-        p2p_payment_type_id: '',
-        p2p_payment_type: undefined,
-        account_name: '',
-        account_number: '',
-        attachments: [],
-        other_details: '',
-        created_at: new Date(),
-        updated_at: new Date()
-      };
-    } else {
-      this.editAdPaymentTypeForm = {
-        id: '',
-        p2p_ad_id: '',
-        p2p_ad: undefined,
-        p2p_payment_type_id: '',
-        p2p_payment_type: undefined,
-        account_name: '',
-        account_number: '',
-        attachments: [],
-        other_details: '',
-        created_at: new Date(),
-        updated_at: new Date()
-      };
-    }
-
-    this.selectedPaymentType = undefined;
-    this.editAdPaymentTypeIndex = -1;
-  }
-
-  savePaymentMethod(): void {
-    if (this.paymentMethodDialogMode === 'edit') {
-      this.updatePaymentType();
-    } else {
-      if (this.paymentMethodDialogMode === 'create') {
-        this.addPaymentTypeToNewAd();
-      } else {
-        this.addPaymentTypeToEditAd();
-      }
     }
   }
 
-  openDeleteDialog(ad: P2pAd): void {
-    this.selectedAdForDelete = ad;
-    this.showDeleteDialog = true;
+  closeP2pAdDetailsDialog(): void {
+    this.showP2pAdDetailsDialog = false;
+
+    this.resetP2pAdForm();
+    this.resetP2pAdPaymentTypes();
+    this.resetP2pAdFormPaymentTypeForm();
   }
 
-  closeDeleteDialog(): void {
-    this.showDeleteDialog = false;
-    this.selectedAdForDelete = null;
+  deleteP2pAd(p2pAd: P2pAd): void {
+    this.selectedP2pAdToDelete = p2pAd;
+    this.showDeleteP2pAdDialog = true;
   }
 
-  confirmDelete(): void {
-    if (!this.selectedAdForDelete) return;
-
+  confirmDeleteP2pAd(): void {
+    if (!this.selectedP2pAdToDelete) return;
     this.isLoading = true;
 
-    this.p2pAdsService.deleteAd(this.selectedAdForDelete.id).subscribe({
+    this.p2pAdsService.deleteP2pAd(this.selectedP2pAdToDelete.id).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
@@ -883,8 +575,8 @@ export class MyAds {
           detail: 'Advertisement deleted successfully!'
         });
 
-        this.loadMyAds();
-        this.closeDeleteDialog();
+        this.loadP2pAds();
+        this.closeDeleteP2pAdDialog();
 
         this.isLoading = false;
       },
@@ -899,13 +591,9 @@ export class MyAds {
     });
   }
 
-  getInitials(name: string): string {
-    if (!name) return 'AD';
-    const words = name.trim().split(/\s+/);
-    if (words.length === 1) {
-      return words[0].substring(0, 2).toUpperCase();
-    }
-    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  closeDeleteP2pAdDialog(): void {
+    this.showDeleteP2pAdDialog = false;
+    this.selectedP2pAdToDelete = null;
   }
 
   checkAuthStatus(): void {
@@ -934,6 +622,6 @@ export class MyAds {
 
   ngOnInit(): void {
     this.checkAuthStatus();
-    this.loadMyAds();
+    this.loadP2pAds();
   }
 }

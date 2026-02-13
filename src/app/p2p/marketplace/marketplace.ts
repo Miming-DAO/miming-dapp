@@ -90,7 +90,7 @@ export class Marketplace {
   loadAds(): void {
     this.isLoading.set(true);
 
-    this.p2pAdsService.getAds().subscribe({
+    this.p2pAdsService.getP2pAds().subscribe({
       next: (ads) => {
         this.allAds = ads;
 
@@ -105,7 +105,7 @@ export class Marketplace {
         }
 
         ads.forEach(ad => {
-          this.p2pAdPaymentTypesService.getAdPaymentTypesByP2pAd(ad.id).subscribe({
+          this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(ad.id).subscribe({
             next: (paymentTypes) => {
               this.adPaymentTypesMap.set(ad.id, paymentTypes);
               completedRequests++;

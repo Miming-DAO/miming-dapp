@@ -32,37 +32,37 @@ export class P2pAdsService {
     return headers;
   }
 
-  getAds(): Observable<P2pAd[]> {
+  getP2pAds(): Observable<P2pAd[]> {
     return this.http.get<P2pAd[]>(`${this.apiUrl}/${this.apiPrefix}`, {
       headers: this.getHeaders()
     });
   }
 
-  getAdsByAuthUser(): Observable<P2pAd[]> {
+  getP2pAdsByAuthUser(): Observable<P2pAd[]> {
     return this.http.get<P2pAd[]>(`${this.apiUrl}/${this.apiPrefix}/by/auth-user`, {
       headers: this.getHeaders()
     });
   }
 
-  createAd(createDto: CreateP2pAdDto): Observable<P2pAd> {
+  createP2pAd(createDto: CreateP2pAdDto): Observable<P2pAd> {
     return this.http.post<P2pAd>(`${this.apiUrl}/${this.apiPrefix}`, createDto, {
       headers: this.getHeaders()
     });
   }
 
-  getAdById(id: string): Observable<P2pAd> {
+  getP2pAdById(id: string): Observable<P2pAd> {
     return this.http.get<P2pAd>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
-  updateAd(id: string, updateDto: UpdateP2pAdDto): Observable<P2pAd> {
+  updateP2pAd(id: string, updateDto: UpdateP2pAdDto): Observable<P2pAd> {
     return this.http.patch<P2pAd>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
       headers: this.getHeaders()
     });
   }
 
-  deleteAd(id: string): Observable<void> {
+  deleteP2pAd(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
