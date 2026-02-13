@@ -4,11 +4,11 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
         <i class="pi pi-clock text-white text-xl"></i>
       </div>
       <span
-        class="font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+        class="font-bold text-2xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
         Coming Soon
       </span>
     </div>
@@ -19,14 +19,14 @@
       <!-- Animated Icon with Glow -->
       <div class="relative inline-block mb-4">
         <div
-          class="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 blur-3xl opacity-30 animate-pulse">
+          class="absolute inset-0 bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 blur-3xl opacity-30 animate-pulse">
         </div>
         <div
-          class="absolute inset-0 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 blur-xl opacity-20 animate-pulse"
+          class="absolute inset-0 bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 blur-xl opacity-20 animate-pulse"
           style="animation-delay: 0.5s;"></div>
         <div class="relative">
           <i
-            class="pi pi-shopping-bag text-7xl bg-gradient-to-br from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl"></i>
+            class="pi pi-shopping-bag text-7xl bg-linear-to-br from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl"></i>
         </div>
       </div>
 
@@ -36,10 +36,10 @@
           P2P Marketplace
         </h3>
         <div
-          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-pink-500/20 border border-purple-500/30">
+          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-linear-to-r from-purple-500/20 via-fuchsia-500/20 to-pink-500/20 border border-purple-500/30">
           <div class="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse"></div>
           <span
-            class="text-sm font-medium bg-gradient-to-r from-purple-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
+            class="text-sm font-medium bg-linear-to-r from-purple-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
             Under Development
           </span>
         </div>
@@ -56,7 +56,7 @@
         <div
           class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-purple-500/10 backdrop-blur-sm">
           <div
-            class="feature-icon w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            class="feature-icon w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
             <i class="pi pi-shield text-purple-400 text-sm"></i>
           </div>
           <div class="text-left">
@@ -68,7 +68,7 @@
         <div
           class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-fuchsia-500/10 backdrop-blur-sm">
           <div
-            class="feature-icon w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            class="feature-icon w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center shrink-0 mt-0.5">
             <i class="pi pi-bolt text-fuchsia-400 text-sm"></i>
           </div>
           <div class="text-left">
@@ -79,8 +79,7 @@
 
         <div
           class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-pink-500/10 backdrop-blur-sm">
-          <div
-            class="feature-icon w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <div class="feature-icon w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center shrink-0 mt-0.5">
             <i class="pi pi-users text-pink-400 text-sm"></i>
           </div>
           <div class="text-left">
@@ -92,7 +91,7 @@
         <div
           class="feature-card flex items-start gap-3 p-3 rounded-2xl bg-slate-800/40 border border-purple-500/10 backdrop-blur-sm">
           <div
-            class="feature-icon w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            class="feature-icon w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
             <i class="pi pi-globe text-purple-400 text-sm"></i>
           </div>
           <div class="text-left">
@@ -122,34 +121,32 @@
 
   <ng-template #footer>
     <button (click)="navigateToCrossChain()"
-      class="w-full px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-purple-500/50 transform hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-2">
+      class="w-full px-6 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-purple-500/50 transform hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-2">
       <i class="pi pi-arrow-left"></i>
       <span>Back to Teleport Page</span>
     </button>
   </ng-template>
 </p-dialog>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 relative overflow-hidden">
+<div class="min-h-screen bg-linear-to-br from-slate-950 via-purple-950/30 to-slate-950 relative overflow-hidden">
   <!-- Animated Background Elements -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
     <div class="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse"
       style="animation-delay: 1s;"></div>
     <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-500/5 rounded-full blur-3xl animate-pulse"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-500px h-500px bg-pink-500/5 rounded-full blur-3xl animate-pulse"
       style="animation-delay: 2s;"></div>
   </div>
 
   <div class="relative z-10 min-h-screen">
-    <app-header [mobileMenuOpen]="mobileMenuOpen" (mobileMenuOpenOnClick)="mobileMenuOpenOnClick($event)"
-      (loginP2PUserOnClick)="isP2PUserLoggedIn = true" (logoutP2PUserOnClick)="isP2PUserLoggedIn = false"></app-header>
+    <app-header [mobileMenuOpen]="mobileMenuOpen" [activeMenu]="activeMenu"
+      (mobileMenuOpenOnClick)="mobileMenuOpenOnClick($event)" (activeMenuOnClick)="activeMenu = $event"
+      (loginP2PUserOnClick)="isP2PUserLoggedIn = true" (logoutP2PUserOnClick)="isP2PUserLoggedIn = false">
+    </app-header>
 
-    <div class="flex relative">
-      @if (isP2PUserLoggedIn) {
-      <app-sidebar [mobileMenuOpen]="mobileMenuOpen" (activeMenuOnClick)="activeMenu = $event"></app-sidebar>
-      }
-
-      <div class="flex-1 p-3 md:p-6 w-full">
+    <div class="w-full">
+      <div class="p-3 md:p-6">
         <router-outlet></router-outlet>
       </div>
     </div>

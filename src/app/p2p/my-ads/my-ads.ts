@@ -517,6 +517,7 @@ export class MyAds {
   editPaymentType(paymentType: P2pAdPaymentType, index: number): void {
     this.isEditingPaymentType = true;
     this.editingPaymentTypeIndex = index;
+    this.paymentMethodDialogMode = 'edit';
     this.editAdPaymentTypeForm = {
       id: paymentType.id,
       p2p_ad_id: paymentType.p2p_ad_id,
@@ -534,6 +535,8 @@ export class MyAds {
     if (this.selectedPaymentType?.id !== paymentType.p2p_payment_type_id) {
       this.selectedPaymentType = this.paymentTypes.find(pt => pt.id === paymentType.p2p_payment_type_id);
     }
+
+    this.showPaymentMethodDialog = true;
   }
 
   updatePaymentType(): void {
@@ -880,6 +883,45 @@ export class MyAds {
       }
     }
     this.closePaymentMethodDialog();
+  }
+
+  // Image upload handler
+  onImageUpload(event: Event, mode: 'create' | 'edit'): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const imageUrl = e.target?.result as string;
+        if (mode === 'create') {
+          this.newAd.logo_url = imageUrl;
+        } else {
+          this.editAd.logo_url = imageUrl;
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Remove image
+  removeImage(mode: 'create' | 'edit'): void {
+    if (mode === 'create') {
+      this.newAd.logo_url = '';
+    } else {
+      this.editAd.logo_url = '';
+    }
+  }
+
+  // Get initials from name (first 2 words)
+  getInitials(name: string): string {
+    if (!name) return 'AD';
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
   }
 
   ngOnInit(): void {

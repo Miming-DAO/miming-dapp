@@ -46,10 +46,12 @@ import { PolkadotIdenticonUtil } from '../../../shared/polkadot-identicon-util/p
 })
 export class Header {
   @Input() mobileMenuOpen: boolean = false;
+  @Input() activeMenu: string = 'marketplace';
 
   @Output() mobileMenuOpenOnClick = new EventEmitter<boolean>();
   @Output() loginP2PUserOnClick = new EventEmitter<void>();
   @Output() logoutP2PUserOnClick = new EventEmitter<void>();
+  @Output() activeMenuOnClick = new EventEmitter<string>();
 
   isMobileDevice: boolean = false;
 
@@ -67,6 +69,9 @@ export class Header {
 
   isXteriumMode: boolean = false;
 
+  navMenuOpen: boolean = false;
+  statsDropdownOpen: boolean = false;
+
   isLoggedIn: boolean = false;
   currentUser: User | null = null;
 
@@ -80,9 +85,28 @@ export class Header {
 
   isProcessing: boolean = false;
 
-  toggleMobileMenu(): void {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
-    this.mobileMenuOpenOnClick.emit(this.mobileMenuOpen);
+  setActiveMenu(menu: string): void {
+    this.activeMenuOnClick.emit(menu);
+    this.navMenuOpen = false;
+
+    switch (menu) {
+      case 'marketplace':
+        this.router.navigate(['/p2p/marketplace']);
+        break;
+      case 'orders':
+        this.router.navigate(['/p2p/orders']);
+        break;
+      case 'my-ads':
+        this.router.navigate(['/p2p/my-ads']);
+        break;
+      case 'messages':
+        this.router.navigate(['/p2p/messages']);
+        break;
+    }
+  }
+
+  navigateToAdminConsole(): void {
+    this.router.navigate(['/p2p/admin']);
   }
 
   login(): void {

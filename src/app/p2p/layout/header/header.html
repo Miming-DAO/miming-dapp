@@ -2,9 +2,9 @@
   <div class="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between">
     <div class="flex items-center gap-2 md:gap-4">
       @if (isLoggedIn) {
-      <button (click)="toggleMobileMenu()"
+      <button (click)="navMenuOpen = !navMenuOpen"
         class="lg:hidden w-8 h-8 flex items-center justify-center text-white hover:bg-slate-800 rounded-full cursor-pointer">
-        <i [class]="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'" class="text-lg"></i>
+        <i [class]="navMenuOpen ? 'pi pi-times' : 'pi pi-bars'" class="text-lg"></i>
       </button>
       }
 
@@ -17,7 +17,7 @@
       </div>
       <div>
         <h1 class="text-lg md:text-2xl font-bold text-white bg-clip-text">
-          P2P Trading Portal
+          P2P Trading
         </h1>
         <p class="text-xs text-slate-400 hidden sm:block">Peer-to-Peer Marketplace</p>
       </div>
@@ -96,6 +96,182 @@
       }
     </div>
   </div>
+
+  <!-- ****************************************** -->
+  <!-- P2P Navigation (shown only when logged in) -->
+  <!-- ****************************************** -->
+  @if (isLoggedIn) {
+  <div class="border-t border-purple-500/20">
+
+    <!-- ****************** -->
+    <!-- Desktop Navigation -->
+    <!-- ****************** -->
+    <div class="px-4 md:px-6 lg:py-3 flex items-center justify-between">
+
+      <!-- ******************************** -->
+      <!-- Left Section: Navigation Buttons -->
+      <!-- ******************************** -->
+      <div class="hidden md:flex items-center space-x-1">
+        <button (click)="setActiveMenu('marketplace')"
+          [class]="activeMenu === 'marketplace' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
+          class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer">
+          <i class="pi pi-shopping-cart text-sm"></i>
+          <span class="font-medium">Marketplace</span>
+        </button>
+        <button (click)="setActiveMenu('orders')"
+          [class]="activeMenu === 'orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
+          class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer">
+          <i class="pi pi-list text-sm"></i>
+          <span class="font-medium">Orders</span>
+        </button>
+        <button (click)="setActiveMenu('my-ads')"
+          [class]="activeMenu === 'my-ads' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
+          class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer">
+          <i class="pi pi-megaphone text-sm"></i>
+          <span class="font-medium">My Ads</span>
+        </button>
+        <button (click)="setActiveMenu('messages')"
+          [class]="activeMenu === 'messages' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
+          class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer relative">
+          <i class="pi pi-comments text-sm"></i>
+          <span class="font-medium">Messages</span>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+        </button>
+      </div>
+
+      <!-- **************************** -->
+      <!-- Right Section: Stats + Admin -->
+      <!-- **************************** -->
+      <div class="hidden lg:flex items-center gap-3">
+
+        <!-- ******************** -->
+        <!-- Quick Stats Dropdown -->
+        <!-- ******************** -->
+        <div class="relative">
+          <button (click)="statsDropdownOpen = !statsDropdownOpen"
+            class="flex items-center gap-2 px-3 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
+            <i class="pi pi-chart-line text-sm"></i>
+            <span class="text-sm font-medium">Stats</span>
+            <i [class]="statsDropdownOpen ? 'pi-chevron-up' : 'pi-chevron-down'" class="pi text-xs"></i>
+          </button>
+
+          @if (statsDropdownOpen) {
+          <div
+            class="absolute right-0 mt-2 w-56 backdrop-blur-xl bg-slate-800/95 rounded-2xl border border-purple-500/20 shadow-xl overflow-hidden z-50">
+            <div class="p-4 space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-400">Active Ads</span>
+                <span class="text-white font-bold">3</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-400">Total Orders</span>
+                <span class="text-white font-bold">127</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-400">Completion Rate</span>
+                <span class="text-green-400 font-bold">98.5%</span>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- ************ -->
+        <!-- Admin Button -->
+        <!-- ************ -->
+        <button (click)="navigateToAdminConsole()"
+          class="flex items-center gap-2 px-4 py-2 rounded-3xl bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white transition-all shadow-md hover:shadow-lg cursor-pointer">
+          <i class="pi pi-shield text-sm"></i>
+          <span class="font-semibold text-sm">Admin</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- *********** -->
+    <!-- Mobile Menu -->
+    <!-- *********** -->
+    @if (navMenuOpen) {
+    <div class="md:hidden border-t border-purple-500/20 p-3">
+      <div class="space-y-2">
+
+        <!-- *********************** -->
+        <!-- Mobile Navigation Links -->
+        <!-- *********************** -->
+        <button (click)="setActiveMenu('marketplace')"
+          [class]="activeMenu === 'marketplace' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
+          <i class="pi pi-shopping-cart"></i>
+          <div class="flex-1 text-left">
+            <div class="font-semibold">Marketplace</div>
+            <div class="text-xs opacity-70">Browse offers</div>
+          </div>
+        </button>
+        <button (click)="setActiveMenu('orders')"
+          [class]="activeMenu === 'orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
+          <i class="pi pi-list"></i>
+          <div class="flex-1 text-left">
+            <div class="font-semibold">Orders</div>
+            <div class="text-xs opacity-70">Track transactions</div>
+          </div>
+        </button>
+        <button (click)="setActiveMenu('my-ads')"
+          [class]="activeMenu === 'my-ads' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
+          <i class="pi pi-megaphone"></i>
+          <div class="flex-1 text-left">
+            <div class="font-semibold">My Ads</div>
+            <div class="text-xs opacity-70">Manage listings</div>
+          </div>
+        </button>
+        <button (click)="setActiveMenu('messages')"
+          [class]="activeMenu === 'messages' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer relative">
+          <i class="pi pi-comments"></i>
+          <div class="flex-1 text-left">
+            <div class="font-semibold">Messages</div>
+            <div class="text-xs opacity-70">Chat history</div>
+          </div>
+          <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+        </button>
+
+        <!-- ************ -->
+        <!-- Mobile Stats -->
+        <!-- ************ -->
+        <div class="pt-3 mt-3 border-t border-purple-500/20">
+          <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Quick Stats</div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
+              <div class="text-xs text-slate-400 mb-1">Ads</div>
+              <div class="text-white font-bold">3</div>
+            </div>
+            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
+              <div class="text-xs text-slate-400 mb-1">Orders</div>
+              <div class="text-white font-bold">127</div>
+            </div>
+            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
+              <div class="text-xs text-slate-400 mb-1">Rate</div>
+              <div class="text-green-400 font-bold text-sm">98%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ******************* -->
+        <!-- Mobile Admin Button -->
+        <!-- ******************* -->
+        <button (click)="navigateToAdminConsole()"
+          class="w-full mt-3 flex items-center gap-3 px-4 py-3 rounded-3xl bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white transition-all shadow-md cursor-pointer">
+          <i class="pi pi-shield"></i>
+          <div class="flex-1 text-left">
+            <div class="font-semibold">Admin Console</div>
+            <div class="text-xs opacity-90">Manage platform</div>
+          </div>
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+  }
 </div>
 
 <!-- ***************************** -->

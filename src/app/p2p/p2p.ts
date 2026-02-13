@@ -10,7 +10,6 @@ import { ButtonModule as PButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
 
 import { Header } from './layout/header/header';
-import { Sidebar } from './layout/sidebar/sidebar';
 
 @Component({
   selector: 'app-p2p',
@@ -23,20 +22,22 @@ import { Sidebar } from './layout/sidebar/sidebar';
     PInputTextModule,
     PButtonModule,
     PSelectModule,
-    Header,
-    Sidebar
+    Header
   ],
   templateUrl: './p2p.html',
   styleUrl: './p2p.css',
 })
 export class P2p {
-  private router = inject(Router);
+
+  constructor(
+    private router: Router
+  ) { }
 
   mobileMenuOpen: boolean = false;
   isP2PUserLoggedIn: boolean = false;
   showComingSoonModal: boolean = false;
 
-  activeMenu: '' | 'marketplace' | 'my-ads' | 'orders' | 'messages' = 'marketplace';
+  activeMenu: string = 'marketplace';
   activeTab: 'buy' | 'sell' = 'buy';
 
   ngOnInit() {

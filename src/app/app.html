@@ -1,12 +1,12 @@
 <div class="relative h-screen overflow-y-auto bg-slate-950">
   @if (!isXteriumMode) {
   <aside
-    class="hidden md:block fixed top-0 left-0 w-64 h-full transition-transform duration-300 ease-in-out backdrop-blur-2xl bg-gradient-to-b from-purple-900/40 via-fuchsia-900/30 to-pink-900/40 shadow-2xl shadow-purple-500/10"
+    class="hidden md:block fixed top-0 left-0 w-64 h-full transition-transform duration-300 ease-in-out backdrop-blur-2xl bg-linear-to-b from-purple-900/40 via-fuchsia-900/30 to-pink-900/40 shadow-2xl shadow-purple-500/10"
     [class.-translate-x-full]="!isSidebarVisible" [class.translate-x-0]="isSidebarVisible">
     <div class="h-full w-full bg-cover bg-center bg-no-repeat p-4 relative"
       style="background-image: url('/images/backgrounds/miming-bg.png');">
       <div
-        class="absolute inset-0 bg-gradient-to-b from-purple-900/70 via-fuchsia-900/60 to-pink-900/70 pointer-events-none">
+        class="absolute inset-0 bg-linear-to-b from-purple-900/70 via-fuchsia-900/60 to-pink-900/70 pointer-events-none">
       </div>
       <div class="relative z-10">
         <app-sidebar (onClickGenerate)="generate()"></app-sidebar>
@@ -19,7 +19,7 @@
     <div class="h-full w-full bg-cover bg-center bg-no-repeat relative p-2"
       style="background-image: url('/images/backgrounds/miming-bg.png');">
       <div
-        class="absolute inset-0 bg-gradient-to-b from-purple-900/70 via-fuchsia-900/60 to-pink-900/70 pointer-events-none">
+        class="absolute inset-0 bg-linear-to-b from-purple-900/70 via-fuchsia-900/60 to-pink-900/70 pointer-events-none">
       </div>
       <div class="relative z-10">
         <app-sidebar (onClickGenerate)="generate()" (onClose)="closeMobileDrawer()"></app-sidebar>
