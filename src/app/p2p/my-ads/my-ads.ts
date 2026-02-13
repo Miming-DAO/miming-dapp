@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -10,14 +10,16 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 
-import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
-import { P2pPaymentTypesService } from '../../../services/p2p-payment-types/p2p-payment-types.service';
-import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
-
+import { User } from '../../../models/user.model';
+import { Token } from '../../../models/token.model';
 import { P2pAd, CreateP2pAdDto, UpdateP2pAdDto } from '../../../models/p2p-ad.model';
 import { P2pPaymentType } from '../../../models/p2p-payment-type.model'
 import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto, UpdateP2pAdPaymentTypeDto } from '../../../models/p2p-ad-payment-type.model';
-import { User } from '../../../models/user.model';
+
+import { TokensService } from '../../../services/tokens/tokens.service';
+import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
+import { P2pPaymentTypesService } from '../../../services/p2p-payment-types/p2p-payment-types.service';
+import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
 
 @Component({
   selector: 'app-my-ads',
@@ -38,6 +40,7 @@ import { User } from '../../../models/user.model';
 export class MyAds {
 
   constructor(
+    private tokensService: TokensService,
     private p2pAdsService: P2pAdsService,
     private p2pPaymentTypesService: P2pPaymentTypesService,
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
@@ -47,20 +50,15 @@ export class MyAds {
   currentUser: User | null = null;
 
   myAds: P2pAd[] = [];
-  adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+  myAdPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+
   paymentTypes: P2pPaymentType[] = [];
   selectedPaymentType: P2pPaymentType | undefined;
 
-  assetOptions = [
-    { label: 'USDT', value: 'USDT' }
-  ];
-  statusOptions = [
-    { label: 'Active', value: 'active' },
-    { label: 'Paused', value: 'paused' },
-    { label: 'Draft', value: 'draft' }
-  ];
+  tokens: Token[] = [];
+  selectedToken: Token | undefined;
 
-  showCreateDialog = signal(false);
+  showCreateDialog: boolean = false;
   newAd: P2pAd = {
     id: '',
     user_id: '',
@@ -95,7 +93,7 @@ export class MyAds {
     updated_at: new Date()
   };
 
-  showEditDialog = signal(false);
+  showEditDialog: boolean = false;
   editAd: P2pAd = {
     id: '',
     user_id: '',
@@ -116,8 +114,6 @@ export class MyAds {
     updated_at: new Date()
   };
   editAdPaymentTypes: P2pAdPaymentType[] = [];
-  originalAdPaymentTypes: P2pAdPaymentType[] = [];
-  paymentTypesToDelete: string[] = [];
   editAdPaymentTypeForm: P2pAdPaymentType = {
     id: '',
     p2p_ad_id: '',
@@ -131,30 +127,33 @@ export class MyAds {
     created_at: new Date(),
     updated_at: new Date()
   };
-  isEditingPaymentType = false;
-  editingPaymentTypeIndex: number = -1;
+  editAdPaymentTypeIndex: number = -1;
 
-  showDeleteDialog = signal(false);
-  selectedAdForDelete: P2pAd | null = null;
+  originalAdPaymentTypes: P2pAdPaymentType[] = [];
+  paymentTypesToDelete: string[] = [];
 
-  showPaymentMethodDialog = false;
+  showPaymentMethodDialog: boolean = false;
   paymentMethodDialogMode: 'create' | 'edit' = 'create';
 
-  isLoading = signal(false);
+  showDeleteDialog: boolean = false;
+  selectedAdForDelete: P2pAd | null = null;
+
+  isLoading: boolean = false;
 
   loadMyAds(): void {
-    this.isLoading.set(true);
+    this.isLoading = true;
 
     this.p2pAdsService.getAdsByAuthUser().subscribe({
       next: (ads) => {
         this.myAds = ads;
+
+        this.loadTokens();
         this.loadPaymentTypes();
 
-        // Load payment types for each ad
         ads.forEach(ad => {
           this.p2pAdPaymentTypesService.getAdPaymentTypesByP2pAd(ad.id).subscribe({
             next: (paymentTypes) => {
-              this.adPaymentTypesMap.set(ad.id, paymentTypes);
+              this.myAdPaymentTypesMap.set(ad.id, paymentTypes);
             },
             error: (error) => {
               console.error('Error loading payment types for ad', ad.id, error);
@@ -162,7 +161,7 @@ export class MyAds {
           });
         });
 
-        this.isLoading.set(false);
+        this.isLoading = false;
       },
       error: (error) => {
         this.messageService.add({
@@ -170,7 +169,25 @@ export class MyAds {
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load your advertisements. Please try again.'
         });
-        this.isLoading.set(false);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadTokens(): void {
+    this.tokensService.getAllTokens().subscribe({
+      next: (tokens) => {
+        const usdtToken = tokens.find(t => t.symbol.toLocaleUpperCase() === 'USDT');
+        if (usdtToken) {
+          this.tokens = [usdtToken];
+        }
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load tokens. Please try again.'
+        });
       }
     });
   }
@@ -180,9 +197,9 @@ export class MyAds {
       next: (paymentTypes) => {
         this.paymentTypes = paymentTypes;
         this.selectedPaymentType = paymentTypes.length > 0 ? paymentTypes[0] : undefined;
+
       },
       error: (error) => {
-        console.log(error);
         this.messageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
@@ -190,6 +207,10 @@ export class MyAds {
         });
       }
     });
+  }
+
+  getAdPaymentTypes(adId: string): P2pAdPaymentType[] {
+    return this.myAdPaymentTypesMap.get(adId) || [];
   }
 
   getStatusBadgeClass(status: string): string {
@@ -208,15 +229,46 @@ export class MyAds {
   }
 
   openCreateDialog(): void {
-    this.showCreateDialog.set(true);
+    this.showCreateDialog = true;
   }
 
   closeCreateDialog(): void {
-    this.showCreateDialog.set(false);
-    this.resetForm();
+    this.showCreateDialog = false;
+
+    this.resetAdForm();
+
+    this.newAdPaymentTypes = [];
+    this.resetNewPaymentTypeForm();
   }
 
-  resetForm(): void {
+  onImageUpload(event: Event, mode: 'create' | 'edit'): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const imageUrl = e.target?.result as string;
+        if (mode === 'create') {
+          this.newAd.logo_url = imageUrl;
+        } else {
+          this.editAd.logo_url = imageUrl;
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage(mode: 'create' | 'edit'): void {
+    if (mode === 'create') {
+      this.newAd.logo_url = '';
+    } else {
+      this.editAd.logo_url = '';
+    }
+  }
+
+  resetAdForm(): void {
     this.newAd = {
       id: '',
       user_id: '',
@@ -236,8 +288,6 @@ export class MyAds {
       created_at: new Date(),
       updated_at: new Date()
     };
-    this.newAdPaymentTypes = [];
-    this.resetNewPaymentTypeForm();
   }
 
   resetNewPaymentTypeForm(): void {
@@ -254,6 +304,27 @@ export class MyAds {
       created_at: new Date(),
       updated_at: new Date()
     };
+
+    this.selectedPaymentType = undefined;
+  }
+
+  resetEditPaymentTypeForm(): void {
+    this.editAdPaymentTypeForm = {
+      id: '',
+      p2p_ad_id: '',
+      p2p_ad: undefined,
+      p2p_payment_type_id: '',
+      p2p_payment_type: undefined,
+      account_name: '',
+      account_number: '',
+      attachments: [],
+      other_details: '',
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    this.editAdPaymentTypeIndex = -1;
+    this.selectedPaymentType = undefined;
   }
 
   addPaymentTypeToNewAd(): void {
@@ -266,7 +337,6 @@ export class MyAds {
       return;
     }
 
-    // Check if payment type already exists
     const isDuplicate = this.newAdPaymentTypes.some(
       pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
     );
@@ -304,6 +374,8 @@ export class MyAds {
       summary: 'Success',
       detail: 'Payment method added!'
     });
+
+    this.closePaymentMethodDialog();
   }
 
   removePaymentTypeFromNewAd(index: number): void {
@@ -319,10 +391,6 @@ export class MyAds {
     return this.paymentTypes.find(pt => pt.id === id)?.name || 'Unknown';
   }
 
-  getAdPaymentTypes(adId: string): P2pAdPaymentType[] {
-    return this.adPaymentTypesMap.get(adId) || [];
-  }
-
   submitAd(): void {
     if (this.newAdPaymentTypes.length === 0) {
       this.messageService.add({
@@ -333,7 +401,7 @@ export class MyAds {
       return;
     }
 
-    this.isLoading.set(true);
+    this.isLoading = true;
 
     const payload: CreateP2pAdDto = {
       user_id: this.currentUser?.id || '',
@@ -350,7 +418,7 @@ export class MyAds {
 
     this.p2pAdsService.createAd(payload).subscribe({
       next: (createdAd) => {
-        // Create payment types for the new ad
+
         const paymentTypeObservables = this.newAdPaymentTypes.map(pt => {
           const paymentPayload: CreateP2pAdPaymentTypeDto = {
             p2p_ad_id: createdAd.id,
@@ -360,25 +428,28 @@ export class MyAds {
             attachments: [],
             other_details: pt.other_details
           };
+
           return this.p2pAdPaymentTypesService.createAdPaymentType(paymentPayload);
         });
 
-        // Wait for all payment types to be created
         if (paymentTypeObservables.length > 0) {
           let completed = 0;
+
           paymentTypeObservables.forEach(obs => {
             obs.subscribe({
               next: () => {
                 completed++;
+
                 if (completed === paymentTypeObservables.length) {
+                  this.loadMyAds();
+                  this.closeCreateDialog();
+
                   this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
                     detail: 'Advertisement created successfully!'
                   });
-                  this.loadMyAds();
-                  this.closeCreateDialog();
-                  this.isLoading.set(false);
+                  this.isLoading = false;
                 }
               },
               error: (error) => {
@@ -387,7 +458,7 @@ export class MyAds {
                   summary: 'Error',
                   detail: 'Failed to create payment method: ' + (error.error?.message || 'Unknown error')
                 });
-                this.isLoading.set(false);
+                this.isLoading = false;
               }
             });
           });
@@ -399,7 +470,7 @@ export class MyAds {
           });
           this.loadMyAds();
           this.closeCreateDialog();
-          this.isLoading.set(false);
+          this.isLoading = false;
         }
       },
       error: (error) => {
@@ -408,7 +479,7 @@ export class MyAds {
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to create advertisement. Please try again.'
         });
-        this.isLoading.set(false);
+        this.isLoading = false;
       }
     });
   }
@@ -417,7 +488,7 @@ export class MyAds {
     this.editAd = ad;
 
     this.loadAdPaymentTypes(ad.id);
-    this.showEditDialog.set(true);
+    this.showEditDialog = true;
   }
 
   loadAdPaymentTypes(p2p_ad_id: string): void {
@@ -437,31 +508,75 @@ export class MyAds {
     });
   }
 
-  resetEditPaymentTypeForm(): void {
-    this.editAdPaymentTypeForm = {
-      id: '',
-      p2p_ad_id: '',
-      p2p_ad: undefined,
-      p2p_payment_type_id: '',
-      p2p_payment_type: undefined,
-      account_name: '',
-      account_number: '',
-      attachments: [],
-      other_details: '',
-      created_at: new Date(),
-      updated_at: new Date()
-    };
-    this.isEditingPaymentType = false;
-    this.editingPaymentTypeIndex = -1;
-    this.selectedPaymentType = undefined;
+  editPaymentType(paymentType: P2pAdPaymentType, index: number): void {
+    this.editAdPaymentTypeIndex = index;
+    this.paymentMethodDialogMode = 'edit';
+
+    this.editAdPaymentTypeForm = paymentType;
+
+    if (this.selectedPaymentType?.id !== paymentType.p2p_payment_type_id) {
+      this.selectedPaymentType = this.paymentTypes.find(pt => pt.id === paymentType.p2p_payment_type_id);
+    }
+
+    this.showPaymentMethodDialog = true;
   }
 
-  closeEditDialog(): void {
-    this.showEditDialog.set(false);
-    this.editAdPaymentTypes = [];
-    this.originalAdPaymentTypes = [];
-    this.paymentTypesToDelete = [];
+  updatePaymentType(): void {
+    if (!this.editAdPaymentTypeForm.id || this.editAdPaymentTypeIndex === -1) return;
+
+    if (!this.selectedPaymentType?.id || !this.editAdPaymentTypeForm.account_name || !this.editAdPaymentTypeForm.account_number) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please fill in payment type, account name, and account number.'
+      });
+      return;
+    }
+
+    const isDuplicate = this.editAdPaymentTypes.some(
+      (pt, index) => pt.p2p_payment_type_id === this.selectedPaymentType?.id && index !== this.editAdPaymentTypeIndex
+    );
+
+    if (isDuplicate) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Duplicate Payment Type',
+        detail: 'This payment type has already been added. Each payment type can only be added once.'
+      });
+      return;
+    }
+
+    this.editAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
+    this.editAdPaymentTypeForm.p2p_payment_type = this.selectedPaymentType;
+    this.editAdPaymentTypeForm.updated_at = new Date();
+
+    this.editAdPaymentTypes[this.editAdPaymentTypeIndex] = { ...this.editAdPaymentTypeForm };
+
     this.resetEditPaymentTypeForm();
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Draft',
+      detail: 'Payment method updated. Click Update to save changes.'
+    });
+
+    this.closePaymentMethodDialog();
+  }
+
+  deletePaymentType(paymentTypeId: string): void {
+    const paymentType = this.editAdPaymentTypes.find(pt => pt.id === paymentTypeId);
+
+    if (paymentType && !paymentTypeId.startsWith('temp_')) {
+      this.paymentTypesToDelete.push(paymentTypeId);
+    }
+
+    this.editAdPaymentTypes = this.editAdPaymentTypes.filter(pt => pt.id !== paymentTypeId);
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Draft',
+      detail: 'Payment method marked for deletion. Click Update to save changes.'
+    });
   }
 
   addPaymentTypeToEditAd(): void {
@@ -474,7 +589,6 @@ export class MyAds {
       return;
     }
 
-    // Check if payment type already exists
     const isDuplicate = this.editAdPaymentTypes.some(
       pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
     );
@@ -514,87 +628,12 @@ export class MyAds {
     });
   }
 
-  editPaymentType(paymentType: P2pAdPaymentType, index: number): void {
-    this.isEditingPaymentType = true;
-    this.editingPaymentTypeIndex = index;
-    this.paymentMethodDialogMode = 'edit';
-    this.editAdPaymentTypeForm = {
-      id: paymentType.id,
-      p2p_ad_id: paymentType.p2p_ad_id,
-      p2p_ad: paymentType.p2p_ad,
-      p2p_payment_type_id: paymentType.p2p_payment_type_id,
-      p2p_payment_type: paymentType.p2p_payment_type,
-      account_name: paymentType.account_name,
-      account_number: paymentType.account_number,
-      attachments: paymentType.attachments,
-      other_details: paymentType.other_details,
-      created_at: paymentType.created_at,
-      updated_at: paymentType.updated_at
-    };
-
-    if (this.selectedPaymentType?.id !== paymentType.p2p_payment_type_id) {
-      this.selectedPaymentType = this.paymentTypes.find(pt => pt.id === paymentType.p2p_payment_type_id);
-    }
-
-    this.showPaymentMethodDialog = true;
-  }
-
-  updatePaymentType(): void {
-    if (!this.editAdPaymentTypeForm.id || this.editingPaymentTypeIndex === -1) return;
-
-    if (!this.selectedPaymentType?.id || !this.editAdPaymentTypeForm.account_name || !this.editAdPaymentTypeForm.account_number) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in payment type, account name, and account number.'
-      });
-      return;
-    }
-
-    // Check if payment type already exists (excluding current one being edited)
-    const isDuplicate = this.editAdPaymentTypes.some(
-      (pt, index) => pt.p2p_payment_type_id === this.selectedPaymentType?.id && index !== this.editingPaymentTypeIndex
-    );
-
-    if (isDuplicate) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Duplicate Payment Type',
-        detail: 'This payment type has already been added. Each payment type can only be added once.'
-      });
-      return;
-    }
-
-    this.editAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
-    this.editAdPaymentTypeForm.p2p_payment_type = this.selectedPaymentType;
-    this.editAdPaymentTypeForm.updated_at = new Date();
-
-    this.editAdPaymentTypes[this.editingPaymentTypeIndex] = { ...this.editAdPaymentTypeForm };
-
+  closeEditDialog(): void {
+    this.showEditDialog = false;
+    this.editAdPaymentTypes = [];
+    this.originalAdPaymentTypes = [];
+    this.paymentTypesToDelete = [];
     this.resetEditPaymentTypeForm();
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Draft',
-      detail: 'Payment method updated. Click Update to save changes.'
-    });
-  }
-
-  deletePaymentType(paymentTypeId: string): void {
-    const paymentType = this.editAdPaymentTypes.find(pt => pt.id === paymentTypeId);
-
-    // If it's an existing payment type (not temp), mark for deletion
-    if (paymentType && !paymentTypeId.startsWith('temp_')) {
-      this.paymentTypesToDelete.push(paymentTypeId);
-    }
-
-    // Remove from the list
-    this.editAdPaymentTypes = this.editAdPaymentTypes.filter(pt => pt.id !== paymentTypeId);
-
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Draft',
-      detail: 'Payment method marked for deletion. Click Update to save changes.'
-    });
   }
 
   updateAd(): void {
@@ -607,7 +646,7 @@ export class MyAds {
       return;
     }
 
-    this.isLoading.set(true);
+    this.isLoading = true;
 
     const { id, ...updateDto } = this.editAd;
     const payload: UpdateP2pAdDto = {
@@ -623,7 +662,6 @@ export class MyAds {
 
     this.p2pAdsService.updateAd(id, payload).subscribe({
       next: (updatedAd) => {
-        // Process payment type changes
         this.processPaymentTypeChanges();
       },
       error: (error) => {
@@ -632,7 +670,7 @@ export class MyAds {
           summary: 'Error',
           detail: 'Failed to update advertisement. Please try again.'
         });
-        this.isLoading.set(false);
+        this.isLoading = false;
       }
     });
   }
@@ -642,13 +680,11 @@ export class MyAds {
     let completedOperations = 0;
     let hasErrors = false;
 
-    // Delete payment types
     const deleteOps = this.paymentTypesToDelete.map(id => {
       pendingOperations++;
       return this.p2pAdPaymentTypesService.deleteAdPaymentType(id);
     });
 
-    // Create new payment types (temp IDs)
     const createOps = this.editAdPaymentTypes
       .filter(pt => pt.id.startsWith('temp_'))
       .map(pt => {
@@ -664,7 +700,6 @@ export class MyAds {
         return this.p2pAdPaymentTypesService.createAdPaymentType(payload);
       });
 
-    // Update existing payment types
     const updateOps = this.editAdPaymentTypes
       .filter(pt => !pt.id.startsWith('temp_'))
       .filter(pt => {
@@ -697,25 +732,28 @@ export class MyAds {
             detail: 'Advertisement and payment methods updated successfully!'
           });
         }
+
         this.loadMyAds();
         this.closeEditDialog();
-        this.isLoading.set(false);
+
+        this.isLoading = false;
       }
     };
 
     if (pendingOperations === 0) {
+      this.loadMyAds();
+      this.closeEditDialog();
+
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Advertisement updated successfully!'
       });
-      this.loadMyAds();
-      this.closeEditDialog();
-      this.isLoading.set(false);
+      this.isLoading = false;
+
       return;
     }
 
-    // Execute all operations
     deleteOps.forEach(obs => {
       obs.subscribe({
         next: () => checkCompletion(),
@@ -726,6 +764,7 @@ export class MyAds {
             summary: 'Error',
             detail: error.error?.message || 'Failed to delete payment method.'
           });
+
           checkCompletion();
         }
       });
@@ -741,6 +780,7 @@ export class MyAds {
             summary: 'Error',
             detail: error.error?.message || 'Failed to create payment method.'
           });
+
           checkCompletion();
         }
       });
@@ -756,73 +796,11 @@ export class MyAds {
             summary: 'Error',
             detail: error.error?.message || 'Failed to update payment method.'
           });
+
           checkCompletion();
         }
       });
     });
-  }
-
-  openDeleteDialog(ad: P2pAd): void {
-    this.selectedAdForDelete = ad;
-    this.showDeleteDialog.set(true);
-  }
-
-  closeDeleteDialog(): void {
-    this.showDeleteDialog.set(false);
-    this.selectedAdForDelete = null;
-  }
-
-  confirmDelete(): void {
-    if (!this.selectedAdForDelete) return;
-
-    this.isLoading.set(true);
-
-    this.p2pAdsService.deleteAd(this.selectedAdForDelete.id).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Advertisement deleted successfully!'
-        });
-
-        this.loadMyAds();
-        this.closeDeleteDialog();
-
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to delete advertisement. Please try again.'
-        });
-        this.isLoading.set(false);
-      }
-    });
-  }
-
-  checkAuthStatus(): void {
-    const authUser = localStorage.getItem('auth_user');
-    if (authUser) {
-      try {
-        const userData = JSON.parse(authUser);
-
-        this.currentUser = {
-          id: userData.user._id,
-          email: userData.user.email,
-          full_name: userData.user.full_name,
-          username: userData.user.username,
-          type: userData.user.type,
-          auth_type: userData.user.auth_type,
-          is_disabled: false,
-          photo_url: userData.user.photo_url,
-          google_account_id: userData.user.google_account_id,
-        };
-      } catch (error) {
-        console.error('Failed to parse auth data:', error);
-        localStorage.removeItem('auth_user');
-      }
-    }
   }
 
   openPaymentMethodDialog(mode: 'create' | 'edit'): void {
@@ -865,16 +843,14 @@ export class MyAds {
         updated_at: new Date()
       };
     }
+
     this.selectedPaymentType = undefined;
-    this.isEditingPaymentType = false;
-    this.editingPaymentTypeIndex = -1;
+    this.editAdPaymentTypeIndex = -1;
   }
 
   savePaymentMethod(): void {
-    if (this.isEditingPaymentType) {
-      if (this.paymentMethodDialogMode === 'edit') {
-        this.updatePaymentType();
-      }
+    if (this.paymentMethodDialogMode === 'edit') {
+      this.updatePaymentType();
     } else {
       if (this.paymentMethodDialogMode === 'create') {
         this.addPaymentTypeToNewAd();
@@ -882,39 +858,47 @@ export class MyAds {
         this.addPaymentTypeToEditAd();
       }
     }
-    this.closePaymentMethodDialog();
   }
 
-  // Image upload handler
-  onImageUpload(event: Event, mode: 'create' | 'edit'): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const imageUrl = e.target?.result as string;
-        if (mode === 'create') {
-          this.newAd.logo_url = imageUrl;
-        } else {
-          this.editAd.logo_url = imageUrl;
-        }
-      };
-
-      reader.readAsDataURL(file);
-    }
+  openDeleteDialog(ad: P2pAd): void {
+    this.selectedAdForDelete = ad;
+    this.showDeleteDialog = true;
   }
 
-  // Remove image
-  removeImage(mode: 'create' | 'edit'): void {
-    if (mode === 'create') {
-      this.newAd.logo_url = '';
-    } else {
-      this.editAd.logo_url = '';
-    }
+  closeDeleteDialog(): void {
+    this.showDeleteDialog = false;
+    this.selectedAdForDelete = null;
   }
 
-  // Get initials from name (first 2 words)
+  confirmDelete(): void {
+    if (!this.selectedAdForDelete) return;
+
+    this.isLoading = true;
+
+    this.p2pAdsService.deleteAd(this.selectedAdForDelete.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Advertisement deleted successfully!'
+        });
+
+        this.loadMyAds();
+        this.closeDeleteDialog();
+
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to delete advertisement. Please try again.'
+        });
+        this.isLoading = false;
+      }
+    });
+  }
+
   getInitials(name: string): string {
     if (!name) return 'AD';
     const words = name.trim().split(/\s+/);
@@ -922,6 +906,30 @@ export class MyAds {
       return words[0].substring(0, 2).toUpperCase();
     }
     return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  }
+
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+        };
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
+    }
   }
 
   ngOnInit(): void {

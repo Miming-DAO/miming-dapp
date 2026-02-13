@@ -19,7 +19,7 @@
     <!-- ************* -->
     <!-- Loading State -->
     <!-- ************* -->
-    @if (isLoading()) {
+    @if (isLoading) {
     <div class="flex justify-center items-center py-12">
       <div class="flex flex-col items-center gap-4">
         <i class="pi pi-spin pi-spinner text-4xl text-purple-400"></i>
@@ -31,7 +31,7 @@
     <!-- *********** -->
     <!-- Empty State -->
     <!-- *********** -->
-    @if (!isLoading() && myAds.length === 0) {
+    @if (!isLoading && myAds.length === 0) {
     <div class="text-center py-12">
       <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-purple-500/10 flex items-center justify-center">
         <i class="pi pi-inbox text-4xl text-purple-400"></i>
@@ -49,7 +49,7 @@
     <!-- ******** -->
     <!-- Ads List -->
     <!-- ******** -->
-    @if (!isLoading() && myAds.length > 0) {
+    @if (!isLoading && myAds.length > 0) {
 
     <!-- ****************** -->
     <!-- Desktop Table View -->
@@ -409,24 +409,26 @@
               </div>
 
               <!-- *************** -->
-              <!-- Asset Selection -->
+              <!-- Token Selection -->
               <!-- *************** -->
               <div>
-                <label class="text-xs text-slate-400 mb-2 block">Asset <span class="text-red-400">*</span></label>
-                <p-select [options]="assetOptions" [(ngModel)]="newAd.token_symbol" name="asset"
-                  placeholder="Select Asset" class="w-full" size="large">
+                <label class="text-xs text-slate-400 mb-2 block">Token <span class="text-red-400">*</span></label>
+                <p-select [options]="tokens" [(ngModel)]="selectedToken" name="token" placeholder="Select Token"
+                  class="w-full" size="large">
                   <ng-template #selectedItem let-selectedOption>
                     @if (selectedOption) {
                     <div class="flex items-center gap-2 text-lg">
-                      <img [src]="'/images/tokens/usdt.png'" [alt]="selectedOption" class="w-7 h-7 object-contain" />
-                      <span class="font-semibold text-white">{{ selectedOption.label }}</span>
+                      <img [src]="'/images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'"
+                        [alt]="selectedOption.symbol" class="w-7 h-7 object-contain" />
+                      <span class="font-semibold text-white">{{ selectedOption.symbol }}</span>
                     </div>
                     }
                   </ng-template>
-                  <ng-template let-asset #item>
+                  <ng-template let-token #item>
                     <div class="flex items-center gap-2 transition-colors py-1">
-                      <img [src]="'/images/tokens/usdt.png'" [alt]="asset" class="w-6 h-6 object-contain" />
-                      <span class="font-medium">{{ asset.label }}</span>
+                      <img [src]="'/images/tokens/' + token.symbol.toLowerCase() + '.png'" [alt]="token.symbol"
+                        class="w-6 h-6 object-contain" />
+                      <span class="font-medium">{{ token.symbol }}</span>
                     </div>
                   </ng-template>
                 </p-select>
@@ -701,24 +703,26 @@
               </div>
 
               <!-- *************** -->
-              <!-- Asset Selection -->
+              <!-- Token Selection -->
               <!-- *************** -->
               <div>
-                <label class="text-xs text-slate-400 mb-2 block">Asset <span class="text-red-400">*</span></label>
-                <p-select [options]="assetOptions" [(ngModel)]="editAd.token_symbol" name="editAsset"
-                  placeholder="Select Asset" class="w-full" size="large">
+                <label class="text-xs text-slate-400 mb-2 block">Token <span class="text-red-400">*</span></label>
+                <p-select [options]="tokens" [(ngModel)]="selectedToken" name="token" placeholder="Select Token"
+                  class="w-full" size="large">
                   <ng-template #selectedItem let-selectedOption>
                     @if (selectedOption) {
                     <div class="flex items-center gap-2 text-lg">
-                      <img [src]="'/images/tokens/usdt.png'" [alt]="selectedOption" class="w-7 h-7 object-contain" />
-                      <span class="font-semibold text-white">{{ selectedOption.label }}</span>
+                      <img [src]="'/images/tokens/' + selectedOption.symbol.toLowerCase() + '.png'"
+                        [alt]="selectedOption.symbol" class="w-7 h-7 object-contain" />
+                      <span class="font-semibold text-white">{{ selectedOption.symbol }}</span>
                     </div>
                     }
                   </ng-template>
-                  <ng-template let-asset #item>
+                  <ng-template let-token #item>
                     <div class="flex items-center gap-2 transition-colors py-1">
-                      <img [src]="'/images/tokens/usdt.png'" [alt]="asset" class="w-6 h-6 object-contain" />
-                      <span class="font-medium">{{ asset.label }}</span>
+                      <img [src]="'/images/tokens/' + token.symbol.toLowerCase() + '.png'" [alt]="token.symbol"
+                        class="w-6 h-6 object-contain" />
+                      <span class="font-medium">{{ token.symbol }}</span>
                     </div>
                   </ng-template>
                 </p-select>
@@ -908,13 +912,14 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-        <i [class]="isEditingPaymentType ? 'pi pi-pencil' : 'pi pi-plus'" class="text-white text-lg"></i>
+        <i [class]="paymentMethodDialogMode === 'edit' ? 'pi pi-pencil' : 'pi pi-plus'" class="text-white text-lg"></i>
       </div>
       <div>
         <span class="font-bold text-lg bg-linear-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
-          {{ isEditingPaymentType ? 'Edit Payment Method' : 'Add Payment Method' }}
+          {{ paymentMethodDialogMode === 'edit' ? 'Edit Payment Method' : 'Add Payment Method' }}
         </span>
-        <div class="text-xs text-slate-400">{{ isEditingPaymentType ? 'Update payment details' : 'Add a new payment
+        <div class="text-xs text-slate-400">{{ paymentMethodDialogMode === 'edit' ? 'Update payment details' : 'Add a
+          new payment
           option' }}</div>
       </div>
     </div>
@@ -1040,12 +1045,12 @@
   </div>
   <ng-template #footer>
     <div class="flex flex-col sm:flex-row gap-2">
-      <button type="button" (click)="confirmDelete()" [disabled]="isLoading()"
+      <button type="button" (click)="confirmDelete()" [disabled]="isLoading"
         class="px-6 py-3 rounded-3xl bg-linear-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
         <i class="pi pi-trash mr-2"></i>
         Delete
       </button>
-      <button type="button" (click)="closeDeleteDialog()" [disabled]="isLoading()"
+      <button type="button" (click)="closeDeleteDialog()" [disabled]="isLoading"
         class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer disabled:cursor-not-allowed">
         <i class="pi pi-times mr-2"></i>
         Cancel

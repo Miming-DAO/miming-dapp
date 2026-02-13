@@ -70,7 +70,7 @@ export class Header {
   isXteriumMode: boolean = false;
 
   navMenuOpen: boolean = false;
-  statsDropdownOpen: boolean = false;
+  showStatsDialog: boolean = false;
 
   isLoggedIn: boolean = false;
   currentUser: User | null = null;
