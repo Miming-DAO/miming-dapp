@@ -40,6 +40,7 @@ export class Orders {
     private messageService: MessageService
   ) { }
 
+  activeViewTab: 'my-orders' | 'my-ad-orders' = 'my-orders';
   activeStatusTab: 'in-progress' | 'completed' | 'cancelled' = 'in-progress';
   showOrderDetailsDialog: boolean = false;
   showOrderChatDialog: boolean = false;
@@ -52,7 +53,12 @@ export class Orders {
   chatMessage: string = '';
   chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
 
-  orders: P2pOrder[] = [];
+  myOrders: P2pOrder[] = []; // Orders I placed on others' ads
+  myAdOrders: P2pOrder[] = []; // Orders others placed on my ads
+
+  get orders(): P2pOrder[] {
+    return this.activeViewTab === 'my-orders' ? this.myOrders : this.myAdOrders;
+  }
 
   get filteredOrders(): P2pOrder[] {
     if (this.activeStatusTab === 'in-progress') {
@@ -65,9 +71,10 @@ export class Orders {
   loadOrders(): void {
     this.isLoading = true;
 
+    // Load both my orders and my ad orders
     this.p2pOrdersService.getOrdersByAuthUser().subscribe({
       next: (orders: P2pOrder[]) => {
-        this.orders = orders;
+        this.myOrders = orders;
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -79,6 +86,20 @@ export class Orders {
         this.isLoading = false;
       }
     });
+
+    // TODO: Add API call to load orders on my ads (where I'm the ad owner)
+    // this.p2pOrdersService.getOrdersOnMyAds().subscribe({
+    //   next: (orders: P2pOrder[]) => {
+    //     this.myAdOrders = orders;
+    //   },
+    //   error: (error: any) => {
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: error.error.error || 'Error',
+    //       detail: error.error.message || 'Failed to load ad orders.'
+    //     });
+    //   }
+    // });
   }
 
   openOrderChat(order: P2pOrder) {
