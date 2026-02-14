@@ -50,8 +50,8 @@ export class P2pAdPaymentTypesService {
     });
   }
 
-  createManyP2pAdPaymentTypes(createDto: CreateP2pAdPaymentTypeDto): Observable<P2pAdPaymentType> {
-    return this.http.post<P2pAdPaymentType>(`${this.apiUrl}/${this.apiPrefix}/many`, createDto, {
+  createManyP2pAdPaymentTypes(createDtos: CreateP2pAdPaymentTypeDto[]): Observable<P2pAdPaymentType[]> {
+    return this.http.post<P2pAdPaymentType[]>(`${this.apiUrl}/${this.apiPrefix}/many`, createDtos, {
       headers: this.getHeaders()
     });
   }
@@ -70,6 +70,12 @@ export class P2pAdPaymentTypesService {
 
   deleteP2pAdPaymentType(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteP2pAdPaymentTypesByP2pAd(p2p_ad_id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/many/by/p2p-ad/${p2p_ad_id}`, {
       headers: this.getHeaders()
     });
   }
