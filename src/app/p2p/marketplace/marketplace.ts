@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -14,10 +14,12 @@ import { MessageService } from 'primeng/api';
 import { Chain } from '../../../models/chain.model';
 import { P2pAd } from '../../../models/p2p-ad.model';
 import { P2pAdPaymentType } from '../../../models/p2p-ad-payment-type.model';
+import { P2pPaymentType } from '../../../models/p2p-payment-type.model';
 import { CreateP2pOrderDto } from '../../../models/p2p-order.model';
 
 import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
 import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
+import { P2pPaymentTypesService } from '../../../services/p2p-payment-types/p2p-payment-types.service';
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { User } from '../../../models/user.model';
 
@@ -58,38 +60,61 @@ export class Marketplace {
   constructor(
     private p2pAdsService: P2pAdsService,
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
+    private p2pPaymentTypesService: P2pPaymentTypesService,
     private p2pOrdersService: P2pOrdersService,
     private messageService: MessageService
   ) { }
 
   currentUser: User | null = null;
 
-  paymentTypes: string[] = ['GCash', 'Bank Transfer'];
-  selectedPaymentType: string | undefined;
+  paymentTypes: P2pPaymentType[] = [];
+  selectedPaymentType: P2pPaymentType | undefined;
 
   searchTerm: string = '';
 
   allAds: P2pAd[] = [];
   adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
-  isLoading = signal(false);
+  isLoading: boolean = false;
 
   buyOffers: Offer[] = [];
   sellOffers: Offer[] = [];
 
+  // Computed filtered offers
+  get filteredOffers(): Offer[] {
+    let offers = this.activeTab === 'buy' ? this.buyOffers : this.sellOffers;
+
+    // Filter by payment type
+    if (this.selectedPaymentType) {
+      offers = offers.filter(offer =>
+        offer.paymentMethods.includes(this.selectedPaymentType!.name)
+      );
+    }
+
+    // Filter by search term
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase();
+      offers = offers.filter(offer =>
+        offer.merchant.toLowerCase().includes(searchLower) ||
+        offer.paymentMethods.some(pm => pm.toLowerCase().includes(searchLower))
+      );
+    }
+
+    return offers;
+  }
+
   // Order creation dialog
-  showCreateOrderDialog = signal(false);
+  showCreateOrderDialog: boolean = false;
   selectedOffer: Offer | null = null;
   orderAmount: number = 0;
   orderQuantity: number = 0;
   inputMode: 'amount' | 'quantity' = 'amount';
   selectedPaymentTypeId: string = '';
   selectedAdPaymentTypes: P2pAdPaymentType[] = [];
-  isCreatingOrder = signal(false);
+  isCreatingOrder: boolean = false;
   tradingTerms: string = 'By proceeding with this trade, you agree to complete the transaction within the specified time frame. Ensure all payment details are accurate before confirmation. Disputes should be resolved through the platform\'s resolution center. Cancel or modify orders only if permitted by the advertiser. Both parties must comply with local regulations and platform policies.';
 
   loadAds(): void {
-    this.isLoading.set(true);
-
+    this.isLoading = true;
     this.p2pAdsService.getP2pAds().subscribe({
       next: (ads) => {
         this.allAds = ads;
@@ -100,7 +125,7 @@ export class Marketplace {
 
         if (totalAds === 0) {
           this.transformAds();
-          this.isLoading.set(false);
+          this.isLoading = false;
           return;
         }
 
@@ -112,7 +137,7 @@ export class Marketplace {
 
               if (completedRequests === totalAds) {
                 this.transformAds();
-                this.isLoading.set(false);
+                this.isLoading = false;
               }
             },
             error: (error) => {
@@ -121,7 +146,7 @@ export class Marketplace {
 
               if (completedRequests === totalAds) {
                 this.transformAds();
-                this.isLoading.set(false);
+                this.isLoading = false;
               }
             }
           });
@@ -129,7 +154,22 @@ export class Marketplace {
       },
       error: (error) => {
         console.error('Error loading ads:', error);
-        this.isLoading.set(false);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadPaymentTypes(): void {
+    this.p2pPaymentTypesService.getP2pPaymentTypes().subscribe({
+      next: (paymentTypes) => {
+        this.paymentTypes = paymentTypes;
+        // Set first payment type as default
+        if (paymentTypes.length > 0) {
+          this.selectedPaymentType = paymentTypes[0];
+        }
+      },
+      error: (error) => {
+        console.error('Error loading payment types:', error);
       }
     });
   }
@@ -185,11 +225,11 @@ export class Marketplace {
       this.selectedPaymentTypeId = adPaymentTypes[0].p2p_payment_type_id;
     }
 
-    this.showCreateOrderDialog.set(true);
+    this.showCreateOrderDialog = true;
   }
 
   closeCreateOrderDialog(): void {
-    this.showCreateOrderDialog.set(false);
+    this.showCreateOrderDialog = false;
     this.selectedOffer = null;
     this.orderAmount = 0;
     this.orderQuantity = 0;
@@ -216,6 +256,22 @@ export class Marketplace {
     if (this.selectedOffer && this.orderQuantity > 0) {
       this.orderAmount = this.orderQuantity * this.selectedOffer.price;
     }
+  }
+
+  isOrderValid(): boolean {
+    if (!this.selectedOffer || !this.selectedPaymentTypeId) {
+      return false;
+    }
+
+    if (this.orderAmount <= 0 || this.orderQuantity <= 0) {
+      return false;
+    }
+
+    if (this.orderAmount < this.selectedOffer.minLimit || this.orderAmount > this.selectedOffer.maxLimit) {
+      return false;
+    }
+
+    return true;
   }
 
   createOrder(): void {
@@ -290,7 +346,7 @@ export class Marketplace {
       return;
     }
 
-    this.isCreatingOrder.set(true);
+    this.isCreatingOrder = true;
 
     const createOrderDto: CreateP2pOrderDto = {
       p2p_ad_id: this.selectedOffer.id,
@@ -310,7 +366,7 @@ export class Marketplace {
           detail: `Order ${order.order_number} created successfully`
         });
         this.closeCreateOrderDialog();
-        this.isCreatingOrder.set(false);
+        this.isCreatingOrder = false;
       },
       error: (error) => {
         this.messageService.add({
@@ -318,7 +374,7 @@ export class Marketplace {
           summary: error.error?.error || 'Error',
           detail: error.error?.message || 'Failed to create order'
         });
-        this.isCreatingOrder.set(false);
+        this.isCreatingOrder = false;
       }
     });
   }
@@ -349,6 +405,7 @@ export class Marketplace {
 
   ngOnInit(): void {
     this.checkAuthStatus();
+    this.loadPaymentTypes();
     this.loadAds();
   }
 }

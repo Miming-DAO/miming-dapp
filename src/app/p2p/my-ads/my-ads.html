@@ -548,7 +548,7 @@
             <div class="space-y-2">
               @for (p2pAdPaymentType of p2pAdPaymentTypes; track p2pAdPaymentType.id; let i = $index) {
               <div class="flex items-center gap-3 p-3 rounded-3xl bg-slate-900/50 border border-slate-700/50">
-                <img [src]="'/images/payment-types/gcash.png'"
+                <img [src]="p2pAdPaymentType.p2p_payment_type?.logo_url"
                   [alt]="getPaymentTypeName(p2pAdPaymentType.p2p_payment_type_id)"
                   class="w-8 h-8 rounded-full object-cover" />
                 <div class="flex-1 min-w-0">
@@ -649,10 +649,23 @@
       <label class="text-xs text-slate-400 mb-2 block">Payment Type <span class="text-red-400">*</span></label>
       <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="paymentType"
         placeholder="Select payment type" optionLabel="name" class="w-full" size="large">
+        <ng-template #selectedItem let-selectedOption>
+          @if (selectedOption) {
+          <div class="flex items-center gap-2">
+            @if (selectedOption.logo_url) {
+            <img [src]="selectedOption.logo_url" [alt]="selectedOption.name" class="w-5 h-5 object-contain" />
+            } @else {
+            <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i class="pi pi-wallet text-purple-400 text-xs"></i>
+            </div>
+            }
+            <span class="font-medium">{{ selectedOption.name }}</span>
+          </div>
+          }
+        </ng-template>
         <ng-template let-paymentType #item>
           <div class="flex items-center gap-3 py-2">
-            <img [src]="'/images/payment-types/gcash.png'" [alt]="paymentType.name"
-              class="w-8 h-8 rounded-full object-cover" />
+            <img [src]="paymentType.logo_url" [alt]="paymentType.name" class="w-8 h-8 rounded-full object-cover" />
             <span class="font-medium">{{ paymentType.name }}</span>
           </div>
         </ng-template>

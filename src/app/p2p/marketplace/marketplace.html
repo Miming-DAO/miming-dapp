@@ -1,361 +1,485 @@
 <div class="max-w-7xl mx-auto">
-  <!-- Tabs -->
-  <div class="flex gap-2 md:gap-3 mb-4 md:mb-6">
-    <button (click)="activeTab = 'buy'"
-      [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-      class="flex-1 px-3 md:px-6 py-3 md:py-4 rounded-3xl font-bold text-sm md:text-lg transition-all duration-300 hover:scale-[1.02] hover:cursor-pointer cursor-pointer">
-      <i class="pi pi-arrow-down mr-1 md:mr-2"></i>
-      <span class="hidden sm:inline">Buy USDT</span>
-      <span class="sm:hidden">Buy</span>
-    </button>
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
 
-    <button (click)="activeTab = 'sell'"
-      [class]="activeTab === 'sell' ? 'bg-linear-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-      class="flex-1 px-3 md:px-6 py-3 md:py-4 rounded-3xl font-bold text-sm md:text-lg transition-all duration-300 hover:scale-[1.02] hover:cursor-pointer cursor-pointer">
-      <i class="pi pi-arrow-up mr-1 md:mr-2"></i>
-      <span class="hidden sm:inline">Sell USDT</span>
-      <span class="sm:hidden">Sell</span>
-    </button>
-  </div>
-
-  <!-- Filters -->
-  <div class="flex flex-col md:flex-row gap-3 mb-4 md:mb-6">
-    <div class="w-full md:w-48">
-      <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" placeholder="Payment Type" class="w-full">
-      </p-select>
-    </div>
-
-    <div class="flex-1">
-      <input type="text" [(ngModel)]="searchTerm" placeholder="Search merchants or offers..."
-        class="w-full px-4 py-2 rounded-full bg-slate-800/50 border border-gray-100/30 text-white placeholder:text-slate-500 outline-none transition-all" />
-    </div>
-  </div>
-
-  @if (activeTab === 'buy') {
-  <div class="space-y-3 md:space-y-4">
-    @for (offer of buyOffers; track offer.id) {
-    <div
-      class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 hover:scale-[1.01] relative overflow-hidden">
-      <!-- Decorative Elements -->
-      <div
-        class="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
-      </div>
-
-      <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
-        <!-- Merchant Info -->
-        <div class="md:col-span-3 flex items-center gap-3">
-          <div
-            class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center text-white font-bold text-base md:text-lg shrink-0">
-            {{ offer.merchant.substring(0, 2).toUpperCase() }}
-          </div>
-          <div class="min-w-0">
-            <div class="font-bold text-white text-base md:text-lg truncate">{{ offer.merchant }}</div>
-            <div class="text-xs md:text-sm text-slate-400">{{ offer.orders }} orders | {{ offer.completion
-              }}%
-            </div>
-          </div>
-        </div>
-
-        <!-- Price & Available (combined on mobile) -->
-        <div class="md:col-span-5 grid grid-cols-2 gap-3 md:contents">
-          <!-- Price -->
-          <div class="md:col-span-2">
-            <div class="text-xs md:text-sm text-slate-400 mb-1">Price</div>
-            <div
-              class="font-bold text-xl md:text-2xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-              ${{ offer.price }}
-            </div>
-          </div>
-
-          <!-- Available/Limit -->
-          <div class="md:col-span-3">
-            <div class="text-xs md:text-sm text-slate-400 mb-1">Available / Limit</div>
-            <div class="text-white font-semibold text-sm md:text-base">{{ offer.available }} {{ offer.asset }}
-            </div>
-            <div class="text-xs md:text-sm text-slate-400">{{ offer.minLimit }} - {{ offer.maxLimit }} USD</div>
-          </div>
-        </div>
-
-        <!-- Payment Methods -->
-        <div class="md:col-span-2">
-          <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
-          <div class="flex flex-wrap gap-1">
-            @for (method of offer.paymentMethods.slice(0, 2); track method) {
-            <span class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">
-              {{ method }}
-            </span>
-            }
-            @if (offer.paymentMethods.length > 2) {
-            <span class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">
-              +{{ offer.paymentMethods.length - 2 }}
-            </span>
-            }
-          </div>
-        </div>
-
-        <!-- Buy Button -->
-        <div class="md:col-span-2 flex items-center justify-stretch md:justify-end">
-          <button (click)="openCreateOrderDialog(offer)"
-            class="w-full md:w-auto px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm text-sm md:text-base hover:cursor-pointer cursor-pointer">
-            Buy {{ offer.asset }}
-          </button>
-        </div>
-      </div>
-    </div>
-    }
-  </div>
-  }
-
-  <!-- Sell Tab Content -->
-  @if (activeTab === 'sell') {
-  <div class="space-y-3 md:space-y-4">
-    @for (offer of sellOffers; track offer.id) {
-    <div
-      class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 hover:scale-[1.01] relative overflow-hidden">
-      <!-- Decorative Elements -->
-      <div
-        class="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
-      </div>
-
-      <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
-        <!-- Merchant Info -->
-        <div class="md:col-span-3 flex items-center gap-3">
-          <div
-            class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base md:text-lg shrink-0">
-            {{ offer.merchant.substring(0, 2).toUpperCase() }}
-          </div>
-          <div class="min-w-0">
-            <div class="font-bold text-white text-base md:text-lg truncate">{{ offer.merchant }}</div>
-            <div class="text-xs md:text-sm text-slate-400">{{ offer.orders }} orders | {{ offer.completion
-              }}%
-            </div>
-          </div>
-        </div>
-
-        <!-- Price & Available (combined on mobile) -->
-        <div class="md:col-span-5 grid grid-cols-2 gap-3 md:contents">
-          <!-- Price -->
-          <div class="md:col-span-2">
-            <div class="text-xs md:text-sm text-slate-400 mb-1">Price</div>
-            <div
-              class="font-bold text-xl md:text-2xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-              ${{ offer.price }}
-            </div>
-          </div>
-
-          <!-- Available/Limit -->
-          <div class="md:col-span-3">
-            <div class="text-xs md:text-sm text-slate-400 mb-1">Available / Limit</div>
-            <div class="font-semibold text-white text-sm md:text-base">{{ offer.available }} {{
-              offer.asset }}
-            </div>
-            <div class="text-xs md:text-sm text-slate-400">{{ offer.minLimit }} - {{ offer.maxLimit }} USD</div>
-          </div>
-        </div>
-
-        <!-- Payment Methods -->
-        <div class="md:col-span-2">
-          <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
-          <div class="flex flex-wrap gap-1">
-            @for (method of offer.paymentMethods.slice(0, 2); track method) {
-            <span class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">
-              {{ method }}
-            </span>
-            }
-            @if (offer.paymentMethods.length > 2) {
-            <span class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">
-              +{{ offer.paymentMethods.length - 2 }}
-            </span>
-            }
-          </div>
-        </div>
-
-        <!-- Action Button -->
-        <div class="md:col-span-2 flex justify-stretch md:justify-end">
-          <button (click)="openCreateOrderDialog(offer)"
-            class="w-full md:w-auto px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-linear-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:via-fuchsia-700 hover:to-pink-700 text-white font-bold shadow-sm transition-all duration-300 hover:scale-105 hover:cursor-pointer cursor-pointer text-sm md:text-base">
-            Sell {{ offer.asset }}
-          </button>
-        </div>
-      </div>
-    </div>
-    }
-  </div>
-  }
-</div>
-
-<!-- Create Order Dialog (OKX Style) -->
-<p-dialog [(visible)]="showCreateOrderDialog" [modal]="true"
-  [style]="{ 'width': '550px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
-  styleClass="cosmic-dialog">
-  <ng-template #header>
-    <div class="flex items-center gap-3">
-      <div
-        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500'"
-        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-        <i [class]="activeTab === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="text-white text-xl"></i>
-      </div>
+    <!-- ************ -->
+    <!-- Panel Header -->
+    <!-- ************ -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <span
-          class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-          {{ activeTab === 'buy' ? 'Buy' : 'Sell' }} {{ selectedOffer?.asset || 'USDT' }}
-        </span>
-        <div class="text-sm text-slate-400">with {{ selectedOffer ? selectedOffer.merchant : '' }}</div>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">P2P Marketplace</h2>
+        <p class="text-sm md:text-base text-slate-400">Browse and create orders</p>
+      </div>
+
+      <!-- **** -->
+      <!-- Tabs -->
+      <!-- **** -->
+      <div class="flex gap-2">
+        <button (click)="activeTab = 'buy'"
+          [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="flex-1 px-4 md:px-6 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer">
+          <span class="hidden sm:inline">Buy</span>
+          <span class="sm:hidden">Buy</span>
+        </button>
+
+        <button (click)="activeTab = 'sell'"
+          [class]="activeTab === 'sell' ? 'bg-linear-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="flex-1 px-4 md:px-6 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer">
+          <span class="hidden sm:inline">Sell</span>
+          <span class="sm:hidden">Sell</span>
+        </button>
       </div>
     </div>
-  </ng-template>
 
-  <div class="py-4">
-    @if (selectedOffer) {
-    <form class="space-y-5" autocomplete="off">
-      <!-- Section 1: Amount or Quantity Input with Limits -->
-      <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4">
-        <div class="flex items-center justify-between mb-3">
-          <label class="text-sm font-semibold text-white">I want to {{ activeTab === 'buy' ? 'spend' : 'sell' }}</label>
-          <div class="flex gap-1 bg-slate-900/50 rounded-full p-1">
-            <button type="button" (click)="inputMode = 'amount'" [class]="inputMode === 'amount' ? 'bg-purple-500 text-white' : 'text-slate-400'"
-              class="px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer">
-              {{ activeTab === 'buy' ? 'USD' : 'USDT' }}
-            </button>
-            <button type="button" (click)="inputMode = 'quantity'; calculateAmount()" [class]="inputMode === 'quantity' ? 'bg-purple-500 text-white' : 'text-slate-400'"
-              class="px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer">
-              {{ activeTab === 'buy' ? 'USDT' : 'USD' }}
-            </button>
-          </div>
-        </div>
-
-        @if (inputMode === 'amount') {
-        <p-inputnumber class="w-full" [(ngModel)]="orderAmount" (ngModelChange)="calculateQuantity()" name="amount"
-          inputStyleClass="w-full rounded-xl border border-slate-600/50 px-4 py-4 text-2xl font-bold text-white"
-          style="background-color: oklch(20.8% 0.042 265.755);" mode="decimal"
-          [minFractionDigits]="2" [maxFractionDigits]="2"
-          [placeholder]="'0.00'"
-          [min]="activeTab === 'buy' ? selectedOffer.minLimit : 0"
-          [max]="activeTab === 'buy' ? selectedOffer.maxLimit : (selectedOffer.available * selectedOffer.price)" />
-        } @else {
-        <p-inputnumber class="w-full" [(ngModel)]="orderQuantity" (ngModelChange)="calculateAmount()" name="quantity"
-          inputStyleClass="w-full rounded-xl border border-slate-600/50 px-4 py-4 text-2xl font-bold text-white"
-          style="background-color: oklch(20.8% 0.042 265.755);" mode="decimal"
-          [minFractionDigits]="2" [maxFractionDigits]="6"
-          [placeholder]="'0.00'"
-          [min]="0"
-          [max]="activeTab === 'buy' ? (selectedOffer.maxLimit / selectedOffer.price) : selectedOffer.available" />
-        }
-
-        <div class="flex items-center justify-between mt-2 text-xs">
-          <span class="text-slate-500">Limits</span>
-          <span class="text-slate-400">${{ selectedOffer.minLimit | number:'1.2-2' }} - ${{ selectedOffer.maxLimit | number:'1.2-2' }}</span>
-        </div>
-      </div>
-
-      <!-- Section 2: You Receive -->
-      <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4">
-        <label class="text-sm font-semibold text-white mb-3 block">You will receive</label>
-        <div class="flex items-center justify-between bg-slate-900/50 rounded-xl px-4 py-4">
-          <div>
-            <div class="text-2xl font-bold text-green-400">
-              @if (activeTab === 'buy') {
-              {{ orderQuantity | number:'1.2-6' }}
+    <!-- ******* -->
+    <!-- Filters -->
+    <!-- ******* -->
+    <div class="flex flex-col md:flex-row gap-3 mb-6">
+      <div class="w-full md:w-56">
+        <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" placeholder="All Payment Types"
+          optionLabel="name" class="w-full" size="large">
+          <ng-template #selectedItem let-selectedOption>
+            @if (selectedOption) {
+            <div class="flex items-center gap-2">
+              @if (selectedOption.logo_url) {
+              <img [src]="selectedOption.logo_url" [alt]="selectedOption.name" class="w-5 h-5 object-contain" />
               } @else {
-              {{ orderAmount | number:'1.2-2' }}
+              <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="pi pi-wallet text-purple-400 text-xs"></i>
+              </div>
               }
+              <span class="font-medium">{{ selectedOption.name }}</span>
             </div>
-            <div class="text-xs text-slate-500 mt-1">{{ activeTab === 'buy' ? selectedOffer.asset : 'USD' }}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-sm text-slate-400">Price</div>
-            <div class="text-base font-bold text-yellow-400">${{ selectedOffer.price }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 3: Payment Method -->
-      <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4">
-        <label class="text-sm font-semibold text-white mb-3 block">Payment Method <span class="text-red-400">*</span></label>
-        <p-select [options]="selectedAdPaymentTypes" [(ngModel)]="selectedPaymentTypeId" name="paymentType"
-          optionLabel="p2p_payment_type.name" optionValue="p2p_payment_type_id" placeholder="Select payment method"
-          class="w-full" size="large">
-          <ng-template let-paymentType #item>
-            <div class="flex items-center gap-3 py-2 px-1">
-              <img [src]="'/images/payment-types/' + (paymentType.p2p_payment_type?.name || 'default').toLowerCase().replace(/\s+/g, '-') + '.png'"
-                   [alt]="paymentType.p2p_payment_type?.name"
-                   class="w-8 h-8 rounded-full object-cover"
-                   (error)="$event.target.src='/images/payment-types/default.png'" />
-              <span class="font-medium text-white">{{ paymentType.p2p_payment_type?.name }}</span>
-            </div>
+            }
           </ng-template>
-          <ng-template let-paymentType #selectedItem>
-            <div class="flex items-center gap-3">
-              <img [src]="'/images/payment-types/' + (paymentType.p2p_payment_type?.name || 'default').toLowerCase().replace(/\s+/g, '-') + '.png'"
-                   [alt]="paymentType.p2p_payment_type?.name"
-                   class="w-6 h-6 rounded-full object-cover"
-                   (error)="$event.target.src='/images/payment-types/default.png'" />
-              <span class="font-medium">{{ paymentType.p2p_payment_type?.name }}</span>
+          <ng-template let-paymentType #item>
+            <div class="flex items-center gap-2 py-1">
+              @if (paymentType.logo_url) {
+              <img [src]="paymentType.logo_url" [alt]="paymentType.name" class="w-5 h-5 object-contain" />
+              } @else {
+              <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="pi pi-wallet text-purple-400 text-xs"></i>
+              </div>
+              }
+              <span class="font-medium">{{ paymentType.name }}</span>
             </div>
           </ng-template>
         </p-select>
       </div>
 
-      <!-- Section 4: Maker Info (Ad Info) -->
-      <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4">
-        <label class="text-sm font-semibold text-white mb-3 block">Merchant Information</label>
+      <div class="flex-1">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search merchants or offers..."
+          class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-gray-100/30 text-white placeholder:text-slate-500 outline-none focus:border-purple-500/50 transition-all" />
+      </div>
+    </div>
+
+    <!-- ************* -->
+    <!-- Loading State -->
+    <!-- ************* -->
+    @if (isLoading) {
+    <div class="flex justify-center items-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <i class="pi pi-spin pi-spinner text-4xl text-purple-400"></i>
+        <p class="text-slate-400">Loading marketplace...</p>
+      </div>
+    </div>
+    }
+
+    <!-- *********** -->
+    <!-- Empty State -->
+    <!-- *********** -->
+    @if (!isLoading && filteredOffers.length === 0) {
+    <div class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-purple-500/10 flex items-center justify-center">
+        <i class="pi pi-inbox text-4xl text-purple-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No Offers Available</h3>
+      <p class="text-slate-400">There are no {{ activeTab }} offers at the moment</p>
+    </div>
+    }
+
+    <!-- ******** -->
+    <!-- Ads List -->
+    <!-- ******** -->
+    @if (!isLoading && filteredOffers.length > 0) {
+
+    <!-- ****************** -->
+    <!-- Desktop Table View -->
+    <!-- ****************** -->
+    <div
+      class="hidden md:block backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-max">
+          <thead>
+            <tr class="border-b border-slate-700">
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400">Merchant</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400">Price</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Available
+              </th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Limits</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400 hidden xl:table-cell">Payment</th>
+              <th class="text-center py-3 px-4 text-sm font-semibold text-slate-400">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (offer of filteredOffers; track offer.id) {
+            <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+
+              <!-- *************** -->
+              <!-- Merchant Column -->
+              <!-- *************** -->
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+                    class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    {{ offer.merchant.substring(0, 2).toUpperCase() }}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="font-semibold text-white truncate">{{ offer.merchant }}</div>
+                    <div class="text-xs text-slate-400 mt-0.5">{{ offer.orders }} orders | {{ offer.completion }}%
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- ************ -->
+              <!-- Price Column -->
+              <!-- ************ -->
+              <td class="py-4 px-4 text-right">
+                <div
+                  class="font-bold text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap">
+                  ${{ offer.price | number:'1.2-2' }}
+                </div>
+                <div class="flex items-end justify-end gap-1 mt-0.5">
+                  <img [src]="'/images/tokens/' + offer.asset.toLowerCase() + '.png'" [alt]="offer.asset"
+                    class="w-4 h-4 object-contain" />
+                  <span class="text-xs text-slate-300 font-semibold">{{ offer.asset }}</span>
+                </div>
+              </td>
+
+              <!-- **************** -->
+              <!-- Available Column -->
+              <!-- **************** -->
+              <td class="py-4 px-4 text-right hidden lg:table-cell">
+                <div class="font-semibold text-white">{{ offer.available | number:'1.0-6' }}</div>
+                <div class="text-xs text-slate-400">{{ offer.asset }}</div>
+              </td>
+
+              <!-- ************ -->
+              <!-- Limits Column -->
+              <!-- ************ -->
+              <td class="py-4 px-4 text-right hidden lg:table-cell">
+                <div class="font-semibold text-white whitespace-nowrap">
+                  ${{ offer.minLimit | number:'1.2-2' }}
+                </div>
+                <div class="text-xs text-slate-400 whitespace-nowrap">
+                  ~ ${{ offer.maxLimit | number:'1.2-2' }}
+                </div>
+              </td>
+
+              <!-- *************** -->
+              <!-- Payment Methods -->
+              <!-- *************** -->
+              <td class="py-4 px-4 hidden xl:table-cell">
+                <div class="flex flex-wrap gap-1 max-w-xs">
+                  @for (method of offer.paymentMethods.slice(0, 2); track method) {
+                  <span
+                    class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    {{ method }}
+                  </span>
+                  }
+                  @if (offer.paymentMethods.length > 2) {
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-300">
+                    +{{ offer.paymentMethods.length - 2 }}
+                  </span>
+                  }
+                </div>
+              </td>
+
+              <!-- ******* -->
+              <!-- Actions -->
+              <!-- ******* -->
+              <td class="py-4 px-4">
+                <div class="flex items-center justify-center">
+                  <button (click)="openCreateOrderDialog(offer)"
+                    [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'"
+                    class="px-5 py-2 rounded-3xl text-white font-semibold text-sm hover:scale-105 transition-all duration-200 cursor-pointer whitespace-nowrap">
+                    Create Order
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- **************** -->
+    <!-- Mobile Card View -->
+    <!-- **************** -->
+    <div class="md:hidden space-y-3">
+      @for (offer of filteredOffers; track offer.id) {
+      <div
+        class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 p-4 hover:border-purple-500/40 transition-all duration-200">
+
+        <!-- ******************* -->
+        <!-- Merchant Info Header -->
+        <!-- ******************* -->
         <div class="flex items-center gap-3 mb-3">
           <div
-            [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-500 to-pink-500'"
-            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base">
-            {{ selectedOffer.merchant.substring(0, 2).toUpperCase() }}
+            [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0">
+            {{ offer.merchant.substring(0, 2).toUpperCase() }}
           </div>
-          <div class="flex-1">
-            <div class="font-bold text-white">{{ selectedOffer.merchant }}</div>
-            <div class="text-xs text-slate-400">{{ selectedOffer.orders }} orders | {{ selectedOffer.completion }}% completion</div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-white truncate">{{ offer.merchant }}</h3>
+            <p class="text-xs text-slate-400">{{ offer.orders }} orders | {{ offer.completion }}%</p>
           </div>
+          <span
+            [class]="activeTab === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="px-3 py-1 rounded-full text-xs font-bold border uppercase shrink-0">
+            <i [class]="activeTab === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+            {{ activeTab }}
+          </span>
         </div>
-        <div class="grid grid-cols-2 gap-3 text-xs">
-          <div class="bg-slate-900/50 rounded-lg px-3 py-2">
-            <div class="text-slate-500 mb-1">Available</div>
-            <div class="text-white font-semibold">{{ selectedOffer.available }} {{ selectedOffer.asset }}</div>
-          </div>
-          <div class="bg-slate-900/50 rounded-lg px-3 py-2">
-            <div class="text-slate-500 mb-1">Payment Time</div>
-            <div class="text-white font-semibold">15 minutes</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Section 5: Trading Terms -->
-      <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
-        <div class="flex items-start gap-2 mb-2">
-          <i class="pi pi-info-circle text-amber-400 mt-0.5"></i>
-          <label class="text-sm font-semibold text-amber-300">Trading Terms</label>
+        <!-- ************* -->
+        <!-- Price + Token -->
+        <!-- ************* -->
+        <div class="border-b border-slate-700/50 mb-3 pb-3">
+          <div class="flex items-center justify-between px-2">
+            <span class="text-xs text-slate-400">Price</span>
+            <div class="flex items-center gap-2">
+              <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+                ${{ offer.price | number:'1.2-2' }}
+              </div>
+              <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700/50">
+                <img [src]="'/images/tokens/' + offer.asset.toLowerCase() + '.png'" [alt]="offer.asset"
+                  class="w-4 h-4 object-contain">
+                <span class="text-xs text-white font-semibold">{{ offer.asset }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <p class="text-xs text-amber-200/80 leading-relaxed">
-          {{ tradingTerms }}
-        </p>
+
+        <!-- ********* -->
+        <!-- Info Grid -->
+        <!-- ********* -->
+        <div class="space-y-2 mb-3">
+          <div class="flex justify-between px-2">
+            <span class="text-xs text-slate-400">Available</span>
+            <div class="text-white font-bold text-sm text-right">{{ offer.available | number:'1.0-6' }} {{
+              offer.asset }}</div>
+          </div>
+          <div class="flex justify-between px-2">
+            <span class="text-xs text-slate-400">Limits</span>
+            <div class="text-white font-bold text-sm text-right">${{ offer.minLimit | number:'1.2-2' }} - ${{
+              offer.maxLimit | number:'1.2-2' }}</div>
+          </div>
+        </div>
+
+        <!-- *************** -->
+        <!-- Payment Methods -->
+        <!-- *************** -->
+        <div class="border-b border-slate-700/50 mb-3 pb-3">
+          <div class="px-2">
+            <span class="text-xs text-slate-400 block mb-2">Payment Methods</span>
+            <div class="flex flex-wrap gap-1">
+              @for (method of offer.paymentMethods; track method) {
+              <span
+                class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                {{ method }}
+              </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- ************* -->
+        <!-- Action Button -->
+        <!-- ************* -->
+        <button (click)="openCreateOrderDialog(offer)"
+          [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'"
+          class="w-full px-4 py-3 rounded-3xl text-white font-bold hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+          Create Order
+        </button>
       </div>
-    </form>
+      }
+    </div>
+
     }
   </div>
+</div>
 
+<!-- ******************* -->
+<!-- Create Order Dialog -->
+<!-- ******************* -->
+<p-dialog [(visible)]="showCreateOrderDialog" [modal]="true"
+  [style]="{ 'width': '650px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+        class="w-10 h-10 rounded-3xl flex items-center justify-center">
+        <i [class]="activeTab === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="text-white text-lg"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Create {{ activeTab === 'buy' ? 'Buy' : 'Sell' }} Order
+        </span>
+        <div class="text-xs text-slate-400">
+          {{ activeTab === 'buy' ? 'Purchase' : 'Sell' }} {{ selectedOffer?.asset }} from {{ selectedOffer?.merchant }}
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <div class="py-4 space-y-5">
+    <!-- ***************** -->
+    <!-- Offer Information -->
+    <!-- ***************** -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Price</span>
+          <div class="text-right">
+            <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              ${{ selectedOffer?.price | number:'1.2-2' }}
+            </div>
+            <div class="text-xs text-slate-400">per {{ selectedOffer?.asset }}</div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Available</span>
+          <div class="text-white font-semibold text-right">
+            {{ selectedOffer?.available | number:'1.0-6' }} {{ selectedOffer?.asset }}
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Order Limits</span>
+          <div class="text-white font-semibold text-right">
+            ${{ selectedOffer?.minLimit | number:'1.2-2' }} - ${{ selectedOffer?.maxLimit | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ************** -->
+    <!-- Payment Method -->
+    <!-- ************** -->
+    <div>
+      <label class="text-sm text-slate-400 mb-2 block">Payment Method <span class="text-red-400">*</span></label>
+      <p-select [options]="selectedAdPaymentTypes" [(ngModel)]="selectedPaymentTypeId"
+        optionLabel="p2p_payment_type.name" optionValue="p2p_payment_type_id" placeholder="Select Payment Method"
+        class="w-full" size="large">
+        <ng-template #selectedItem let-selectedOption>
+          @if (selectedOption) {
+          <div class="flex items-center gap-2">
+            @if (selectedOption.p2p_payment_type?.logo_url) {
+            <img [src]="selectedOption.p2p_payment_type.logo_url" [alt]="selectedOption.p2p_payment_type?.name"
+              class="w-6 h-6 object-contain" />
+            } @else {
+            <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i class="pi pi-wallet text-purple-400 text-xs"></i>
+            </div>
+            }
+            <span class="font-medium">{{ selectedOption.p2p_payment_type?.name }}</span>
+          </div>
+          }
+        </ng-template>
+        <ng-template let-paymentType #item>
+          <div class="flex items-center gap-2 py-1">
+            @if (paymentType.p2p_payment_type?.logo_url) {
+            <img [src]="paymentType.p2p_payment_type.logo_url" [alt]="paymentType.p2p_payment_type?.name"
+              class="w-5 h-5 object-contain" />
+            } @else {
+            <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i class="pi pi-wallet text-purple-400 text-xs"></i>
+            </div>
+            }
+            <span class="font-medium">{{ paymentType.p2p_payment_type?.name }}</span>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+
+    <!-- ******************* -->
+    <!-- Order Amount/Crypto -->
+    <!-- ******************* -->
+    <div class="space-y-3">
+      <div class="flex gap-2 border-b border-slate-700/50">
+        <button type="button" (click)="inputMode = 'amount'"
+          [class]="inputMode === 'amount' ? 'text-purple-400 border-purple-400' : 'text-slate-400 border-transparent'"
+          class="flex-1 pb-2 border-b-2 font-semibold text-sm transition-colors cursor-pointer">
+          {{ activeTab === 'buy' ? 'I will pay (USD)' : 'I will pay (USDT)' }}
+        </button>
+        <button type="button" (click)="inputMode = 'quantity'"
+          [class]="inputMode === 'quantity' ? 'text-purple-400 border-purple-400' : 'text-slate-400 border-transparent'"
+          class="flex-1 pb-2 border-b-2 font-semibold text-sm transition-colors cursor-pointer">
+          {{ activeTab === 'buy' ? 'I will receive (USDT)' : 'I will receive (USD)' }}
+        </button>
+      </div>
+
+      @if (inputMode === 'amount') {
+      <div>
+        <label class="text-sm text-slate-400 mb-2 block">
+          {{ activeTab === 'buy' ? 'Amount (USD)' : 'Amount (USDT)' }} <span class="text-red-400">*</span>
+        </label>
+        <p-inputNumber [(ngModel)]="orderAmount" mode="decimal" [minFractionDigits]="2"
+          [maxFractionDigits]="activeTab === 'buy' ? 2 : 6" [min]="selectedOffer?.minLimit"
+          [max]="selectedOffer?.maxLimit" (ngModelChange)="calculateQuantity()"
+          [placeholder]="activeTab === 'buy' ? '0.00' : '0.000000'" class="w-full" size="large" />
+        <div class="text-xs text-slate-500 mt-1">
+          {{ activeTab === 'buy' ? 'You will receive approximately' : 'You will receive' }} {{ orderQuantity |
+          number:'1.6-6' }} {{ activeTab === 'buy' ? selectedOffer?.asset : 'USD' }}
+        </div>
+      </div>
+      } @else {
+      <div>
+        <label class="text-sm text-slate-400 mb-2 block">
+          {{ activeTab === 'buy' ? 'Quantity (' + selectedOffer?.asset + ')' : 'Amount (USD)' }} <span
+            class="text-red-400">*</span>
+        </label>
+        <p-inputNumber [(ngModel)]="orderQuantity" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="6"
+          [min]="0" (ngModelChange)="calculateAmount()" [placeholder]="activeTab === 'buy' ? '0.000000' : '0.00'"
+          class="w-full" size="large" />
+        <div class="text-xs text-slate-500 mt-1">
+          {{ activeTab === 'buy' ? 'Total amount:' : 'You will receive:' }} ${{ orderAmount | number:'1.2-2' }}
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- ************* -->
+    <!-- Trading Terms -->
+    <!-- ************* -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-info-circle text-blue-400 text-lg mt-0.5"></i>
+        <div>
+          <h4 class="text-sm font-semibold text-blue-300 mb-2">Trading Terms</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">{{ tradingTerms }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
   <ng-template #footer>
-    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
-      <button type="button" (click)="closeCreateOrderDialog()"
-        class="flex-1 px-6 py-3 rounded-full bg-slate-700/60 hover:bg-slate-600/60 text-slate-200 hover:text-white font-medium transition-all duration-300 border border-slate-600/40 cursor-pointer">
-        Cancel
-      </button>
-      <button type="submit" (click)="createOrder()"
-        [disabled]="isCreatingOrder() || !orderAmount || !selectedPaymentTypeId"
-        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600'"
-        class="flex-1 px-6 py-3 rounded-full text-white font-bold transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
-        @if (isCreatingOrder()) {
+    <div class="flex gap-2 pt-5">
+      <button type="button" (click)="createOrder()" [disabled]="!isOrderValid() || isCreatingOrder"
+        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-600 disabled:to-slate-600' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-600'"
+        class="px-6 py-3 rounded-3xl text-white font-semibold transition-all duration-200 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        @if (isCreatingOrder) {
         <i class="pi pi-spin pi-spinner mr-2"></i>
-        Creating...
-        } @else {
-        <i class="pi pi-check mr-2"></i>
-        {{ activeTab === 'buy' ? 'Buy' : 'Sell' }} {{ selectedOffer?.asset || 'USDT' }}
         }
+        {{ activeTab === 'buy' ? 'Buy' : 'Sell' }} {{ selectedOffer?.asset }}
+      </button>
+      <button type="button" (click)="showCreateOrderDialog = false"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Cancel
       </button>
     </div>
   </ng-template>
 </p-dialog>
-
-<p-toast />
