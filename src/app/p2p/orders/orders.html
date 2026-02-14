@@ -2,602 +2,643 @@
 
 <div class="max-w-7xl mx-auto">
   <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
-    <div class="mb-6">
-      <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">Order History</h2>
-      <p class="text-sm md:text-base text-slate-400">Track your P2P transactions</p>
+
+    <!-- ************ -->
+    <!-- Panel Header -->
+    <!-- ************ -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">Order History</h2>
+        <p class="text-sm md:text-base text-slate-400">Track your P2P transactions</p>
+      </div>
+
+      <!-- Status Tabs -->
+      <div class="flex gap-2">
+        <button (click)="activeStatusTab = 'in-progress'"
+          [class]="activeStatusTab === 'in-progress' ? 'bg-linear-to-r from-yellow-500 to-orange-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="px-4 md:px-5 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer whitespace-nowrap">
+          <i class="pi pi-clock mr-1 md:mr-2"></i>
+          <span class="hidden sm:inline">In Progress</span>
+          <span class="sm:hidden">Progress</span>
+        </button>
+
+        <button (click)="activeStatusTab = 'completed'"
+          [class]="activeStatusTab === 'completed' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="px-4 md:px-5 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer whitespace-nowrap">
+          <i class="pi pi-check mr-1 md:mr-2"></i>
+          Completed
+        </button>
+
+        <button (click)="activeStatusTab = 'cancelled'"
+          [class]="activeStatusTab === 'cancelled' ? 'bg-linear-to-r from-red-500 to-red-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="px-4 md:px-5 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer whitespace-nowrap">
+          <i class="pi pi-times-circle mr-1 md:mr-2"></i>
+          Cancelled
+        </button>
+      </div>
     </div>
 
-    <!-- Status Tabs -->
-    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-      <button (click)="activeStatusTab = 'pending'"
-        [class]="activeStatusTab === 'pending' ? 'bg-linear-to-r from-yellow-500 to-yellow-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
-        <i class="pi pi-clock mr-2"></i>
-        Pending
-      </button>
-      <button (click)="activeStatusTab = 'paid'"
-        [class]="activeStatusTab === 'paid' ? 'bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
-        <i class="pi pi-check-circle mr-2"></i>
-        Paid
-      </button>
-      <button (click)="activeStatusTab = 'completed'"
-        [class]="activeStatusTab === 'completed' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
-        <i class="pi pi-check mr-2"></i>
-        Completed
-      </button>
-      <button (click)="activeStatusTab = 'cancelled'"
-        [class]="activeStatusTab === 'cancelled' ? 'bg-linear-to-r from-red-500 to-red-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-        class="px-4 md:px-6 py-2.5 md:py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 hover:scale-[1.02] cursor-pointer whitespace-nowrap">
-        <i class="pi pi-times-circle mr-2"></i>
-        Cancelled
+    <!-- ************* -->
+    <!-- Loading State -->
+    <!-- ************* -->
+    @if (isLoading) {
+    <div class="flex justify-center items-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <i class="pi pi-spin pi-spinner text-4xl text-purple-400"></i>
+        <p class="text-slate-400">Loading orders...</p>
+      </div>
+    </div>
+    }
+
+    <!-- *********** -->
+    <!-- Empty State -->
+    <!-- *********** -->
+    @if (!isLoading && filteredOrders.length === 0) {
+    <div class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-purple-500/10 flex items-center justify-center">
+        <i class="pi pi-inbox text-4xl text-purple-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No {{ activeStatusTab === 'in-progress' ? 'In Progress' :
+        activeStatusTab }} Orders</h3>
+      <p class="text-slate-400 mb-6">You don't have any {{ activeStatusTab === 'in-progress' ? 'in progress' :
+        activeStatusTab }} orders at the moment</p>
+      <button (click)="loadOrders()"
+        class="px-6 py-3 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-200 shadow-sm cursor-pointer">
+        <i class="pi pi-refresh mr-2"></i>
+        Refresh
       </button>
     </div>
+    }
 
-    <div class="space-y-3 md:space-y-4">
-      <ng-container *ngIf="!isLoading; else loading">
-        <div *ngIf="filteredOrders.length === 0" class="text-center py-12">
-          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
-            <i class="pi pi-inbox text-4xl text-purple-400"></i>
-          </div>
-          <h3 class="text-xl font-semibold text-white mb-2">No {{ activeStatusTab }} Orders</h3>
-          <p class="text-slate-400 mb-6">You don't have any {{ activeStatusTab }} orders at the moment.</p>
-          <button (click)="loadOrders()"
-            class="px-6 py-3 rounded-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
-            <i class="pi pi-refresh mr-2"></i>
-            Refresh
-          </button>
+    <!-- ********** -->
+    <!-- Order List -->
+    <!-- ********** -->
+    @if (!isLoading && filteredOrders.length > 0) {
+
+    <!-- ****************** -->
+    <!-- Desktop Table View -->
+    <!-- ****************** -->
+    <div
+      class="hidden md:block backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-max">
+          <thead>
+            <tr class="border-b border-slate-700">
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400">Order</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Date</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400">Price</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400 hidden xl:table-cell">Quantity</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400">Amount</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Payment</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400">Status</th>
+              <th class="text-center py-3 px-4 text-sm font-semibold text-slate-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of filteredOrders; track order.id) {
+            <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+
+              <!-- ********************* -->
+              <!-- Order Number + Ad Info -->
+              <!-- ********************* -->
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    [class]="order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+                    class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="font-semibold text-white truncate">{{ order.order_number }}</div>
+                    <div class="text-xs text-slate-400 mt-0.5 truncate">{{ order.p2p_ad?.name }}</div>
+                    <span
+                      [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+                      class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold border uppercase lg:hidden">
+                      <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
+                        class="mr-1"></i>
+                      {{ order.p2p_ad?.type }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- ************ -->
+              <!-- Date Column -->
+              <!-- ************ -->
+              <td class="py-4 px-4 hidden lg:table-cell">
+                <div class="text-sm text-slate-300">{{ order.created_at | date:'MMM d, y' }}</div>
+                <div class="text-xs text-slate-400 mt-1">{{ order.created_at | date:'h:mm a' }}</div>
+              </td>
+
+              <!-- ************ -->
+              <!-- Price Column -->
+              <!-- ************ -->
+              <td class="py-4 px-4 text-right">
+                <div class="font-bold text-base text-slate-200 whitespace-nowrap">
+                  ${{ order.ordered_price | number:'1.2-2' }}
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5">per unit</div>
+              </td>
+
+              <!-- **************** -->
+              <!-- Quantity Column -->
+              <!-- **************** -->
+              <td class="py-4 px-4 text-right hidden xl:table-cell">
+                <div class="font-semibold text-white">{{ order.quantity | number:'1.2-6' }}</div>
+                <div class="text-xs text-slate-400">USDT</div>
+              </td>
+
+              <!-- ************* -->
+              <!-- Amount Column -->
+              <!-- ************* -->
+              <td class="py-4 px-4 text-right">
+                <div
+                  class="font-bold text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap">
+                  ${{ order.amount | number:'1.2-2' }}
+                </div>
+              </td>
+
+              <!-- ************** -->
+              <!-- Payment Method -->
+              <!-- ************** -->
+              <td class="py-4 px-4 hidden lg:table-cell">
+                <div class="flex items-center gap-2">
+                  @if (order.p2p_payment_type?.logo_url) {
+                  <img [src]="order.p2p_payment_type!.logo_url" [alt]="order.p2p_payment_type!.name"
+                    class="w-5 h-5 object-contain" />
+                  } @else {
+                  <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <i class="pi pi-wallet text-purple-400 text-xs"></i>
+                  </div>
+                  }
+                  <span class="text-sm text-slate-300">{{ order.p2p_payment_type?.name || 'N/A' }}</span>
+                </div>
+              </td>
+
+              <!-- ****** -->
+              <!-- Status -->
+              <!-- ****** -->
+              <td class="py-4 px-4">
+                <span [class]="getStatusBadgeClass(order.status)"
+                  class="px-2 py-1 rounded-full text-xs font-semibold border uppercase inline-block">
+                  {{ order.status }}
+                </span>
+              </td>
+
+              <!-- ******* -->
+              <!-- Actions -->
+              <!-- ******* -->
+              <td class="py-4 px-4">
+                <div class="flex items-center justify-center">
+                  <button (click)="openOrderDetails(order)" title="View Details"
+                    class="w-8 h-8 flex items-center justify-center rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 transition-all cursor-pointer">
+                    <i class="pi pi-eye text-sm"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- **************** -->
+    <!-- Mobile Card View -->
+    <!-- **************** -->
+    <div class="md:hidden space-y-3">
+      @for (order of filteredOrders; track order.id) {
+      <div
+        class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 p-4 hover:border-purple-500/40 transition-all duration-200"
+        (click)="openOrderDetails(order)">
+
+        <!-- **************************** -->
+        <!-- Header: Type Badge + Status -->
+        <!-- **************************** -->
+        <div class="flex items-center justify-between mb-3">
+          <span
+            [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="px-3 py-1 rounded-full text-xs font-bold border uppercase">
+            <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+            {{ order.p2p_ad?.type }}
+          </span>
+          <span [class]="getStatusBadgeClass(order.status)"
+            class="px-2 py-1 rounded-full text-xs font-semibold border uppercase">
+            {{ order.status }}
+          </span>
         </div>
 
-        <div *ngFor="let order of filteredOrders"
-          class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-2xl md:rounded-3xl border border-purple-500/20 shadow p-4 md:p-6 hover:border-purple-500/40 transition-all duration-300 relative overflow-hidden cursor-pointer"
-          (click)="openOrderDetails(order)">
+        <!-- ******************* -->
+        <!-- Order Number + Name -->
+        <!-- ******************* -->
+        <div class="flex items-center gap-3 mb-3 px-2">
           <div
-            class="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-2xl">
+            [class]="order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0">
+            <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
           </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-white truncate">{{ order.order_number }}</h3>
+            <p class="text-xs text-slate-400 truncate">{{ order.p2p_ad?.name }}</p>
+            <p class="text-xs text-slate-400">{{ order.created_at | date:'MMM d, y h:mm a' }}</p>
+          </div>
+        </div>
 
-          <div class="relative z-10 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 md:items-center">
-            <div class="md:col-span-3">
-              <div class="text-xs md:text-sm text-slate-400 mb-1">Order ID</div>
-              <div class="font-bold text-white text-sm md:text-base">{{ order.order_number || order.id }}</div>
-              <div class="text-xs text-slate-400 mb-2">
-                <span class="font-semibold text-white">{{ order.p2p_ad?.name }}</span>
-              </div>
-              <span
-                [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-                class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold border uppercase">
-                <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
-                {{ order.p2p_ad?.type }}
-              </span>
+        <!-- ************** -->
+        <!-- Price & Amount -->
+        <!-- ************** -->
+        <div class="border-b border-slate-700/50 mb-3 pb-3">
+          <div class="flex items-center justify-between px-2 mb-2">
+            <span class="text-xs text-slate-400">Unit Price</span>
+            <div class="font-bold text-base text-slate-200">
+              ${{ order.ordered_price | number:'1.2-2' }}
             </div>
-
-            <div class="md:col-span-2">
-              <div class="text-xs md:text-sm text-slate-400 mb-1">Quantity</div>
-              <div class="font-bold text-lg md:text-xl text-white">
-                {{ order.quantity | number:'1.2-6' }}
-              </div>
-              <div class="text-xs text-slate-400">Unit: ${{ order.ordered_price | number:'1.2-2' }}</div>
-            </div>
-
-            <div class="md:col-span-3">
-              <div class="text-xs md:text-sm text-slate-400 mb-1">Total Amount</div>
-              <div
-                class="font-bold text-base md:text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-                ${{ order.amount | number:'1.2-2' }}
-              </div>
-              <div class="text-xs md:text-sm text-slate-300">{{ order.ordered_by_user?.full_name }}</div>
-            </div>
-
-            <div class="md:col-span-2">
-              <div class="text-xs md:text-sm text-slate-400 mb-1">Payment</div>
-              <div
-                class="text-xs px-2 py-1 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50 inline-block">
-                {{ order.p2p_payment_type?.name || 'N/A' }}
-              </div>
-              <div class="text-xs text-slate-400 mt-1">{{ order.created_at | date:'short' }}</div>
-            </div>
-
-            <div class="md:col-span-2 flex items-center justify-end">
-              <span [class]="getStatusBadgeClass(order.status)"
-                class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase text-center">
-                {{ order.status }}
-              </span>
+          </div>
+          <div class="flex items-center justify-between px-2">
+            <span class="text-xs text-slate-400">Total Amount</span>
+            <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              ${{ order.amount | number:'1.2-2' }}
             </div>
           </div>
         </div>
-      </ng-container>
-      <ng-template #loading>
-        <div class="text-slate-400 text-center py-12">
-          <i class="pi pi-spin pi-spinner text-4xl text-purple-400 mb-4"></i>
-          <p>Loading orders...</p>
+
+        <!-- ********* -->
+        <!-- Info Grid -->
+        <!-- ********* -->
+        <div class="space-y-2 mb-3">
+          <div class="flex justify-between px-2">
+            <span class="text-xs text-slate-400">Quantity</span>
+            <div class="text-white font-bold text-sm text-right">{{ order.quantity | number:'1.2-6' }} USDT</div>
+          </div>
+          <div class="flex justify-between px-2">
+            <span class="text-xs text-slate-400">Payment Method</span>
+            <div class="flex items-center gap-1.5">
+              @if (order.p2p_payment_type?.logo_url) {
+              <img [src]="order.p2p_payment_type!.logo_url" [alt]="order.p2p_payment_type!.name"
+                class="w-4 h-4 object-contain" />
+              }
+              <span class="text-white font-bold text-sm">{{ order.p2p_payment_type?.name || 'N/A' }}</span>
+            </div>
+          </div>
         </div>
-      </ng-template>
+      </div>
+      }
     </div>
+
+    }
   </div>
 </div>
 
-<!-- Order Details Dialog with Stepper (OKX Style) -->
+<!-- ************************** -->
+<!-- Order Details Dialog -->
+<!-- ************************** -->
 <p-dialog [(visible)]="showOrderDetailsDialog" [modal]="true"
-  [style]="{ 'width': '800px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
-  styleClass="cosmic-dialog">
+  [style]="{ 'width': '800px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true">
   <ng-template #header>
-    <div *ngIf="selectedOrder" class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-3">
-        <div
-          [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500'"
-          class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-          <i class="pi pi-file-check text-white text-xl"></i>
-        </div>
-        <div>
-          <span
-            class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-            Order Details
-          </span>
-          <div class="text-sm text-slate-400">{{ selectedOrder.order_number || selectedOrder.id }}</div>
-        </div>
+    @if (selectedOrder) {
+    <div class="flex items-center gap-3">
+      <div
+        [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+        class="w-10 h-10 rounded-3xl flex items-center justify-center">
+        <i class="pi pi-file-check text-white text-lg"></i>
       </div>
-      <span [class]="getStatusBadgeClass(selectedOrder.status)"
-        class="px-4 py-2 rounded-full text-xs font-semibold border uppercase">
-        {{ selectedOrder.status }}
-      </span>
+      <div>
+        <span
+          class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Order Details
+        </span>
+        <div class="text-xs text-slate-400">{{ selectedOrder.order_number }}</div>
+      </div>
     </div>
+    }
   </ng-template>
 
-  <div *ngIf="selectedOrder" class="py-4">
-    <!-- Status Stepper (OKX Style - Bars Only) -->
-    <div class="mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <div class="text-sm font-semibold text-white">Order Progress</div>
-        <div class="text-xs text-slate-400">{{ selectedOrder.created_at | date:'medium' }}</div>
-      </div>
+  @if (selectedOrder) {
+  <div class="py-4 space-y-5">
 
-      <!-- Progress Bars -->
-      <div class="space-y-3">
-        <!-- Step 1: Created -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span [class]="getCurrentStepIndex() >= 0 ? 'text-white font-semibold' : 'text-slate-500'"
-              class="text-xs">1. Created</span>
-            <span [class]="getCurrentStepIndex() >= 0 ? 'text-white' : 'text-slate-500'"
-              class="text-xs">{{ selectedOrder.created_at | date:'short' }}</span>
-          </div>
-          <div class="w-full h-1.5 rounded-full bg-slate-700 overflow-hidden">
-            <div [class]="getCurrentStepIndex() >= 0 ? 'bg-linear-to-r from-purple-500 to-pink-500' : 'bg-slate-700'"
-              class="h-full rounded-full transition-all duration-500"
-              [style.width]="getCurrentStepIndex() >= 0 ? '100%' : '0%'"></div>
-          </div>
-        </div>
+    <!-- ******************* -->
+    <!-- Status-Specific UI  -->
+    <!-- ******************* -->
 
-        <!-- Step 2: Paid -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span [class]="getCurrentStepIndex() >= 1 ? 'text-white font-semibold' : 'text-slate-500'"
-              class="text-xs">2. Paid</span>
-            <span [class]="getCurrentStepIndex() >= 1 ? 'text-white' : 'text-slate-500'"
-              class="text-xs">{{ getCurrentStepIndex() >= 1 ? (selectedOrder.updated_at | date:'short') : '--' }}</span>
-          </div>
-          <div class="w-full h-1.5 rounded-full bg-slate-700 overflow-hidden">
-            <div [class]="getCurrentStepIndex() >= 1 ? 'bg-linear-to-r from-blue-500 to-blue-600' : 'bg-slate-700'"
-              class="h-full rounded-full transition-all duration-500"
-              [style.width]="getCurrentStepIndex() >= 1 ? '100%' : '0%'"></div>
-          </div>
-        </div>
-
-        <!-- Step 3: Completed -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span [class]="getCurrentStepIndex() >= 2 ? 'text-white font-semibold' : 'text-slate-500'"
-              class="text-xs">3. Completed</span>
-            <span [class]="getCurrentStepIndex() >= 2 ? 'text-white' : 'text-slate-500'"
-              class="text-xs">{{ getCurrentStepIndex() >= 2 ? (selectedOrder.updated_at | date:'short') : '--' }}</span>
-          </div>
-          <div class="w-full h-1.5 rounded-full bg-slate-700 overflow-hidden">
-            <div [class]="getCurrentStepIndex() >= 2 ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-slate-700'"
-              class="h-full rounded-full transition-all duration-500"
-              [style.width]="getCurrentStepIndex() >= 2 ? '100%' : '0%'"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Merchant/User Information -->
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
-      <div class="flex items-center justify-between mb-3">
-        <label class="text-sm font-semibold text-white">{{ selectedOrder.p2p_ad?.type === 'buy' ? 'Buyer' : 'Seller' }} Information</label>
-        <button (click)="goToMessages(selectedOrder.id)"
-          class="px-4 py-2 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-200 transition-all text-xs font-semibold flex items-center gap-2 cursor-pointer">
-          <i class="pi pi-comments"></i>
-          <span>Message</span>
-        </button>
-      </div>
-      <div class="flex items-center gap-3">
+    <!-- PENDING STATUS -->
+    @if (selectedOrder.status === 'pending') {
+    <div class="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-5 md:p-6">
+      <div class="flex items-start gap-3 md:gap-4">
         <div
-          [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-500 to-pink-500'"
-          class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg">
-          {{ (selectedOrder.ordered_by_user?.full_name || 'U').substring(0, 2).toUpperCase() }}
+          class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-r from-yellow-500 to-orange-500 flex items-center justify-center shrink-0">
+          <i class="pi pi-clock text-white text-lg md:text-xl"></i>
         </div>
-        <div class="flex-1">
-          <div class="font-bold text-white text-lg">{{ selectedOrder.ordered_by_user?.full_name || 'Unknown User' }}</div>
-          <div class="text-sm text-slate-400">{{ selectedOrder.ordered_by_user?.email || 'No email provided' }}</div>
+        <div class="flex-1 space-y-2">
+          <h3 class="text-base md:text-lg font-bold text-white">Waiting for Payment</h3>
+          @if (selectedOrder.p2p_ad?.type === 'buy') {
+          <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+            You are buying <span class="font-bold text-yellow-400">{{ selectedOrder.quantity | number:'1.2-6' }}
+              USDT</span>.
+            Please pay <span class="font-bold text-yellow-400">${{ selectedOrder.amount | number:'1.2-2' }} USD</span>
+            to the seller and upload your proof of payment.
+          </p>
+          } @else {
+          <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+            You are selling <span class="font-bold text-yellow-400">{{ selectedOrder.quantity | number:'1.2-6' }}
+              USDT</span>.
+            Please wait for the buyer to pay <span class="font-bold text-yellow-400">${{ selectedOrder.amount |
+              number:'1.2-2' }} USD</span> and upload proof of payment.
+          </p>
+          }
+          <div class="flex items-center gap-2 text-xs md:text-sm text-slate-400 pt-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Order created {{ selectedOrder.created_at | date:'short' }}</span>
+          </div>
         </div>
       </div>
     </div>
+    }
 
+    <!-- PAID STATUS -->
+    @if (selectedOrder.status === 'paid') {
+    <div class="bg-blue-500/10 border-2 border-blue-500/30 rounded-3xl p-5 md:p-6">
+      <div class="flex items-start gap-3 md:gap-4">
+        <div
+          class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-check-circle text-white text-lg md:text-xl"></i>
+        </div>
+        <div class="flex-1 space-y-2">
+          <h3 class="text-base md:text-lg font-bold text-white">Payment Submitted</h3>
+          @if (selectedOrder.p2p_ad?.type === 'buy') {
+          <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+            Your payment proof has been uploaded. Please wait for the seller to verify the <span
+              class="font-bold text-blue-400">${{ selectedOrder.amount | number:'1.2-2' }} USD</span> payment and
+            release <span class="font-bold text-blue-400">{{ selectedOrder.quantity | number:'1.2-6' }} USDT</span> to
+            your wallet.
+          </p>
+          } @else {
+          <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+            The buyer has uploaded their payment proof. Please check if you've received <span
+              class="font-bold text-blue-400">${{ selectedOrder.amount | number:'1.2-2' }} USD</span> in your account.
+            Once confirmed, click "Confirm" to complete the order and release the crypto.
+          </p>
+          }
+          <div class="flex items-center gap-2 text-xs md:text-sm text-slate-400 pt-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Payment marked {{ selectedOrder.updated_at | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- COMPLETED STATUS -->
+    @if (selectedOrder.status === 'completed') {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-5 md:p-6">
+      <div class="flex items-start gap-3 md:gap-4">
+        <div
+          class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-check text-white text-lg md:text-xl"></i>
+        </div>
+        <div class="flex-1 space-y-2">
+          <h3 class="text-base md:text-lg font-bold text-white">Order Completed Successfully!</h3>
+          <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+            This order has been completed successfully. The crypto has been transferred and payment has been received.
+            Thank you for using our P2P marketplace!
+          </p>
+          <div class="flex items-center gap-2 text-xs md:text-sm text-slate-400 pt-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Completed {{ selectedOrder.updated_at | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- CANCELLED STATUS -->
+    @if (selectedOrder.status === 'cancelled') {
+    <div class="bg-red-500/10 border-2 border-red-500/30 rounded-3xl p-5 md:p-6">
+      <div class="flex items-start gap-3 md:gap-4">
+        <div
+          class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-r from-red-500 to-red-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-times-circle text-white text-lg md:text-xl"></i>
+        </div>
+        <div class="flex-1 space-y-2">
+          <h3 class="text-base md:text-lg font-bold text-white">Order Cancelled</h3>
+          <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+            This order has been cancelled. If you have any questions or concerns, please contact support or the other
+            party through messages.
+          </p>
+          <div class="flex items-center gap-2 text-xs md:text-sm text-slate-400 pt-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Cancelled {{ selectedOrder.updated_at | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- ************* -->
     <!-- Order Summary -->
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
-      <label class="text-sm font-semibold text-white mb-3 block">Order Summary</label>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
-          <div class="text-xs text-slate-500 mb-1">Order Type</div>
-          <div class="flex items-center gap-2">
-            <span
-              [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-              class="px-2 py-1 rounded-full text-xs font-bold border uppercase">
-              <i [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
-              {{ selectedOrder.p2p_ad?.type }}
-            </span>
-          </div>
+    <!-- ************* -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-file-edit text-white text-sm"></i>
         </div>
-        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
-          <div class="text-xs text-slate-500 mb-1">Unit Price</div>
-          <div class="text-base font-bold text-yellow-400">${{ selectedOrder.ordered_price | number:'1.2-2' }}</div>
-        </div>
-        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
-          <div class="text-xs text-slate-500 mb-1">Quantity</div>
-          <div class="text-base font-bold text-white">{{ selectedOrder.quantity | number:'1.2-6' }} USDT</div>
-        </div>
-        <div class="bg-slate-900/50 rounded-xl px-4 py-3">
-          <div class="text-xs text-slate-500 mb-1">Total Amount</div>
-          <div class="text-base font-bold text-green-400">${{ selectedOrder.amount | number:'1.2-2' }}</div>
-        </div>
+        <span class="text-sm font-semibold text-white">Order Summary</span>
       </div>
-    </div>
 
-    <!-- Payment Information -->
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
-      <label class="text-sm font-semibold text-white mb-3 block">Payment Information</label>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-slate-400">Payment Method</span>
-          <div class="flex items-center gap-2">
-            <img [src]="'/images/payment-types/' + (selectedOrder.p2p_payment_type?.name || 'default').toLowerCase().replace(/\s+/g, '-') + '.png'"
-                 [alt]="selectedOrder.p2p_payment_type?.name"
-                 class="w-6 h-6 rounded-full object-cover"
-                 (error)="$event.target.src='/images/payment-types/default.png'" />
-            <span class="text-sm font-semibold text-white">{{ selectedOrder.p2p_payment_type?.name || 'N/A' }}</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-slate-400">Advertisement</span>
-          <span class="text-sm font-semibold text-white">{{ selectedOrder.p2p_ad?.name }}</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-slate-400">Ad Number</span>
-          <span class="text-sm font-mono font-semibold text-white">{{ selectedOrder.p2p_ad?.p2p_number }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Account Details -->
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4 mb-4">
-      <div class="flex items-center gap-2 mb-3">
-        <div class="w-6 h-6 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-          <i class="pi pi-credit-card text-white text-xs"></i>
-        </div>
-        <label class="text-sm font-semibold text-white">Payment Account Details</label>
-      </div>
-      <div class="space-y-3">
-        <div class="bg-slate-900/50 rounded-xl p-3">
-          <div class="text-xs text-slate-400 mb-1">Account Name</div>
-          <div class="text-sm font-semibold text-white">{{ getPaymentAccountName() || 'N/A' }}</div>
-        </div>
-        <div class="bg-slate-900/50 rounded-xl p-3">
-          <div class="text-xs text-slate-400 mb-1">Account Number / ID</div>
-          <div class="text-sm font-mono font-semibold text-white">{{ getPaymentAccountNumber() || 'N/A' }}</div>
-        </div>
-        @if (getPaymentOtherDetails()) {
-        <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3">
-          <div class="flex items-start gap-2">
-            <i class="pi pi-info-circle text-blue-400 text-sm mt-0.5"></i>
-            <div class="flex-1">
-              <div class="text-xs text-blue-300 font-semibold mb-1">Additional Instructions</div>
-              <div class="text-xs text-blue-200">{{ getPaymentOtherDetails() }}</div>
-            </div>
-          </div>
-        </div>
-        }
-        @if (selectedOrder.p2p_ad?.payment_instructions) {
-        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3">
-          <div class="flex items-start gap-2">
-            <i class="pi pi-file-edit text-purple-400 text-sm mt-0.5"></i>
-            <div class="flex-1">
-              <div class="text-xs text-purple-300 font-semibold mb-1">Merchant Instructions</div>
-              <div class="text-xs text-purple-200">{{ selectedOrder.p2p_ad?.payment_instructions }}</div>
-            </div>
-          </div>
-        </div>
-        }
-      </div>
-    </div>
-
-    <!-- Transaction Timeline -->
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-2xl p-4">
-      <label class="text-sm font-semibold text-white mb-3 block">Timeline</label>
-      <div class="space-y-3">
-        <div class="flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
-            <i class="pi pi-file-plus text-purple-400 text-xs"></i>
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-white">Order Created</div>
-            <div class="text-xs text-slate-400">{{ selectedOrder.created_at | date:'medium' }}</div>
-          </div>
-        </div>
-        @if (selectedOrder.status === 'paid' || selectedOrder.status === 'completed') {
-        <div class="flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-            <i class="pi pi-check-circle text-blue-400 text-xs"></i>
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-white">Payment Confirmed</div>
-            <div class="text-xs text-slate-400">{{ selectedOrder.updated_at | date:'medium' }}</div>
-          </div>
-        </div>
-        }
-        @if (selectedOrder.status === 'completed') {
-        <div class="flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-            <i class="pi pi-check text-green-400 text-xs"></i>
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-white">Order Completed</div>
-            <div class="text-xs text-slate-400">{{ selectedOrder.updated_at | date:'medium' }}</div>
-          </div>
-        </div>
-        }
-      </div>
-    </div>
-  </div>
-
-  <ng-template #footer>
-    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
-      <button (click)="goToMessages(selectedOrder!.id)"
-        class="flex-1 px-6 py-3 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-200 font-semibold transition-all duration-300 border border-purple-500/30 cursor-pointer flex items-center justify-center gap-2">
-        <i class="pi pi-comments"></i>
-        <span>Open Chat</span>
-      </button>
-      <button (click)="closeOrderDetails()"
-        class="flex-1 px-6 py-3 rounded-full bg-slate-700/60 hover:bg-slate-600/60 text-slate-200 hover:text-white font-medium transition-all duration-300 border border-slate-600/40 cursor-pointer">
-        Close
-      </button>
-    </div>
-  </ng-template>
-</p-dialog>
-
-<!-- Order Chat Dialog -->
-<p-dialog [(visible)]="showOrderChatDialog" [modal]="true"
-  [style]="{ 'width': '1200px', 'max-width': '95vw', 'height': '95vh', 'border-radius': '1.25rem' }"
-  [dismissableMask]="true" styleClass="cosmic-dialog">
-  <ng-template #header>
-    <div *ngIf="selectedOrder" class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
-          <i class="pi pi-comments text-white text-lg"></i>
-        </div>
-        <div>
-          <span
-            class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Order
-            Chat</span>
-          <div class="text-xs text-slate-400">Order #: {{ selectedOrder.order_number || selectedOrder.id }}</div>
-        </div>
-      </div>
-      <span [class]="getStatusBadgeClass(selectedOrder.status || '')"
-        class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase">{{ selectedOrder.status }}</span>
-    </div>
-  </ng-template>
-
-  <div *ngIf="selectedOrder" class="h-[calc(90vh-200px)] flex flex-col lg:flex-row gap-3 p-2">
-
-    <!-- Left: Order Details -->
-    <div class="lg:w-5/12 h-full bg-slate-800/50 rounded-2xl border border-purple-500/20 p-3 overflow-y-auto">
-      <!-- Ad Info -->
-      <div class="mb-3">
-        <div class="flex items-center justify-between mb-2">
-          <div class="text-slate-400 text-xs uppercase tracking-wide">Advertisement</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Order Type</span>
           <span
             [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-            class="px-2.5 py-1 rounded-full text-xs font-bold border uppercase">
-            <i [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
-              class="mr-0.5 text-[9px]"></i>
+            class="px-2 py-1 rounded-full text-xs font-bold border uppercase">
+            <i [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
             {{ selectedOrder.p2p_ad?.type }}
           </span>
         </div>
-        <div class="font-bold text-white text-lg mb-1">{{ selectedOrder.p2p_ad?.name }}</div>
-        <div class="text-sm text-slate-400">
-          <div>Ad #: <span class="font-mono text-white">{{ selectedOrder.p2p_ad?.p2p_number }}</span></div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Unit Price</span>
+          <span class="text-white font-semibold text-right">${{ selectedOrder.ordered_price | number:'1.2-2' }}</span>
         </div>
-      </div>
 
-      <!-- Action Required -->
-      <div class="mb-3 p-3 rounded-xl border-2"
-        [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
-        <div class="flex items-center gap-2 mb-1">
-          <i class="pi pi-info-circle text-base"
-            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
-          <div class="font-semibold text-sm"
-            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
-            {{ selectedOrder.p2p_ad?.type === 'buy' ? 'You are sending USDT' : 'You are sending payment' }}
-          </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Quantity</span>
+          <span class="text-white font-semibold text-right">{{ selectedOrder.quantity | number:'1.2-6' }}</span>
         </div>
-        <div class="text-xs" [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-200' : 'text-purple-200'">
-          {{ selectedOrder.p2p_ad?.type === 'buy' ? 'Send USDT tokens to receive payment' : 'Send payment to receive
-          USDT
-          tokens' }}
-        </div>
-      </div>
 
-      <!-- Order Details -->
-      <div class="mb-3">
-        <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">Order Details</div>
-        <div class="bg-slate-900/40 rounded-xl p-2.5 space-y-3">
-
-          <!-- You Send Section -->
-          <div class="p-3 rounded-2xl border-2"
-            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-green-500/10 border-green-500/40' : 'bg-purple-500/10 border-purple-500/40'">
-            <div class="flex items-center gap-1 mb-1">
-              <i class="pi pi-arrow-up text-sm"
-                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-400' : 'text-purple-400'"></i>
-              <div class="text-xs font-semibold"
-                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-green-300' : 'text-purple-300'">
-                YOU SEND
-              </div>
-            </div>
-
-            <!-- For BUY Ad (P2P user sells USDT): Send Quantity -->
-            <div *ngIf="selectedOrder.p2p_ad?.type === 'buy'">
-              <div class="text-xs text-green-200 mb-0.5">Quantity (USDT)</div>
-              <div class="text-3xl font-bold text-green-300">
-                {{ selectedOrder.quantity >= 1000000 ?
-                ((selectedOrder.quantity / 1000000) | number:'1.1-1') + 'M' : (selectedOrder.quantity | number) }}
-              </div>
-              <div class="text-xs text-green-200 font-mono">
-                Exact: <span class="text-white font-bold">{{ selectedOrder.quantity | number }}</span>
-              </div>
-            </div>
-
-            <!-- For SELL Ad (P2P user buys USDT): Send Amount -->
-            <div *ngIf="selectedOrder.p2p_ad?.type === 'sell'">
-              <div class="text-xs text-purple-200 mb-0.5">Total Amount (USD)</div>
-              <div class="text-3xl font-bold text-purple-300">
-                ${{ selectedOrder.amount >= 1000000000 ? ((selectedOrder.amount/1000000000) | number:'1.1-1') + 'B' :
-                (selectedOrder.amount >= 1000000 ? ((selectedOrder.amount/1000000) | number:'1.1-1') + 'M' :
-                (selectedOrder.amount >= 1000 ? ((selectedOrder.amount/1000) | number:'1.1-1') + 'K' :
-                (selectedOrder.amount | number:'1.2-2'))) }}
-              </div>
-              <div class="text-xs text-purple-200 font-mono">
-                Exact: <span class="text-white font-bold">${{ selectedOrder.amount | number:'1.2-2' }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- You Receive Section -->
-          <div class="p-3 rounded-2xl border-2"
-            [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'bg-blue-500/10 border-blue-500/40' : 'bg-yellow-500/10 border-yellow-500/40'">
-            <div class="flex items-center gap-1 mb-1">
-              <i class="pi pi-arrow-down text-sm"
-                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-blue-400' : 'text-yellow-400'"></i>
-              <div class="text-xs font-semibold"
-                [class]="selectedOrder.p2p_ad?.type === 'buy' ? 'text-blue-300' : 'text-yellow-300'">
-                YOU RECEIVE
-              </div>
-            </div>
-
-            <!-- For BUY Ad (P2P user sells USDT): Receive Amount -->
-            <div *ngIf="selectedOrder.p2p_ad?.type === 'buy'">
-              <div class="text-xs text-blue-200 mb-0.5">Total Amount (USD)</div>
-              <div class="text-2xl font-bold text-blue-300">
-                ${{ selectedOrder.amount >= 1000000000 ? ((selectedOrder.amount/1000000000) | number:'1.1-1') + 'B' :
-                (selectedOrder.amount >= 1000000 ? ((selectedOrder.amount/1000000) | number:'1.1-1') + 'M' :
-                (selectedOrder.amount >= 1000 ? ((selectedOrder.amount/1000) | number:'1.1-1') + 'K' :
-                (selectedOrder.amount | number:'1.2-2'))) }}
-              </div>
-              <div class="text-xs text-blue-200 font-mono">
-                Exact: <span class="text-white font-bold">${{ selectedOrder.amount | number:'1.2-2' }}</span>
-              </div>
-            </div>
-
-            <!-- For SELL Ad (P2P user buys USDT): Receive Quantity -->
-            <div *ngIf="selectedOrder.p2p_ad?.type === 'sell'">
-              <div class="text-xs text-yellow-200 mb-0.5">Quantity (USDT)</div>
-              <div class="text-2xl font-bold text-yellow-300">
-                {{ selectedOrder.quantity >= 1000000 ?
-                ((selectedOrder.quantity / 1000000) | number:'1.1-1') + 'M' : (selectedOrder.quantity | number) }}
-              </div>
-              <div class="text-xs text-yellow-200 font-mono">
-                Exact: <span class="text-white font-bold">{{ selectedOrder.quantity | number }}</span>
-              </div>
-            </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Total Amount</span>
+          <div
+            class="font-bold text-base bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent text-right">
+            ${{ selectedOrder.amount | number:'1.2-2' }}
           </div>
         </div>
       </div>
-
-      <!-- Payment & Buyer Info -->
-      <div>
-        <div class="text-slate-400 text-xs uppercase tracking-wide mb-2">Payment Information</div>
-        <div class="space-y-1.5 text-sm">
-          <div class="flex justify-between">
-            <span class="text-slate-400">Method:</span>
-            <span class="text-white font-semibold">{{ selectedOrder.p2p_payment_type?.name ||
-              selectedOrder.p2p_payment_type_id }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">Date:</span>
-            <span class="text-white">{{ selectedOrder.created_at | date:'short' }}</span>
-          </div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Right: Chat -->
-    <div class="lg:w-7/12 h-full flex flex-col bg-slate-900/40 rounded-2xl border border-purple-500/10">
-      <div class="flex-1 overflow-y-auto p-3 min-h-0">
-        <div class="space-y-2">
-          <div *ngFor="let msg of chatMessages" [class.justify-end]="msg.sender === 'user'" class="flex">
-            <div [class.bg-purple-500/20]="msg.sender === 'user'" [class.border-purple-500/30]="msg.sender === 'user'"
-              [class.bg-slate-700/50]="msg.sender === 'merchant'"
-              [class.border-slate-600/30]="msg.sender === 'merchant'" class="max-w-[75%] rounded-2xl border p-3">
-              <div class="flex items-center gap-2 mb-1">
-                <span [class.text-purple-300]="msg.sender === 'user'" [class.text-slate-300]="msg.sender === 'merchant'"
-                  class="text-xs font-semibold">{{ msg.senderName }}</span>
-                <span class="text-xs text-slate-500">{{ formatMessageTime(msg.timestamp) }}</span>
-              </div>
-              <div class="text-sm text-white">{{ msg.message }}</div>
-            </div>
-          </div>
+    <!-- ******************* -->
+    <!-- Payment Information -->
+    <!-- ******************* -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <i class="pi pi-credit-card text-white text-sm"></i>
         </div>
+        <span class="text-sm font-semibold text-white">Payment Information</span>
       </div>
 
-      <div class="p-3 border-t border-slate-700/50">
-        <div class="flex gap-2">
-          <input [ngModel]="chatMessage" (ngModelChange)="chatMessage = $event" (keyup.enter)="sendChatMessage()"
-            type="text" placeholder="Type your message..."
-            class="flex-1 px-4 py-3 rounded-full bg-slate-800/50 border border-slate-600/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none transition-all" />
-          <button (click)="sendChatMessage()" [disabled]="!chatMessage.trim()"
-            class="px-6 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2">
-            <i class="pi pi-send"></i>
-          </button>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Payment Method</span>
+          <div class="flex items-center gap-2">
+            @if (selectedOrder.p2p_payment_type?.logo_url) {
+            <img [src]="selectedOrder.p2p_payment_type!.logo_url" [alt]="selectedOrder.p2p_payment_type!.name"
+              class="w-5 h-5 object-contain" />
+            }
+            <span class="text-white font-semibold">{{ selectedOrder.p2p_payment_type?.name || 'N/A' }}</span>
+          </div>
         </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Advertisement</span>
+          <span class="text-white font-semibold text-right">{{ selectedOrder.p2p_ad?.name }}</span>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">User</span>
+          <span class="text-white font-semibold text-right">{{ selectedOrder.ordered_by_user?.full_name || 'N/A'
+            }}</span>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Created</span>
+          <span class="text-white font-semibold text-right">{{ selectedOrder.created_at | date:'medium' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ****************** -->
+    <!-- Action Buttons     -->
+    <!-- ****************** -->
+    <div class="space-y-3 pt-2">
+      <!-- BUY ORDER - Pending: Show Pay button -->
+      @if (selectedOrder.p2p_ad?.type === 'buy' && selectedOrder.status === 'pending') {
+      <button type="button" (click)="openPaymentProofDialog()"
+        class="w-full px-6 py-3.5 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold text-base transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg">
+        <i class="pi pi-upload text-lg"></i>
+        <span>Pay & Upload Proof</span>
+      </button>
+      }
+
+      <!-- SELL ORDER - Paid: Show Confirm button -->
+      @if (selectedOrder.p2p_ad?.type === 'sell' && selectedOrder.status === 'paid') {
+      <button type="button" (click)="confirmPaymentReceived(selectedOrder.id)"
+        class="w-full px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-base transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg">
+        <i class="pi pi-check-circle text-lg"></i>
+        <span>Confirm Payment Received</span>
+      </button>
+      }
+
+      <!-- Cancel Order button (for active orders only) -->
+      @if (selectedOrder.status !== 'completed' && selectedOrder.status !== 'cancelled') {
+      <button type="button" (click)="cancelOrder(selectedOrder.id)"
+        class="w-full px-6 py-3 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
+        <i class="pi pi-times-circle"></i>
+        <span>Cancel Order</span>
+      </button>
+      }
+
+      <!-- Message and Close buttons (always visible) -->
+      <div class="flex gap-3">
+        <button type="button" (click)="goToMessages(selectedOrder.id)"
+          class="flex-1 px-6 py-3 rounded-3xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
+          <i class="pi pi-comments"></i>
+          <span class="hidden md:inline">Message</span>
+          <span class="md:hidden">Chat</span>
+        </button>
+        <button type="button" (click)="closeOrderDetails()"
+          class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+          Close
+        </button>
       </div>
     </div>
   </div>
+  }
+</p-dialog>
 
-  <ng-template #footer>
-    <div class="flex flex-wrap gap-2">
-      @if (selectedOrder?.status === 'pending') {
-      <button
-        class="px-4 py-3 rounded-full bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 font-semibold transition-all duration-200 border border-green-500/30 hover:border-green-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
-        <i class="pi pi-check"></i><span>Mark as Paid</span>
-      </button>
-      }
-
-      @if (selectedOrder?.status === 'paid') {
-      <button
-        class="px-4 py-3 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 font-semibold transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
-        <i class="pi pi-verified"></i><span>Confirm Release</span>
-      </button>
-      }
-
-      <button
-        class="px-4 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 font-semibold transition-all duration-200 border border-red-500/30 hover:border-red-500/50 cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap">
-        <i class="pi pi-flag"></i><span>Dispute</span>
-      </button>
-      <button (click)="closeOrderChat()"
-        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer whitespace-nowrap">
-        Close
-      </button>
+<!-- ********************************************** -->
+<!-- Upload Proof of Payment Dialog                -->
+<!-- ********************************************** -->
+<p-dialog [(visible)]="showPaymentProofDialog" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem'  }">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+        <i class="pi pi-upload text-white text-lg"></i>
+      </div>
+      <span class="text-lg font-bold text-white">Upload Proof of Payment</span>
     </div>
   </ng-template>
+
+  <div class="space-y-5 py-4">
+    <!-- Payment Information -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400">Amount to Pay</span>
+          <span class="text-white font-bold text-lg">${{ selectedOrder?.amount | number:'1.2-2' }} USD</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400">You Will Receive</span>
+          <span class="text-white font-semibold">{{ selectedOrder?.quantity | number:'1.2-6' }} USDT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Upload Area -->
+    <div class="space-y-2">
+      <label class="text-sm font-semibold text-white">Payment Proof (Screenshot/Receipt)</label>
+      <div class="relative">
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,.pdf" class="hidden" />
+        <div (click)="fileInput.click()"
+          class="border-2 border-dashed border-slate-600 rounded-3xl p-8 text-center cursor-pointer hover:border-purple-500/50 hover:bg-purple-500/5 transition-all duration-200">
+          @if (!selectedFile) {
+          <div class="space-y-3">
+            <i class="pi pi-cloud-upload text-4xl text-slate-500"></i>
+            <div class="space-y-1">
+              <p class="text-white font-semibold">Click to upload</p>
+              <p class="text-xs text-slate-400">PNG, JPG, PDF up to 10MB</p>
+            </div>
+          </div>
+          } @else {
+          <div class="space-y-2">
+            <i class="pi pi-file text-3xl text-green-400"></i>
+            <p class="text-white font-semibold">{{ selectedFile.name }}</p>
+            <p class="text-xs text-slate-400">{{ (selectedFile.size / 1024).toFixed(2) }} KB</p>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Reference Number (Optional) -->
+    <div class="space-y-2">
+      <label class="text-sm font-semibold text-white">Transaction Reference (Optional)</label>
+      <input type="text" [(ngModel)]="paymentReference" pInputText placeholder="Enter transaction reference number"
+        class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 focus:bg-slate-800" />
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3 pt-2">
+      <button type="button" (click)="uploadPaymentProof()" [disabled]="!selectedFile" [class.opacity-50]="!selectedFile"
+        [class.cursor-not-allowed]="!selectedFile"
+        class="flex-1 px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg">
+        <i class="pi pi-check"></i>
+        <span>Submit Proof</span>
+      </button>
+      <button type="button" (click)="closePaymentProofDialog()"
+        class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </div>
 </p-dialog>

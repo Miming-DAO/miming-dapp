@@ -40,18 +40,25 @@ export class Orders {
     private messageService: MessageService
   ) { }
 
-  activeStatusTab: 'pending' | 'paid' | 'completed' | 'cancelled' = 'pending';
+  activeStatusTab: 'in-progress' | 'completed' | 'cancelled' = 'in-progress';
   showOrderDetailsDialog: boolean = false;
   showOrderChatDialog: boolean = false;
+  showPaymentProofDialog: boolean = false;
   isLoading: boolean = false;
 
   selectedOrder: P2pOrder | null = null;
+  selectedFile: File | null = null;
+  paymentReference: string = '';
   chatMessage: string = '';
   chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
 
   orders: P2pOrder[] = [];
 
   get filteredOrders(): P2pOrder[] {
+    if (this.activeStatusTab === 'in-progress') {
+      // In Progress includes 'pending' and 'paid' statuses
+      return this.orders.filter(order => order.status === 'pending' || order.status === 'paid');
+    }
     return this.orders.filter(order => order.status === this.activeStatusTab);
   }
 
@@ -98,16 +105,73 @@ export class Orders {
     this.router.navigate(['/p2p/messages'], { queryParams: { orderId } });
   }
 
-  getCurrentStepIndex(): number {
-    if (!this.selectedOrder) return 0;
-    const statusMap: any = {
-      'pending': 0,
-      'paid': 1,
-      'completed': 2,
-      'cancelled': 0,
-      'disputed': 1
-    };
-    return statusMap[this.selectedOrder.status] || 0;
+  openPaymentProofDialog(): void {
+    this.showPaymentProofDialog = true;
+  }
+
+  closePaymentProofDialog(): void {
+    this.showPaymentProofDialog = false;
+    this.selectedFile = null;
+    this.paymentReference = '';
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'File Too Large',
+          detail: 'Please upload a file smaller than 10MB.'
+        });
+        return;
+      }
+      this.selectedFile = file;
+    }
+  }
+
+  uploadPaymentProof(): void {
+    if (!this.selectedFile || !this.selectedOrder) return;
+
+    // TODO: Implement actual file upload to backend
+    // For now, simulate the upload and status change
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Proof Uploaded',
+      detail: 'Your payment proof has been submitted. The seller will verify your payment.'
+    });
+
+    // Close dialogs and reload orders
+    this.closePaymentProofDialog();
+    this.closeOrderDetails();
+    this.loadOrders();
+  }
+
+  confirmPaymentReceived(orderId: string): void {
+    // TODO: Implement API call to confirm payment and complete order
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Payment Confirmed',
+      detail: 'You have confirmed payment received. The crypto will be released to the buyer.'
+    });
+
+    // Reload orders to reflect status change
+    this.loadOrders();
+    this.closeOrderDetails();
+  }
+
+  cancelOrder(orderId: string): void {
+    // TODO: Implement API call to cancel order
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Order Cancelled',
+      detail: 'The order has been cancelled successfully.'
+    });
+
+    // Reload orders to reflect status change
+    this.loadOrders();
+    this.closeOrderDetails();
   }
 
   getPaymentAccountName(): string {
