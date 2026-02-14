@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { MessageService } from 'primeng/api';
-import { DialogModule } from 'primeng/dialog';
-import { SelectModule } from 'primeng/select';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ToastModule } from 'primeng/toast';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
+import { SelectModule as PSelectModule } from 'primeng/select';
+import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
+import { TextareaModule as PTextareaModule } from 'primeng/textarea';
+import { InputNumberModule as PInputNumberModule } from 'primeng/inputnumber';
+import { ToastModule as PToastModule } from 'primeng/toast';
 
 import { User } from '../../../models/user.model';
 import { Token } from '../../../models/token.model';
@@ -26,12 +26,12 @@ import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types
   imports: [
     CommonModule,
     FormsModule,
-    DialogModule,
-    SelectModule,
-    InputTextModule,
-    TextareaModule,
-    InputNumberModule,
-    ToastModule,
+    PDialogModule,
+    PSelectModule,
+    PInputTextModule,
+    PTextareaModule,
+    PInputNumberModule,
+    PToastModule,
   ],
   templateUrl: './my-ads.html',
   styleUrl: './my-ads.css',
