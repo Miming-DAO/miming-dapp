@@ -46,6 +46,7 @@ export class Orders {
   showOrderChatDialog: boolean = false;
   showPaymentProofDialog: boolean = false;
   isLoading: boolean = false;
+  searchTerm: string = '';
 
   selectedOrder: P2pOrder | null = null;
   selectedFile: File | null = null;
@@ -56,16 +57,38 @@ export class Orders {
   myOrders: P2pOrder[] = []; // Orders I placed on others' ads
   myAdOrders: P2pOrder[] = []; // Orders others placed on my ads
 
+  statusOptions = [
+    { label: 'In Progress', value: 'in-progress', icon: 'pi pi-clock text-yellow-400' },
+    { label: 'Completed', value: 'completed', icon: 'pi pi-check text-green-400' },
+    { label: 'Cancelled', value: 'cancelled', icon: 'pi pi-times-circle text-red-400' }
+  ];
+
   get orders(): P2pOrder[] {
     return this.activeViewTab === 'my-orders' ? this.myOrders : this.myAdOrders;
   }
 
   get filteredOrders(): P2pOrder[] {
+    let filtered = this.orders;
+
+    // Filter by status
     if (this.activeStatusTab === 'in-progress') {
-      // In Progress includes 'pending' and 'paid' statuses
-      return this.orders.filter(order => order.status === 'pending' || order.status === 'paid');
+      filtered = filtered.filter(order => order.status === 'pending' || order.status === 'paid');
+    } else {
+      filtered = filtered.filter(order => order.status === this.activeStatusTab);
     }
-    return this.orders.filter(order => order.status === this.activeStatusTab);
+
+    // Filter by search term
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const search = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(order =>
+        order.order_number?.toLowerCase().includes(search) ||
+        order.ordered_by_user?.full_name?.toLowerCase().includes(search) ||
+        order.amount?.toString().includes(search) ||
+        order.p2p_ad?.name?.toLowerCase().includes(search)
+      );
+    }
+
+    return filtered;
   }
 
   loadOrders(): void {

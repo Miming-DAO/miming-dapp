@@ -6,56 +6,59 @@
     <!-- ************ -->
     <!-- Panel Header -->
     <!-- ************ -->
-    <div class="flex flex-col gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">Order History</h2>
         <p class="text-sm md:text-base text-slate-400">Track your P2P transactions</p>
       </div>
 
       <!-- View Toggle (My Orders vs My Ad Orders) -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div class="flex gap-2 w-full sm:w-auto">
-          <button (click)="activeViewTab = 'my-orders'"
-            [class]="activeViewTab === 'my-orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-            class="flex-1 sm:flex-none px-5 md:px-6 py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
-            <i class="pi pi-shopping-bag"></i>
-            <span>My Orders</span>
-          </button>
+      <div class="flex gap-2">
+        <button (click)="activeViewTab = 'my-orders'"
+          [class]="activeViewTab === 'my-orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="flex-1 sm:flex-none px-4 md:px-6 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
+          <i class="pi pi-shopping-bag"></i>
+          <span class="hidden sm:inline">My Orders</span>
+          <span class="sm:hidden">Mine</span>
+        </button>
 
-          <button (click)="activeViewTab = 'my-ad-orders'"
-            [class]="activeViewTab === 'my-ad-orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-            class="flex-1 sm:flex-none px-5 md:px-6 py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
-            <i class="pi pi-briefcase"></i>
-            <span>My Ad Orders</span>
-          </button>
-        </div>
+        <button (click)="activeViewTab = 'my-ad-orders'"
+          [class]="activeViewTab === 'my-ad-orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="flex-1 sm:flex-none px-4 md:px-6 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
+          <i class="pi pi-briefcase"></i>
+          <span class="hidden sm:inline">My Ad Orders</span>
+          <span class="sm:hidden">Ads</span>
+        </button>
+      </div>
+    </div>
 
-        <!-- Status Tabs -->
-        <div class="flex gap-2 w-full sm:w-auto">
-          <button (click)="activeStatusTab = 'in-progress'"
-            [class]="activeStatusTab === 'in-progress' ? 'bg-linear-to-r from-yellow-500 to-orange-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-            class="flex-1 sm:flex-none px-4 md:px-5 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer whitespace-nowrap">
-            <i class="pi pi-clock mr-1 md:mr-2"></i>
-            <span class="hidden sm:inline">In Progress</span>
-            <span class="sm:hidden">Progress</span>
-          </button>
+    <!-- ******* -->
+    <!-- Filters -->
+    <!-- ******* -->
+    <div class="flex flex-col md:flex-row gap-3 mb-6">
+      <div class="w-full md:w-56">
+        <p-select [options]="statusOptions" [(ngModel)]="activeStatusTab" placeholder="Filter by Status"
+          optionLabel="label" optionValue="value" class="w-full" size="large">
+          <ng-template #selectedItem let-selectedOption>
+            @if (selectedOption) {
+            <div class="flex items-center gap-2">
+              <i [class]="selectedOption.icon" class="text-sm"></i>
+              <span class="font-medium">{{ selectedOption.label }}</span>
+            </div>
+            }
+          </ng-template>
+          <ng-template let-status #item>
+            <div class="flex items-center gap-2 py-1">
+              <i [class]="status.icon" class="text-sm"></i>
+              <span class="font-medium">{{ status.label }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
 
-          <button (click)="activeStatusTab = 'completed'"
-            [class]="activeStatusTab === 'completed' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-            class="flex-1 sm:flex-none px-4 md:px-5 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer whitespace-nowrap">
-            <i class="pi pi-check mr-1 md:mr-2"></i>
-            <span class="hidden sm:inline">Completed</span>
-            <span class="sm:hidden">Done</span>
-          </button>
-
-          <button (click)="activeStatusTab = 'cancelled'"
-            [class]="activeStatusTab === 'cancelled' ? 'bg-linear-to-r from-red-500 to-red-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
-            class="flex-1 sm:flex-none px-4 md:px-5 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer whitespace-nowrap">
-            <i class="pi pi-times-circle mr-1 md:mr-2"></i>
-            <span class="hidden sm:inline">Cancelled</span>
-            <span class="sm:hidden">Cancel</span>
-          </button>
-        </div>
+      <div class="flex-1">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search by order number, user, or amount..."
+          class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-gray-100/30 text-white placeholder:text-slate-500 outline-none focus:border-purple-500/50 transition-all" />
       </div>
     </div>
 
