@@ -136,17 +136,16 @@ export class Orders {
   }
 
   openOrderDetails(order: P2pOrder) {
-    this.selectedOrder = order;
-    this.showOrderDetailsDialog = true;
+    this.router.navigate(['/p2p/order-details', order.id], {
+      queryParams: {
+        view: this.activeViewTab
+      }
+    });
   }
 
   closeOrderDetails() {
     this.showOrderDetailsDialog = false;
     this.selectedOrder = null;
-  }
-
-  goToMessages(orderId: string) {
-    this.router.navigate(['/p2p/messages'], { queryParams: { orderId } });
   }
 
   openPaymentProofDialog(): void {

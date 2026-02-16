@@ -16,16 +16,12 @@ export const routes: Routes = [
         loadComponent: () => import('./orders/orders').then(m => m.Orders)
       },
       {
-        path: "order-details",
+        path: "order-details/:id",
         loadComponent: () => import('./order-details/order-details').then(m => m.OrderDetails)
       },
       {
         path: "my-ads",
         loadComponent: () => import('./my-ads/my-ads').then(m => m.MyAds)
-      },
-      {
-        path: "messages",
-        loadComponent: () => import('./messages/messages').then(m => m.Messages)
       },
       {
         path: 'admin',

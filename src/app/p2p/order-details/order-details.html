@@ -1,521 +1,612 @@
-@if (isLoading) {
-<div class="flex items-center justify-center min-h-screen">
-  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-8 text-center">
-    <div
-      class="inline-block w-10 h-10 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-3">
-    </div>
-    <p class="text-slate-400">Loading order...</p>
-  </div>
-</div>
-}
+<p-toast />
 
-@if (!isLoading && order) {
-<!-- MOBILE LAYOUT -->
-<div class="md:hidden flex flex-col h-[88dvh] overflow-hidden bg-slate-950 rounded-3xl">
-  <!-- Mobile Header -->
-  <div
-    class="backdrop-blur-md bg-slate-900/95 border-b border-purple-500/20 px-4 py-3.5 flex items-center gap-3 shrink-0 rounded-t-3xl">
-    <button (click)="goBack()" type="button"
-      class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-all cursor-pointer">
-      <i class="pi pi-arrow-left text-white text-sm"></i>
-    </button>
-
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <h2 class="text-sm font-bold text-white truncate">Order #{{ order.order_number || order.id }}</h2>
-        <span [class]="getStatusBadgeClass(order.status)"
-          class="px-2.5 py-1 rounded-full text-[10px] font-semibold border uppercase">
-          {{ order.status }}
-        </span>
-      </div>
-    </div>
-
-    <button (click)="showOrderInfo = true" type="button"
-      class="w-10 h-10 flex items-center justify-center rounded-full bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 transition-all cursor-pointer">
-      <i class="pi pi-info-circle text-purple-400 text-sm"></i>
+<div class="max-w-7xl mx-auto">
+  <!-- Back Button & Header -->
+  <div class="mb-4 md:mb-6">
+    <button (click)="goBack()"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-700/50 transition-all duration-200">
+      <i class="pi pi-arrow-left"></i>
+      <span class="text-sm font-medium">Back to Orders</span>
     </button>
   </div>
 
-  <!-- Mobile Chat Messages -->
-  <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-    @for (msg of chatMessages; track $index) {
-    @if (msg.type === 'system') {
-    <div class="flex justify-center">
-      <div class="backdrop-blur-xl bg-blue-500/10 border border-blue-500/20 rounded-3xl px-4 py-2.5 max-w-[85%]">
-        <p class="text-xs text-blue-300 text-center">
-          <i class="pi pi-info-circle mr-1.5"></i>
-          {{ msg.message }}
-        </p>
-        <p class="text-[10px] text-blue-400/60 text-center mt-1">{{ formatMessageTime(msg.timestamp) }}</p>
-      </div>
+  @if (isLoading) {
+  <div class="flex justify-center items-center py-20">
+    <div class="flex flex-col items-center gap-4">
+      <i class="pi pi-spin pi-spinner text-5xl text-purple-400"></i>
+      <p class="text-slate-400">Loading order details...</p>
     </div>
-    }
-
-    @if (msg.sender === 'merchant' && msg.type === 'text') {
-    <div class="flex items-start gap-2">
-      <div
-        class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
-        <i class="pi pi-user text-white text-xs"></i>
-      </div>
-      <div class="flex-1 max-w-[75%]">
-        <div class="backdrop-blur-xl bg-slate-800/80 rounded-3xl px-4 py-3 border border-purple-500/20">
-          <p class="text-sm text-white leading-relaxed">{{ msg.message }}</p>
-        </div>
-        <p class="text-[10px] text-slate-500 mt-1.5 ml-3">{{ formatMessageTime(msg.timestamp) }}</p>
-      </div>
-    </div>
-    }
-
-    @if (msg.sender === 'user' && msg.type === 'text') {
-    <div class="flex items-start gap-2 justify-end">
-      <div class="flex-1 flex flex-col items-end max-w-[75%]">
-        <div class="backdrop-blur-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-3xl px-4 py-3">
-          <p class="text-sm text-white leading-relaxed">{{ msg.message }}</p>
-        </div>
-        <p class="text-[10px] text-slate-500 mt-1.5 mr-3">{{ formatMessageTime(msg.timestamp) }}</p>
-      </div>
-    </div>
-    }
-
-    @if (msg.sender === 'user' && msg.type === 'image') {
-    <div class="flex items-start gap-2 justify-end">
-      <div class="flex-1 flex flex-col items-end max-w-[85%]">
-        <div class="backdrop-blur-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-3xl p-3">
-          <img [src]="msg.imageUrl" alt="Payment Proof"
-            class="rounded-3xl max-w-full h-auto mb-2 max-h-56 object-cover">
-          <p class="text-xs text-white">{{ msg.message }}</p>
-        </div>
-        <p class="text-[10px] text-slate-500 mt-1.5 mr-3">{{ formatMessageTime(msg.timestamp) }}</p>
-      </div>
-    </div>
-    }
-    }
-  </div>
-
-  <!-- Mobile Action Bar (Pay Button for Buy Orders) -->
-  @if (order.p2p_ad?.type === 'buy' && order.status === 'pending') {
-  <div
-    class="backdrop-blur-xl bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-t border-blue-500/30 px-4 py-3 shrink-0">
-    <button (click)="openPaymentDialog()" type="button"
-      class="w-full px-6 py-3.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-base transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg">
-      <i class="pi pi-credit-card text-lg"></i>
-      <span>Pay Now - ${{ formatNumber(order.amount) }}</span>
-    </button>
   </div>
   }
 
-  <!-- Mobile Chat Input -->
-  <div class="backdrop-blur-xl bg-slate-900/98 border-t border-purple-500/20 px-4 py-3 pb-safe shrink-0 rounded-b-3xl">
-    <div class="flex items-center gap-2.5">
-      <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendChatMessage()" placeholder="Type a message..."
-        class="flex-1 px-4 py-3 rounded-full bg-slate-800/50 border border-purple-500/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none text-sm transition-all">
-      <button (click)="sendChatMessage()" type="button" [disabled]="!chatMessage.trim()"
-        class="w-11 h-11 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer shadow-lg shrink-0">
-        <i class="pi pi-send text-white text-sm"></i>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- DESKTOP LAYOUT -->
-<div class="hidden md:flex md:gap-4 md:h-[84dvh]">
-  <!-- Left: Chat Panel (Separate Card) -->
-  <div
-    class="flex-1 flex flex-col rounded-3xl overflow-hidden backdrop-blur-xl bg-slate-900/50 border border-purple-500/20">
-    <!-- Chat Header -->
-    <div
-      class="backdrop-blur-md bg-slate-900/95 border-b border-purple-500/20 px-6 py-4 flex items-center gap-4 shrink-0">
-      <button (click)="goBack()" type="button"
-        class="w-11 h-11 flex items-center justify-center rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition-all cursor-pointer">
-        <i class="pi pi-arrow-left text-white"></i>
-      </button>
-
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-3 flex-wrap">
-          <h2 class="text-xl font-bold text-white">Order #{{ order.order_number || order.id }}</h2>
-          <span [class]="getStatusBadgeClass(order.status)"
-            class="px-3 py-1.5 rounded-full text-xs font-semibold border uppercase">
-            {{ order.status }}
-          </span>
+  @if (!isLoading && order) {
+  <!-- Mobile: Chat-first view with button to show order details in dialog -->
+  <div class="lg:hidden">
+    <!-- Mobile Header with Order Details Button -->
+    <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 mb-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <div
+            [class]="order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+            class="w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+            <i class="pi pi-shopping-cart text-white"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-base font-bold text-white truncate">{{ order.order_number }}</h1>
+            <span
+              [class]="order.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : order.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : order.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
+              class="inline-block px-2 py-1 rounded-full text-xs font-bold border uppercase">
+              {{ order.status }}
+            </span>
+          </div>
         </div>
-        <p class="text-sm text-slate-400 mt-1 truncate">{{ order.p2p_ad?.name }}</p>
+        <button (click)="showMobileOrderDetails = true" type="button"
+          class="px-3 py-2 rounded-3xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-all duration-200 shrink-0">
+          <i class="pi pi-info-circle mr-1.5"></i>
+          Details
+        </button>
       </div>
     </div>
 
-    <!-- Chat Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Chat Messages Area -->
-      <div class="flex-1 overflow-y-auto px-8 py-6 space-y-4 bg-slate-950">
-        @for (msg of chatMessages; track $index) {
-        @if (msg.type === 'system') {
-        <div class="flex justify-center">
-          <div class="backdrop-blur-xl bg-blue-500/10 border border-blue-500/20 rounded-3xl px-6 py-3.5 max-w-xl">
-            <p class="text-sm text-blue-300 text-center">
-              <i class="pi pi-info-circle mr-2"></i>
-              {{ msg.message }}
-            </p>
-            <p class="text-xs text-blue-400/60 text-center mt-1.5">{{ formatMessageTime(msg.timestamp) }}</p>
-          </div>
-        </div>
-        }
+    <!-- Mobile Chat -->
+    <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
+      <!-- Chat Header -->
+      <div class="p-4 border-b border-slate-700/50 bg-slate-900/50">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="pi pi-comments text-purple-400"></i>
+          Order Chat
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">Communicate with {{ viewType === 'my-orders' ? 'seller' : 'buyer' }}</p>
+      </div>
 
-        @if (msg.sender === 'merchant' && msg.type === 'text') {
-        <div class="flex items-start gap-3 max-w-2xl">
-          <div
-            class="w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
-            <i class="pi pi-user text-white"></i>
-          </div>
-          <div class="flex-1">
-            <div class="backdrop-blur-xl bg-slate-800/80 rounded-3xl px-5 py-4 border border-purple-500/20">
-              <p class="text-base text-white leading-relaxed">{{ msg.message }}</p>
-            </div>
-            <p class="text-xs text-slate-500 mt-2 ml-4">{{ formatMessageTime(msg.timestamp) }}</p>
-          </div>
-        </div>
-        }
-
-        @if (msg.sender === 'user' && msg.type === 'text') {
-        <div class="flex items-start gap-3 justify-end max-w-2xl ml-auto">
-          <div class="flex-1 flex flex-col items-end">
-            <div class="backdrop-blur-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-3xl px-5 py-4">
-              <p class="text-base text-white leading-relaxed">{{ msg.message }}</p>
-            </div>
-            <p class="text-xs text-slate-500 mt-2 mr-4">{{ formatMessageTime(msg.timestamp) }}</p>
-          </div>
-        </div>
-        }
-
-        @if (msg.sender === 'user' && msg.type === 'image') {
-        <div class="flex items-start gap-3 justify-end max-w-2xl ml-auto">
-          <div class="flex-1 flex flex-col items-end">
-            <div class="backdrop-blur-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-3xl p-4">
-              <img [src]="msg.imageUrl" alt="Payment Proof"
-                class="rounded-3xl max-w-full h-auto mb-3 max-h-96 object-cover">
+      <!-- Chat Messages -->
+      <div class="chat-messages p-4 space-y-3 bg-slate-900/30"
+        style="height: calc(100vh - 340px); max-height: calc(100vh - 340px);">
+        @for (msg of chatMessages; track msg.timestamp) {
+        @if (msg.sender === 'me') {
+        <!-- My Message -->
+        <div class="flex justify-end">
+          <div class="max-w-[80%]">
+            <div class="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl rounded-tr-sm p-3">
               <p class="text-sm text-white">{{ msg.message }}</p>
             </div>
-            <p class="text-xs text-slate-500 mt-2 mr-4">{{ formatMessageTime(msg.timestamp) }}</p>
+            <p class="text-xs text-slate-500 mt-1 text-right">{{ formatMessageTime(msg.timestamp) }}</p>
+          </div>
+        </div>
+        } @else {
+        <!-- Other's Message -->
+        <div class="flex justify-start">
+          <div class="max-w-[80%]">
+            <div class="flex items-center gap-2 mb-1">
+              <div
+                class="w-6 h-6 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                <i class="pi pi-user text-white text-xs"></i>
+              </div>
+              <span class="text-xs font-medium text-slate-400">{{ msg.senderName }}</span>
+            </div>
+            <div class="bg-slate-700/50 rounded-3xl rounded-tl-sm p-3">
+              <p class="text-sm text-slate-200">{{ msg.message }}</p>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">{{ formatMessageTime(msg.timestamp) }}</p>
           </div>
         </div>
         }
         }
+
+        @if (chatMessages.length === 0) {
+        <div class="flex flex-col items-center justify-center h-full text-center">
+          <i class="pi pi-comments text-4xl text-slate-600 mb-2"></i>
+          <p class="text-sm text-slate-500">No messages yet</p>
+          <p class="text-xs text-slate-600 mt-1">Start a conversation</p>
+        </div>
+        }
       </div>
 
-      <!-- Desktop Action Bar (Pay Button for Buy Orders) -->
-      @if (order.p2p_ad?.type === 'buy' && order.status === 'pending') {
-      <div
-        class="backdrop-blur-xl bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-t border-blue-500/30 px-8 py-4 shrink-0">
-        <div class="max-w-3xl mx-auto">
-          <button (click)="openPaymentDialog()" type="button"
-            class="w-full px-8 py-3.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-base transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg">
-            <i class="pi pi-credit-card text-lg"></i>
-            <span>Pay Now - ${{ formatNumber(order.amount) }}</span>
+      <!-- Chat Input -->
+      <div class="p-4 border-t border-slate-700/50 bg-slate-900/50">
+        <div class="flex gap-2">
+          <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
+            class="flex-1 px-4 py-2.5 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 text-sm" />
+          <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
+            [class.opacity-50]="!chatMessage || !chatMessage.trim()"
+            [class.cursor-not-allowed]="!chatMessage || !chatMessage.trim()"
+            class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200">
+            <i class="pi pi-send"></i>
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop: Original 2-column layout -->
+  <div class="hidden lg:grid lg:grid-cols-3 gap-4 md:gap-6">
+
+    <!-- Left Column: Order Details (2/3 width on desktop) -->
+    <div class="lg:col-span-2 space-y-4">
+
+      <!-- Order Header Card -->
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <div
+                [class]="order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+                class="w-10 h-10 rounded-full flex items-center justify-center">
+                <i class="pi pi-shopping-cart text-white"></i>
+              </div>
+              <div>
+                <h1 class="text-lg md:text-xl font-bold text-white">{{ order.order_number }}</h1>
+                <p class="text-xs text-slate-400">{{ order.created_at | date:'medium' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <span
+              [class]="order.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : order.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : order.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
+              class="px-4 py-2 rounded-full text-sm font-bold border uppercase">
+              {{ order.status }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Order Type Badge -->
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-700/30 border border-slate-600/30">
+          <i
+            [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down text-green-400' : 'pi pi-arrow-up text-purple-400'"></i>
+          <span class="text-sm font-semibold text-white uppercase">{{ order.p2p_ad?.type }}</span>
+        </div>
+      </div>
+
+      <!-- Status-Specific Information -->
+      @if (order.status === 'pending') {
+      <div class="backdrop-blur-xl bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-5 md:p-6">
+        <div class="flex items-start gap-3 md:gap-4">
+          <div
+            class="w-12 h-12 rounded-full bg-linear-to-r from-yellow-500 to-orange-500 flex items-center justify-center shrink-0">
+            <i class="pi pi-clock text-white text-xl"></i>
+          </div>
+          <div class="flex-1 space-y-2">
+            <h3 class="text-lg font-bold text-white">Waiting for Payment</h3>
+
+            @if (viewType === 'my-orders') {
+            @if (order.p2p_ad?.type === 'buy') {
+            <p class="text-sm text-slate-300 leading-relaxed">
+              You are buying <span class="font-bold text-yellow-400">{{ order.quantity | number:'1.2-6' }} USDT</span>.
+              Please pay <span class="font-bold text-yellow-400">${{ order.amount | number:'1.2-2' }} USD</span>
+              to the seller and upload your proof of payment.
+            </p>
+            } @else {
+            <p class="text-sm text-slate-300 leading-relaxed">
+              You are selling <span class="font-bold text-yellow-400">{{ order.quantity | number:'1.2-6' }} USDT</span>.
+              Please wait for the buyer to pay <span class="font-bold text-yellow-400">${{ order.amount | number:'1.2-2'
+                }} USD</span>.
+            </p>
+            }
+            }
+
+            @if (viewType === 'my-ad-orders') {
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Waiting for the buyer to pay <span class="font-bold text-yellow-400">${{ order.amount | number:'1.2-2' }}
+                USD</span>
+              and upload their proof of payment.
+            </p>
+            }
+          </div>
         </div>
       </div>
       }
 
-      <!-- Desktop Chat Input -->
-      <div class="backdrop-blur-xl bg-slate-900/95 border-t border-purple-500/20 px-8 py-5 shrink-0">
-        <div class="flex items-center gap-3 max-w-3xl mx-auto">
-          <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendChatMessage()" placeholder="Type a message..."
-            class="flex-1 px-6 py-4 rounded-full bg-slate-800/50 border border-purple-500/30 focus:border-purple-500/50 text-white placeholder:text-slate-500 outline-none text-base transition-all">
-          <button (click)="sendChatMessage()" type="button" [disabled]="!chatMessage.trim()"
-            class="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer shadow-lg shrink-0">
-            <i class="pi pi-send text-white text-lg"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right: Order Info Panel (Separate Card - Desktop Only) -->
-  <div
-    class="w-72 flex flex-col rounded-3xl overflow-hidden backdrop-blur-xl bg-slate-900/50 border border-purple-500/20 shrink-0">
-    <!-- Info Header -->
-    <div class="backdrop-blur-xl bg-slate-900/80 border-b border-purple-500/20 px-6 py-5 shrink-0">
-      <div class="flex items-center gap-3">
-        <div
-          class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 flex items-center justify-center shrink-0">
-          <i class="pi pi-file-edit text-white text-xl"></i>
-        </div>
-        <div>
-          <span
-            class="font-bold text-xl bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
-            Order Details
-          </span>
-          <div class="text-xs text-slate-400 mt-0.5">Complete order information</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Info Content -->
-    <div class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-      <!-- Order Type Badge -->
-      <span
-        [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-        class="inline-flex items-center gap-2.5 px-5 py-3 rounded-full text-sm font-bold border">
-        <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
-        {{ order.p2p_ad?.type === 'buy' ? 'Buying USDT' : 'Selling USDT' }}
-      </span>
-
-      <!-- Key Info Cards -->
-      <div class="space-y-4">
-        <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl p-5 border border-purple-500/10">
-          <div class="text-xs text-slate-400 mb-2">
-            {{ order.p2p_ad?.type === 'buy' ? 'You Receive' : 'You Send' }}
+      @if (order.status === 'paid') {
+      <div class="backdrop-blur-xl bg-blue-500/10 border-2 border-blue-500/30 rounded-3xl p-5 md:p-6">
+        <div class="flex items-start gap-3 md:gap-4">
+          <div
+            class="w-12 h-12 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-check-circle text-white text-xl"></i>
           </div>
-          <div class="font-bold text-3xl text-green-400">{{ formatNumber(order.quantity) }}</div>
-          <div class="text-xs text-slate-500 mt-1">USDT Token</div>
-        </div>
+          <div class="flex-1 space-y-2">
+            <h3 class="text-lg font-bold text-white">Payment Submitted</h3>
 
-        <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl p-5 border border-purple-500/10">
-          <div class="text-xs text-slate-400 mb-2">
-            {{ order.p2p_ad?.type === 'buy' ? 'You Pay' : 'You Receive' }}
+            @if (viewType === 'my-orders') {
+            @if (order.p2p_ad?.type === 'buy') {
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Your payment proof has been uploaded. Waiting for the seller to verify and release
+              <span class="font-bold text-blue-400">{{ order.quantity | number:'1.2-6' }} USDT</span>.
+            </p>
+            } @else {
+            <p class="text-sm text-slate-300 leading-relaxed">
+              The buyer has uploaded their payment proof. Waiting for seller confirmation.
+            </p>
+            }
+            }
+
+            @if (viewType === 'my-ad-orders') {
+            <p class="text-sm text-slate-300 leading-relaxed">
+              The buyer has uploaded their payment proof. Please verify you received
+              <span class="font-bold text-blue-400">${{ order.amount | number:'1.2-2' }} USD</span>
+              and confirm to complete the order.
+            </p>
+            }
           </div>
-          <div class="font-bold text-3xl text-yellow-400">${{ formatNumber(order.amount) }}</div>
-          <div class="text-xs text-slate-500 mt-1">USD Currency</div>
         </div>
-      </div>
-
-      <!-- Additional Details -->
-      <div class="backdrop-blur-xl bg-slate-800/30 rounded-3xl p-5 space-y-3.5 border border-purple-500/10">
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-slate-400">Price Rate</span>
-          <span class="text-white font-semibold">{{ order.p2p_ad?.price || 'N/A' }}</span>
-        </div>
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-slate-400">Payment Method</span>
-          <span class="text-white font-semibold">Bank Transfer</span>
-        </div>
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-slate-400">Created</span>
-          <span class="text-white text-sm">{{ order.created_at | date:'MMM d, h:mm a' }}</span>
-        </div>
-      </div>
-
-      <!-- Status Indicators (Desktop Info Panel - No Action Buttons) -->
-      @if (order.p2p_ad?.type === 'buy' && order.status === 'paid') {
-      <div class="backdrop-blur-xl bg-blue-500/10 border border-blue-500/20 rounded-3xl p-6 text-center">
-        <i class="pi pi-clock text-blue-400 text-4xl mb-3"></i>
-        <p class="text-base text-blue-300 font-semibold mb-2">Waiting for Release</p>
-        <p class="text-sm text-slate-400 leading-relaxed">Merchant will release your USDT tokens shortly</p>
       </div>
       }
 
       @if (order.status === 'completed') {
-      <div class="backdrop-blur-xl bg-green-500/10 border border-green-500/20 rounded-3xl p-6 text-center">
-        <i class="pi pi-check-circle text-green-400 text-5xl mb-4"></i>
-        <p class="text-xl text-green-300 font-bold mb-2">Order Completed!</p>
-        <p class="text-base text-slate-400 leading-relaxed">
-          @if (order.p2p_ad?.type === 'buy') {
-          You received {{ formatNumber(order.quantity) }} USDT tokens
-          } @else {
-          You received ${{ formatNumber(order.amount) }} USD currency
-          }
-        </p>
+      <div class="backdrop-blur-xl bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-5 md:p-6">
+        <div class="flex items-start gap-3 md:gap-4">
+          <div
+            class="w-12 h-12 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-check text-white text-xl"></i>
+          </div>
+          <div class="flex-1 space-y-2">
+            <h3 class="text-lg font-bold text-white">Order Completed!</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              This order has been completed successfully. Thank you for using our P2P marketplace!
+            </p>
+          </div>
+        </div>
       </div>
       }
+
+      @if (order.status === 'cancelled') {
+      <div class="backdrop-blur-xl bg-red-500/10 border-2 border-red-500/30 rounded-3xl p-5 md:p-6">
+        <div class="flex items-start gap-3 md:gap-4">
+          <div
+            class="w-12 h-12 rounded-full bg-linear-to-r from-red-500 to-red-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-times-circle text-white text-xl"></i>
+          </div>
+          <div class="flex-1 space-y-2">
+            <h3 class="text-lg font-bold text-white">Order Cancelled</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              This order has been cancelled. If you have questions, please contact support.
+            </p>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Transaction Details -->
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+          <i class="pi pi-file-edit text-purple-400"></i>
+          Transaction Details
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <p class="text-xs text-slate-400">Price per USDT</p>
+            <p class="text-lg font-bold text-white">${{ order.ordered_price | number:'1.2-2' }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs text-slate-400">Quantity</p>
+            <p class="text-lg font-bold text-white">{{ order.quantity | number:'1.2-6' }} USDT</p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs text-slate-400">Total Amount</p>
+            <p class="text-xl font-bold bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              ${{ order.amount | number:'1.2-2' }} USD
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs text-slate-400">Payment Method</p>
+            <div class="flex items-center gap-2">
+              @if (order.p2p_payment_type?.logo_url) {
+              <img [src]="order.p2p_payment_type!.logo_url" [alt]="order.p2p_payment_type!.name"
+                class="w-5 h-5 object-contain" />
+              }
+              <p class="text-base font-semibold text-white">{{ order.p2p_payment_type?.name || 'N/A' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Counterparty Information -->
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+          <i class="pi pi-user text-purple-400"></i>
+          {{ viewType === 'my-orders' ? 'Seller' : 'Buyer' }} Information
+        </h3>
+
+        <div class="flex items-center gap-3 p-3 rounded-3xl bg-slate-700/30">
+          <div
+            class="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+            <i class="pi pi-user text-white text-lg"></i>
+          </div>
+          <div>
+            <p class="text-base font-semibold text-white">{{ order.ordered_by_user?.full_name || 'User' }}</p>
+            <p class="text-xs text-slate-400">{{ order.p2p_ad?.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <div class="flex flex-wrap gap-3">
+          @if (viewType === 'my-orders' && order.p2p_ad?.type === 'buy' && order.status === 'pending') {
+          <button type="button" (click)="openPaymentProofDialog()"
+            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
+            <i class="pi pi-upload"></i>
+            <span>Pay & Upload Proof</span>
+          </button>
+          }
+
+          @if (viewType === 'my-ad-orders' && order.p2p_ad?.type === 'sell' && order.status === 'paid') {
+          <button type="button" (click)="confirmPaymentReceived(order.id)"
+            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
+            <i class="pi pi-check-circle"></i>
+            <span>Confirm Payment Received</span>
+          </button>
+          }
+
+          @if (order.status !== 'completed' && order.status !== 'cancelled') {
+          <button type="button" (click)="cancelOrder(order.id)"
+            class="px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200 flex items-center gap-2">
+            <i class="pi pi-times-circle"></i>
+            <span>Cancel Order</span>
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Chat (1/3 width on desktop, full width on mobile) -->
+    <div class="lg:col-span-1">
+      <div
+        class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden sticky top-4">
+        <!-- Chat Header -->
+        <div class="p-4 border-b border-slate-700/50 bg-slate-900/50">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="pi pi-comments text-purple-400"></i>
+            Order Chat
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">Communicate with {{ viewType === 'my-orders' ? 'seller' : 'buyer' }}
+          </p>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages p-4 space-y-3 bg-slate-900/30" style="height: 400px; max-height: 400px;">
+          @for (msg of chatMessages; track msg.timestamp) {
+          @if (msg.sender === 'me') {
+          <!-- My Message -->
+          <div class="flex justify-end">
+            <div class="max-w-[80%]">
+              <div class="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl rounded-tr-sm p-3">
+                <p class="text-sm text-white">{{ msg.message }}</p>
+              </div>
+              <p class="text-xs text-slate-500 mt-1 text-right">{{ formatMessageTime(msg.timestamp) }}</p>
+            </div>
+          </div>
+          } @else {
+          <!-- Other's Message -->
+          <div class="flex justify-start">
+            <div class="max-w-[80%]">
+              <div class="flex items-center gap-2 mb-1">
+                <div
+                  class="w-6 h-6 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                  <i class="pi pi-user text-white text-xs"></i>
+                </div>
+                <span class="text-xs font-medium text-slate-400">{{ msg.senderName }}</span>
+              </div>
+              <div class="bg-slate-700/50 rounded-3xl rounded-tl-sm p-3">
+                <p class="text-sm text-slate-200">{{ msg.message }}</p>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">{{ formatMessageTime(msg.timestamp) }}</p>
+            </div>
+          </div>
+          }
+          }
+
+          @if (chatMessages.length === 0) {
+          <div class="flex flex-col items-center justify-center h-full text-center">
+            <i class="pi pi-comments text-4xl text-slate-600 mb-2"></i>
+            <p class="text-sm text-slate-500">No messages yet</p>
+            <p class="text-xs text-slate-600 mt-1">Start a conversation</p>
+          </div>
+          }
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-4 border-t border-slate-700/50 bg-slate-900/50">
+          <div class="flex gap-2">
+            <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
+              class="flex-1 px-4 py-2.5 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 text-sm" />
+            <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
+              [class.opacity-50]="!chatMessage || !chatMessage.trim()"
+              [class.cursor-not-allowed]="!chatMessage || !chatMessage.trim()"
+              class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200">
+              <i class="pi pi-send"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+  }
 </div>
 
-<!-- Order Info Dialog (Shared by Mobile & Desktop) -->
-<p-dialog [(visible)]="showOrderInfo" [modal]="true" [closable]="true" [dismissableMask]="true"
-  styleClass="cosmic-dialog" [style]="{ 'width': '90vw', 'max-width': '500px', 'border-radius': '1.25rem' }">
+<!-- Payment Proof Upload Dialog -->
+<p-dialog [(visible)]="showPaymentProofDialog" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem' }">
   <ng-template #header>
     <div class="flex items-center gap-3">
-      <div
-        class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center shrink-0">
-        <i class="pi pi-info-circle text-white text-xl"></i>
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+        <i class="pi pi-upload text-white text-lg"></i>
       </div>
-      <div>
-        <span
-          class="font-bold text-xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-          Order Details
-        </span>
-        <div class="text-sm text-slate-400 mt-0.5">Complete order information</div>
-      </div>
+      <span class="text-lg font-bold text-white">Upload Proof of Payment</span>
     </div>
   </ng-template>
 
-  <div class="py-4 space-y-5">
-    <!-- Order Type Badge -->
-    <span
-      [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-      class="inline-flex items-center gap-2.5 px-5 py-3 rounded-full text-sm font-bold border">
-      <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
-      {{ order.p2p_ad?.type === 'buy' ? 'Buying USDT' : 'Selling USDT' }}
-    </span>
-
-    <!-- Key Info Cards -->
-    <div class="space-y-4">
-      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl p-5 border border-purple-500/10">
-        <div class="text-xs text-slate-400 mb-2">
-          {{ order.p2p_ad?.type === 'buy' ? 'You Receive' : 'You Send' }}
+  <div class="space-y-5 py-4">
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400">Amount to Pay</span>
+          <span class="text-white font-bold text-lg">${{ order?.amount | number:'1.2-2' }} USD</span>
         </div>
-        <div class="font-bold text-3xl text-green-400">{{ formatNumber(order.quantity) }}</div>
-        <div class="text-xs text-slate-500 mt-1">USDT Token</div>
-      </div>
-
-      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl p-5 border border-purple-500/10">
-        <div class="text-xs text-slate-400 mb-2">
-          {{ order.p2p_ad?.type === 'buy' ? 'You Pay' : 'You Receive' }}
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400">You Will Receive</span>
+          <span class="text-white font-semibold">{{ order?.quantity | number:'1.2-6' }} USDT</span>
         </div>
-        <div class="font-bold text-3xl text-yellow-400">${{ formatNumber(order.amount) }}</div>
-        <div class="text-xs text-slate-500 mt-1">USD Currency</div>
       </div>
     </div>
 
-    <!-- Additional Details -->
-    <div class="backdrop-blur-xl bg-slate-800/30 rounded-3xl p-5 space-y-3.5 border border-purple-500/10">
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-slate-400">Price Rate</span>
-        <span class="text-white font-semibold">{{ order.p2p_ad?.price || 'N/A' }}</span>
-      </div>
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-slate-400">Payment Method</span>
-        <span class="text-white font-semibold">Bank Transfer</span>
-      </div>
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-slate-400">Created</span>
-        <span class="text-white text-sm">{{ order.created_at | date:'MMM d, h:mm a' }}</span>
+    <div class="space-y-2">
+      <label class="text-sm font-semibold text-white">Payment Proof (Screenshot/Receipt)</label>
+      <div class="relative">
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,.pdf" class="hidden" />
+        <div (click)="fileInput.click()"
+          class="border-2 border-dashed border-slate-600 rounded-3xl p-8 text-center cursor-pointer hover:border-purple-500/50 hover:bg-purple-500/5 transition-all duration-200">
+          @if (!selectedFile) {
+          <div class="space-y-3">
+            <i class="pi pi-cloud-upload text-4xl text-slate-500"></i>
+            <div class="space-y-1">
+              <p class="text-white font-semibold">Click to upload</p>
+              <p class="text-xs text-slate-400">PNG, JPG, PDF up to 10MB</p>
+            </div>
+          </div>
+          } @else {
+          <div class="space-y-2">
+            <i class="pi pi-file text-3xl text-green-400"></i>
+            <p class="text-white font-semibold">{{ selectedFile.name }}</p>
+            <p class="text-xs text-slate-400">{{ (selectedFile.size / 1024).toFixed(2) }} KB</p>
+          </div>
+          }
+        </div>
       </div>
     </div>
 
-    <!-- Action Buttons for BUY Orders -->
-    @if (order.p2p_ad?.type === 'buy' && order.status !== 'completed' && order.status !== 'cancelled') {
-    <div class="space-y-3 pt-2">
-      @if (order.status === 'pending') {
-      <button (click)="openPaymentDialog(); showOrderInfo = false" type="button"
-        class="w-full px-6 py-4 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-base transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-lg">
-        <i class="pi pi-credit-card text-lg"></i>
-        <span>Pay Now</span>
+    <div class="space-y-2">
+      <label class="text-sm font-semibold text-white">Transaction Reference (Optional)</label>
+      <input type="text" [(ngModel)]="paymentReference" pInputText placeholder="Enter transaction reference number"
+        class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 focus:bg-slate-800" />
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <button type="button" (click)="uploadPaymentProof()" [disabled]="!selectedFile" [class.opacity-50]="!selectedFile"
+        [class.cursor-not-allowed]="!selectedFile"
+        class="flex-1 px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg">
+        <i class="pi pi-check"></i>
+        <span>Submit Proof</span>
       </button>
-      }
-
-      @if (order.status === 'paid') {
-      <div class="backdrop-blur-xl bg-blue-500/10 border border-blue-500/20 rounded-3xl p-6 text-center">
-        <i class="pi pi-clock text-blue-400 text-4xl mb-3"></i>
-        <p class="text-base text-blue-300 font-semibold mb-2">Waiting for Release</p>
-        <p class="text-sm text-slate-400 leading-relaxed">Merchant will release your USDT tokens shortly</p>
-      </div>
-      }
-    </div>
-    }
-
-    <!-- Action Buttons for SELL Orders -->
-    @if (order.p2p_ad?.type === 'sell' && order.status !== 'completed' && order.status !== 'cancelled') {
-    <div class="space-y-3 pt-2">
-      @if (order.status === 'pending' || order.status === 'paid') {
-      <button (click)="releaseTokens(); showOrderInfo = false" type="button" [disabled]="isProcessing"
-        class="w-full px-6 py-5 rounded-full bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold text-lg transition-all disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-3 shadow-xl">
-        @if (isProcessing) {
-        <i class="pi pi-spin pi-spinner text-xl"></i>
-        <span>Releasing...</span>
-        } @else {
-        <i class="pi pi-send text-xl"></i>
-        <span>Release {{ formatNumber(order.quantity) }} USDT</span>
-        }
+      <button type="button" (click)="closePaymentProofDialog()"
+        class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200">
+        Cancel
       </button>
-
-      <div class="backdrop-blur-xl bg-yellow-500/10 border border-yellow-500/20 rounded-3xl p-4">
-        <p class="text-sm text-yellow-300 text-center leading-relaxed">
-          <i class="pi pi-exclamation-triangle mr-2"></i>
-          Only release after confirming USD payment received
-        </p>
-      </div>
-      }
     </div>
-    }
-
-    <!-- Completed Status -->
-    @if (order.status === 'completed') {
-    <div class="backdrop-blur-xl bg-green-500/10 border border-green-500/20 rounded-3xl p-6 text-center">
-      <i class="pi pi-check-circle text-green-400 text-5xl mb-4"></i>
-      <p class="text-xl text-green-300 font-bold mb-2">Order Completed!</p>
-      <p class="text-base text-slate-400 leading-relaxed">
-        @if (order.p2p_ad?.type === 'buy') {
-        You received {{ formatNumber(order.quantity) }} USDT tokens
-        } @else {
-        You received ${{ formatNumber(order.amount) }} USD currency
-        }
-      </p>
-    </div>
-    }
   </div>
 </p-dialog>
 
-<!-- Payment Dialog -->
-<p-dialog [(visible)]="showPaymentDialog" [modal]="true" [closable]="true" [dismissableMask]="true"
-  styleClass="cosmic-dialog" [style]="{ 'width': '90vw', 'max-width': '500px', 'border-radius': '1.25rem' }">
+<!-- Mobile Order Details Dialog -->
+<p-dialog [(visible)]="showMobileOrderDetails" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem' }">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 flex items-center justify-center shrink-0">
-        <i class="pi pi-credit-card text-white text-xl"></i>
+        [class]="order && order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+        class="w-10 h-10 rounded-full flex items-center justify-center">
+        <i class="pi pi-shopping-cart text-white text-lg"></i>
       </div>
-      <div>
-        <span
-          class="font-bold text-xl bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
-          Submit Payment
-        </span>
-        <div class="text-sm text-slate-400 mt-0.5">Upload proof and confirm payment</div>
-      </div>
+      <span class="text-lg font-bold text-white">Order Details</span>
     </div>
   </ng-template>
 
-  <div class="py-4 space-y-5">
-    <!-- Payment Amount Info -->
-    <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl p-5 border border-purple-500/10">
-      <div class="text-sm text-slate-400 mb-2">Amount to Pay</div>
-      <div class="font-bold text-3xl text-yellow-400">${{ formatNumber(order.amount) }}</div>
-      <div class="text-xs text-slate-500 mt-1">USD Currency</div>
-    </div>
-
-    <!-- Payment Proof Upload -->
-    <div class="space-y-3">
-      <label class="text-sm font-semibold text-slate-300">
-        <i class="pi pi-image mr-2"></i>
-        Payment Proof (Optional)
-      </label>
-
-      @if (paymentProofPreview) {
-      <div class="relative rounded-3xl overflow-hidden border border-purple-500/30">
-        <img [src]="paymentProofPreview" alt="Preview" class="w-full h-48 object-cover">
-        <button (click)="paymentProofPreview = null; selectedPaymentProof = null" type="button"
-          class="absolute top-3 right-3 w-10 h-10 rounded-full bg-red-500/90 hover:bg-red-500 flex items-center justify-center cursor-pointer transition-all shadow-lg">
-          <i class="pi pi-times text-white"></i>
-        </button>
-      </div>
-      }
-
-      <label class="block cursor-pointer">
-        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="hidden">
+  @if (order) {
+  <div class="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+    <!-- Status Info -->
+    @if (order.status === 'pending') {
+    <div class="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
         <div
-          class="w-full px-5 py-3.5 rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-purple-500/30 hover:border-purple-500/50 text-center text-sm font-medium text-purple-400 hover:text-purple-300 transition-all flex items-center justify-center gap-2">
-          <i class="pi pi-upload"></i>
-          <span>{{ paymentProofPreview ? 'Change Image' : 'Upload Screenshot' }}</span>
+          class="w-10 h-10 rounded-full bg-linear-to-r from-yellow-500 to-orange-500 flex items-center justify-center shrink-0">
+          <i class="pi pi-clock text-white"></i>
         </div>
-      </label>
+        <div class="flex-1 space-y-1">
+          <h3 class="text-base font-bold text-white">Waiting for Payment</h3>
+          @if (viewType === 'my-orders') {
+          @if (order.p2p_ad?.type === 'buy') {
+          <p class="text-sm text-slate-300">
+            Pay <span class="font-bold text-yellow-400">${{ order.amount | number:'1.2-2' }} USD</span> and upload
+            proof.
+          </p>
+          } @else {
+          <p class="text-sm text-slate-300">
+            Wait for buyer to pay <span class="font-bold text-yellow-400">${{ order.amount | number:'1.2-2' }}
+              USD</span>.
+          </p>
+          }
+          } @else {
+          @if (order.p2p_ad?.type === 'sell') {
+          <p class="text-sm text-slate-300">
+            Waiting for buyer to pay <span class="font-bold text-yellow-400">${{ order.amount | number:'1.2-2' }}
+              USD</span>.
+          </p>
+          } @else {
+          <p class="text-sm text-slate-300">
+            You need to pay <span class="font-bold text-yellow-400">{{ order.quantity | number:'1.2-6' }} USDT</span> to
+            the buyer.
+          </p>
+          }
+          }
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Transaction Details -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <h3 class="text-sm font-bold text-white mb-3">Transaction Details</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Price</span>
+          <span class="text-white font-semibold">${{ order.ordered_price | number:'1.2-2' }} USD</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Quantity</span>
+          <span class="text-white font-semibold">{{ order.quantity | number:'1.2-6' }} USDT</span>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-slate-700/50">
+          <span class="text-slate-400 font-semibold">Total Amount</span>
+          <span class="text-white font-bold text-base">${{ order.amount | number:'1.2-2' }} USD</span>
+        </div>
+        @if (order.p2p_payment_type) {
+        <div class="flex justify-between">
+          <span class="text-slate-400">Payment Method</span>
+          <span class="text-white font-semibold">{{ order.p2p_payment_type.name }}</span>
+        </div>
+        }
+      </div>
     </div>
 
-    <!-- Confirm Button -->
-    <button (click)="markAsPaid()" type="button" [disabled]="isProcessing"
-      class="w-full px-6 py-4 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold text-base transition-all disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-3 shadow-lg">
-      @if (isProcessing) {
-      <i class="pi pi-spin pi-spinner text-lg"></i>
-      <span>Processing...</span>
-      } @else {
-      <i class="pi pi-check-circle text-lg"></i>
-      <span>Confirm Payment</span>
+    <!-- Action Buttons -->
+    <div class="space-y-2">
+      @if (viewType === 'my-orders' && order.p2p_ad?.type === 'buy' && order.status === 'pending') {
+      <button type="button" (click)="openPaymentProofDialog(); showMobileOrderDetails = false"
+        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
+        <i class="pi pi-upload"></i>
+        <span>Pay & Upload Proof</span>
+      </button>
       }
-    </button>
 
-    <p class="text-xs text-center text-slate-400 leading-relaxed px-2">
-      By confirming, you acknowledge that you have completed the payment
-    </p>
+      @if (viewType === 'my-ad-orders' && order.p2p_ad?.type === 'sell' && order.status === 'paid') {
+      <button type="button" (click)="confirmPaymentReceived(order.id); showMobileOrderDetails = false"
+        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
+        <i class="pi pi-check-circle"></i>
+        <span>Confirm Payment Received</span>
+      </button>
+      }
+
+      @if (order.status !== 'completed' && order.status !== 'cancelled') {
+      <button type="button" (click)="cancelOrder(order.id); showMobileOrderDetails = false"
+        class="w-full px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200">
+        <i class="pi pi-times-circle mr-1.5"></i>
+        Cancel Order
+      </button>
+      }
+    </div>
   </div>
+  }
 </p-dialog>
-
-<p-toast></p-toast>
-}

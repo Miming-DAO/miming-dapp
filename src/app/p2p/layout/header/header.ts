@@ -99,9 +99,6 @@ export class Header {
       case 'my-ads':
         this.router.navigate(['/p2p/my-ads']);
         break;
-      case 'messages':
-        this.router.navigate(['/p2p/messages']);
-        break;
     }
   }
 

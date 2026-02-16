@@ -1,287 +1,210 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { DialogModule } from 'primeng/dialog';
 
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { P2pOrder } from '../../../models/p2p-order.model';
-
-interface ChatMessage {
-  sender: 'user' | 'merchant' | 'system';
-  senderName: string;
-  message: string;
-  timestamp: string;
-  type?: 'text' | 'image' | 'system';
-  imageUrl?: string;
-}
 
 @Component({
   selector: 'app-order-details',
   imports: [
     CommonModule,
     FormsModule,
-    ToastModule,
     DialogModule,
+    InputTextModule,
+    ButtonModule,
+    ToastModule,
   ],
   templateUrl: './order-details.html',
   styleUrl: './order-details.css',
   providers: [MessageService],
 })
-export class OrderDetails {
-  @Input() orderId: string = '698d7eb1e83fcdd7617aac3a';
-  @Output() backToOrders = new EventEmitter<void>();
-
-  order: P2pOrder | null = null;
-  isLoading: boolean = false;
-  chatMessage: string = '';
-  chatMessages: ChatMessage[] = [];
-  showOrderInfo: boolean = false;
-  showPaymentDialog: boolean = false;
-  selectedPaymentProof: File | null = null;
-  paymentProofPreview: string | null = null;
-  isProcessing: boolean = false;
+export class OrderDetails implements OnInit {
 
   constructor(
+    private router: Router,
+    private route: ActivatedRoute,
     private p2pOrdersService: P2pOrdersService,
     private messageService: MessageService
   ) { }
 
+  orderId: string = '';
+  viewType: 'my-orders' | 'my-ad-orders' = 'my-orders';
+  order: P2pOrder | null = null;
+  isLoading: boolean = false;
+  showMobileOrderDetails: boolean = false;
+
+  // Payment proof upload
+  showPaymentProofDialog: boolean = false;
+  selectedFile: File | null = null;
+  paymentReference: string = '';
+
+  // Chat
+  chatMessage: string = '';
+  chatMessages: Array<{
+    sender: 'me' | 'other';
+    senderName: string;
+    message: string;
+    timestamp: Date;
+    avatar?: string;
+  }> = [];
+
   ngOnInit(): void {
-    if (this.orderId) {
-      this.loadOrderDetails(this.orderId);
-    }
+    this.route.params.subscribe(params => {
+      this.orderId = params['id'];
+      if (this.orderId) {
+        this.loadOrderDetails();
+        this.loadChatMessages();
+      }
+    });
+
+    this.route.queryParams.subscribe(params => {
+      this.viewType = params['view'] || 'my-orders';
+    });
   }
 
-  ngOnChanges(): void {
-    if (this.orderId) {
-      this.loadOrderDetails(this.orderId);
-    }
-  }
-
-  loadOrderDetails(orderId: string): void {
+  loadOrderDetails(): void {
     this.isLoading = true;
-
-    this.p2pOrdersService.getOrderById(orderId).subscribe({
-      next: (order: P2pOrder) => {
-        this.order = order;
+    // TODO: Implement actual API call
+    // For now, using the existing service
+    this.p2pOrdersService.getOrdersByAuthUser().subscribe({
+      next: (orders: P2pOrder[]) => {
+        this.order = orders.find(o => o.id === this.orderId) || null;
         this.isLoading = false;
-        this.initializeChatMessages(order);
       },
       error: (error: any) => {
         this.messageService.add({
           severity: 'error',
-          summary: error.error?.error || 'Error',
-          detail: error.error?.message || 'Failed to load order details.'
+          summary: 'Error',
+          detail: 'Failed to load order details.'
         });
         this.isLoading = false;
       }
     });
   }
 
-  initializeChatMessages(order: P2pOrder): void {
+  loadChatMessages(): void {
+    // TODO: Load actual chat messages from backend
+    // Mock data for now
     this.chatMessages = [
       {
-        sender: 'system',
-        senderName: 'System',
-        message: `Order #${order.order_number || order.id} has been created.`,
-        timestamp: typeof order.created_at === 'string' ? order.created_at : new Date().toISOString(),
-        type: 'system'
+        sender: 'other',
+        senderName: 'John Seller',
+        message: 'Hello! Thanks for your order. Please proceed with the payment.',
+        timestamp: new Date(Date.now() - 3600000),
+        avatar: ''
       },
       {
-        sender: 'merchant',
-        senderName: 'Merchant',
-        message: order.p2p_ad?.type === 'buy'
-          ? `Hello! I'm ready to sell you ${this.formatNumber(order.quantity)} USDT for $${this.formatNumber(order.amount)}. Please proceed with the payment.`
-          : `Hello! Please transfer ${this.formatNumber(order.quantity)} USDT to complete this order. I will release $${this.formatNumber(order.amount)} once confirmed.`,
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        type: 'text'
+        sender: 'me',
+        senderName: 'You',
+        message: 'Payment sent! Reference: TXN123456',
+        timestamp: new Date(Date.now() - 1800000)
       }
     ];
   }
 
-  sendChatMessage(): void {
-    if (this.chatMessage && this.chatMessage.trim()) {
-      this.chatMessages.push({
-        sender: 'user',
-        senderName: 'You',
-        message: this.chatMessage,
-        timestamp: new Date().toISOString(),
-        type: 'text'
-      });
-      this.chatMessage = '';
-      this.scrollToBottom();
-    }
-  }
+  sendMessage(): void {
+    if (!this.chatMessage || !this.chatMessage.trim()) return;
 
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      this.selectedPaymentProof = file;
+    const newMessage = {
+      sender: 'me' as const,
+      senderName: 'You',
+      message: this.chatMessage.trim(),
+      timestamp: new Date()
+    };
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.paymentProofPreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Invalid File',
-        detail: 'Please select an image file.'
-      });
-    }
-  }
+    this.chatMessages.push(newMessage);
+    this.chatMessage = '';
 
-  uploadPaymentProof(): void {
-    if (!this.selectedPaymentProof) return;
-
-    this.isProcessing = true;
-
-    // Simulate upload - replace with actual API call
+    // TODO: Send message to backend
+    // Scroll to bottom
     setTimeout(() => {
-      this.chatMessages.push({
-        sender: 'user',
-        senderName: 'You',
-        message: 'Payment proof uploaded',
-        timestamp: new Date().toISOString(),
-        type: 'image',
-        imageUrl: this.paymentProofPreview || ''
-      });
-
-      this.chatMessages.push({
-        sender: 'system',
-        senderName: 'System',
-        message: 'Payment proof has been uploaded. Waiting for merchant verification.',
-        timestamp: new Date().toISOString(),
-        type: 'system'
-      });
-
-      this.selectedPaymentProof = null;
-      this.paymentProofPreview = null;
-      this.isProcessing = false;
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Payment proof uploaded successfully.'
-      });
-
-      this.scrollToBottom();
-    }, 1500);
-  }
-
-  markAsPaid(): void {
-    if (!this.order) return;
-
-    this.isProcessing = true;
-
-    // Simulate API call - replace with actual implementation
-    setTimeout(() => {
-      this.chatMessages.push({
-        sender: 'system',
-        senderName: 'System',
-        message: 'Order marked as paid. Waiting for merchant to release USDT tokens.',
-        timestamp: new Date().toISOString(),
-        type: 'system'
-      });
-
-      if (this.order) {
-        this.order.status = 'paid';
-      }
-
-      this.isProcessing = false;
-      this.showPaymentDialog = false;
-      this.selectedPaymentProof = null;
-      this.paymentProofPreview = null;
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Order marked as paid. Waiting for token release.'
-      });
-
-      this.scrollToBottom();
-    }, 1500);
-  }
-
-  releaseTokens(): void {
-    if (!this.order) return;
-
-    this.isProcessing = true;
-
-    // Simulate API call - replace with actual implementation
-    setTimeout(() => {
-      this.chatMessages.push({
-        sender: 'system',
-        senderName: 'System',
-        message: `${this.formatNumber(this.order?.quantity || 0)} USDT has been released to the buyer. Transaction completed.`,
-        timestamp: new Date().toISOString(),
-        type: 'system'
-      });
-
-      if (this.order) {
-        this.order.status = 'completed';
-      }
-
-      this.isProcessing = false;
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Tokens released successfully.'
-      });
-
-      this.scrollToBottom();
-    }, 1500);
-  }
-
-  toggleOrderInfo(): void {
-    this.showOrderInfo = !this.showOrderInfo;
-  }
-
-  openPaymentDialog(): void {
-    this.showPaymentDialog = true;
-    this.selectedPaymentProof = null;
-    this.paymentProofPreview = null;
-  }
-
-  scrollToBottom(): void {
-    setTimeout(() => {
-      const chatContainer = document.querySelector('.chat-messages-container');
+      const chatContainer = document.querySelector('.chat-messages');
       if (chatContainer) {
         chatContainer.scrollTop = chatContainer.scrollHeight;
       }
     }, 100);
   }
 
-  formatMessageTime(timestamp: string): string {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  openPaymentProofDialog(): void {
+    this.showPaymentProofDialog = true;
   }
 
-  formatNumber(num: number): string {
-    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toFixed(2);
+  closePaymentProofDialog(): void {
+    this.showPaymentProofDialog = false;
+    this.selectedFile = null;
+    this.paymentReference = '';
   }
 
-  getStatusBadgeClass(status: string): string {
-    const classes: any = {
-      'pending': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      'paid': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      'completed': 'bg-green-500/20 text-green-400 border-green-500/30',
-      'cancelled': 'bg-red-500/20 text-red-400 border-red-500/30',
-      'disputed': 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-    };
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'File Too Large',
+          detail: 'Please upload a file smaller than 10MB.'
+        });
+        return;
+      }
+      this.selectedFile = file;
+    }
+  }
 
-    return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  uploadPaymentProof(): void {
+    if (!this.selectedFile || !this.order) return;
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Proof Uploaded',
+      detail: 'Your payment proof has been submitted successfully.'
+    });
+
+    this.closePaymentProofDialog();
+    this.loadOrderDetails();
+  }
+
+  confirmPaymentReceived(orderId: string): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Payment Confirmed',
+      detail: 'Payment has been confirmed. The order is now complete.'
+    });
+    this.loadOrderDetails();
+  }
+
+  cancelOrder(orderId: string): void {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Order Cancelled',
+      detail: 'The order has been cancelled successfully.'
+    });
+    this.loadOrderDetails();
   }
 
   goBack(): void {
-    this.backToOrders.emit();
+    this.router.navigate(['/p2p/orders'], {
+      queryParams: { view: this.viewType }
+    });
+  }
+
+  formatMessageTime(timestamp: Date): string {
+    const now = new Date();
+    const diff = now.getTime() - timestamp.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return 'Just now';
   }
 }
