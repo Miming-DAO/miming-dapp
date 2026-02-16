@@ -8,15 +8,13 @@ import { MessageService } from 'primeng/api';
 import { ToastModule as PToastModule } from 'primeng/toast';
 
 import { PolkadotIdenticonUtil } from './../../shared/polkadot-identicon-util/polkadot-identicon-util';
-import { Header } from '../layout/header/header';
 
 @Component({
   selector: 'app-xterium-accounts',
   imports: [
     CommonModule,
     PToastModule,
-    PolkadotIdenticonUtil,
-    Header
+    PolkadotIdenticonUtil
   ],
   templateUrl: './xterium-accounts.html',
   styleUrl: './xterium-accounts.css',

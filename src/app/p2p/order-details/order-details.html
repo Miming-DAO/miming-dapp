@@ -1,7 +1,7 @@
-<p-toast />
-
 <div class="max-w-7xl mx-auto">
+  <!-- ******************** -->
   <!-- Back Button & Header -->
+  <!-- ******************** -->
   <div class="mb-4 md:mb-6">
     <button (click)="goBack()"
       class="inline-flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-700/50 transition-all duration-200">
@@ -20,9 +20,14 @@
   }
 
   @if (!isLoading && order) {
+  <!-- ******************************************************************* -->
   <!-- Mobile: Chat-first view with button to show order details in dialog -->
+  <!-- ******************************************************************* -->
   <div class="lg:hidden">
+
+    <!-- *************************************** -->
     <!-- Mobile Header with Order Details Button -->
+    <!-- *************************************** -->
     <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 mb-4">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 flex-1 min-w-0">
@@ -48,7 +53,9 @@
       </div>
     </div>
 
+    <!-- *********** -->
     <!-- Mobile Chat -->
+    <!-- *********** -->
     <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
       <!-- Chat Header -->
       <div class="p-4 border-b border-slate-700/50 bg-slate-900/50">
@@ -118,13 +125,19 @@
     </div>
   </div>
 
+  <!-- ********************************* -->
   <!-- Desktop: Original 2-column layout -->
+  <!-- ********************************* -->
   <div class="hidden lg:grid lg:grid-cols-3 gap-4 md:gap-6">
 
+    <!-- ************************************************* -->
     <!-- Left Column: Order Details (2/3 width on desktop) -->
+    <!-- ************************************************* -->
     <div class="lg:col-span-2 space-y-4">
 
+      <!-- ***************** -->
       <!-- Order Header Card -->
+      <!-- ***************** -->
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
@@ -158,7 +171,9 @@
         </div>
       </div>
 
+      <!-- *************************** -->
       <!-- Status-Specific Information -->
+      <!-- *************************** -->
       @if (order.status === 'pending') {
       <div class="backdrop-blur-xl bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-5 md:p-6">
         <div class="flex items-start gap-3 md:gap-4">
@@ -266,7 +281,9 @@
       </div>
       }
 
+      <!-- ******************* -->
       <!-- Transaction Details -->
+      <!-- ******************* -->
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
           <i class="pi pi-file-edit text-purple-400"></i>
@@ -304,7 +321,9 @@
         </div>
       </div>
 
+      <!-- ************************ -->
       <!-- Counterparty Information -->
+      <!-- ************************ -->
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
           <i class="pi pi-user text-purple-400"></i>
@@ -323,7 +342,9 @@
         </div>
       </div>
 
+      <!-- ************** -->
       <!-- Action Buttons -->
+      <!-- ************** -->
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <div class="flex flex-wrap gap-3">
           @if (viewType === 'my-orders' && order.p2p_ad?.type === 'buy' && order.status === 'pending') {
@@ -353,7 +374,9 @@
       </div>
     </div>
 
+    <!-- ************************************************************* -->
     <!-- Right Column: Chat (1/3 width on desktop, full width on mobile) -->
+    <!-- ************************************************************* -->
     <div class="lg:col-span-1">
       <div
         class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden sticky top-4">
@@ -428,7 +451,9 @@
   }
 </div>
 
+<!-- *************************** -->
 <!-- Payment Proof Upload Dialog -->
+<!-- *************************** -->
 <p-dialog [(visible)]="showPaymentProofDialog" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem' }">
   <ng-template #header>
@@ -500,7 +525,9 @@
   </div>
 </p-dialog>
 
+<!-- *************************** -->
 <!-- Mobile Order Details Dialog -->
+<!-- *************************** -->
 <p-dialog [(visible)]="showMobileOrderDetails" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem' }">
   <ng-template #header>
@@ -610,3 +637,8 @@
   </div>
   }
 </p-dialog>
+
+<!-- ***** -->
+<!-- Toast -->
+<!-- ***** -->
+<p-toast />

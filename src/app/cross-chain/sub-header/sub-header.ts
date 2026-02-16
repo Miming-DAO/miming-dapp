@@ -1,6 +1,5 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { firstValueFrom } from 'rxjs';
@@ -8,60 +7,48 @@ import { firstValueFrom } from 'rxjs';
 import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/extension-inject/types';
 import { web3FromSource } from '@polkadot/extension-dapp';
 
-import { TabsModule as PTabsModule } from 'primeng/tabs';
-import { DialogModule as PDialogModule } from 'primeng/dialog';
-import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
-import { ButtonModule as PButtonModule } from 'primeng/button';
-import { SelectModule as PSelectModule } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 import { ToastModule as PToastModule } from 'primeng/toast';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
 import { TooltipModule as PTooltipModule } from 'primeng/tooltip';
+import { SelectModule as PSelectModule } from 'primeng/select';
 
-import { DeviceDetectorService } from '../../../../services/device-detector/device-detector.service';
-import { AuthGoogleService } from '../../../../services/auth-google/auth-google.service';
-import { AuthWalletService } from '../../../../services/auth-wallet/auth-wallet.service';
-import { PolkadotJsService } from '../../../../services/polkadot-js/polkadot-js.service';
+import { PolkadotIdenticonUtil } from '../../shared/polkadot-identicon-util/polkadot-identicon-util';
+import { DeviceDetectorService } from '../../../services/device-detector/device-detector.service';
+import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.service';
+import { AuthWalletService } from '../../../services/auth-wallet/auth-wallet.service';
 
-import { User } from '../../../../models/user.model';
-
-import { PolkadotIdenticonUtil } from '../../../shared/polkadot-identicon-util/polkadot-identicon-util';
+import { User } from '../../../models/user.model';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-sub-header',
   imports: [
     CommonModule,
-    FormsModule,
-    PTabsModule,
-    PDialogModule,
-    PInputTextModule,
-    PButtonModule,
-    PSelectModule,
     PToastModule,
+    PDialogModule,
     PTooltipModule,
+    PSelectModule,
     PolkadotIdenticonUtil
   ],
-  templateUrl: './header.html',
-  styleUrl: './header.css',
+  templateUrl: './sub-header.html',
+  styleUrl: './sub-header.css',
   providers: [MessageService],
 })
-export class Header {
+export class SubHeader {
   @Input() mobileMenuOpen: boolean = false;
-  @Input() activeMenu: string = 'marketplace';
 
   @Output() mobileMenuOpenOnClick = new EventEmitter<boolean>();
-  @Output() loginP2PUserOnClick = new EventEmitter<void>();
-  @Output() logoutP2PUserOnClick = new EventEmitter<void>();
-  @Output() activeMenuOnClick = new EventEmitter<string>();
+  @Output() loginCrossChainUserOnClick = new EventEmitter<void>();
+  @Output() logoutCrossChainUserOnClick = new EventEmitter<void>();
 
   isMobileDevice: boolean = false;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authGoogleService: AuthGoogleService,
     private authWalletService: AuthWalletService,
-    private polkadotJsService: PolkadotJsService,
     private deviceDetectorService: DeviceDetectorService,
+    private polkadotJsService: PolkadotJsService,
     private messageService: MessageService
   ) {
     this.isMobileDevice = this.deviceDetectorService.isMobile();
@@ -69,13 +56,8 @@ export class Header {
 
   isXteriumMode: boolean = false;
 
-  navMenuOpen: boolean = false;
-  showStatsDialog: boolean = false;
-
   isLoggedIn: boolean = false;
   currentUser: User | null = null;
-
-  showAuthMethodDialog: boolean = false;
 
   showAvailableWalletsDialog: boolean = false;
   showPolkadotWalletAccountsDialog: boolean = false;
@@ -85,43 +67,13 @@ export class Header {
 
   isProcessing: boolean = false;
 
-  setActiveMenu(menu: string): void {
-    this.activeMenuOnClick.emit(menu);
-    this.navMenuOpen = false;
-
-    switch (menu) {
-      case 'marketplace':
-        this.router.navigate(['/p2p/marketplace']);
-        break;
-      case 'orders':
-        this.router.navigate(['/p2p/orders']);
-        break;
-      case 'my-ads':
-        this.router.navigate(['/p2p/my-ads']);
-        break;
-    }
-  }
-
-  navigateToAdminConsole(): void {
-    this.router.navigate(['/p2p/admin']);
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    this.mobileMenuOpenOnClick.emit(this.mobileMenuOpen);
   }
 
   login(): void {
-    this.showAuthMethodDialog = true;
-  }
-
-  selectAuthMethod(method: 'google' | 'wallet'): void {
-    this.showAuthMethodDialog = false;
-
-    if (method === 'google') {
-      this.handleGoogleLogin();
-    } else if (method === 'wallet') {
-      this.showAvailableWalletsDialog = true;
-    }
-  }
-
-  handleGoogleLogin(): void {
-    window.location.href = this.authGoogleService.getGoogleAuthUrl();
+    this.showAvailableWalletsDialog = true;
   }
 
   async connectPolkadotJsWallet() {
@@ -234,7 +186,7 @@ export class Header {
       this.showPolkadotWalletAccountsDialog = false;
       this.showAvailableWalletsDialog = false;
 
-      this.loginP2PUserOnClick.emit();
+      this.loginCrossChainUserOnClick.emit();
 
       this.messageService.add({
         severity: 'success',
@@ -253,6 +205,31 @@ export class Header {
     }
   }
 
+  logout(): void {
+    this.isProcessing = true;
+
+    setTimeout(() => {
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_wallet');
+
+      this.showPolkadotWalletAccountDialog = false;
+
+      this.isLoggedIn = false;
+      this.currentUser = null;
+
+      this.logoutCrossChainUserOnClick.emit();
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Disconnected',
+        detail: 'Wallet disconnected successfully'
+      });
+
+      this.isProcessing = false;
+      this.router.navigate(['/cross-chain']);
+    }, 500);
+  }
+
   getPolkadotWalletAccount(): void {
     this.showPolkadotWalletAccountDialog = true;
   }
@@ -266,31 +243,6 @@ export class Header {
         detail: 'Address copied to clipboard'
       });
     });
-  }
-
-  logout(): void {
-    this.isProcessing = true;
-
-    setTimeout(() => {
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('auth_wallet');
-
-      this.showPolkadotWalletAccountDialog = false;
-
-      this.isLoggedIn = false;
-      this.currentUser = null;
-
-      this.logoutP2PUserOnClick.emit();
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Disconnected',
-        detail: 'Wallet disconnected successfully'
-      });
-
-      this.isProcessing = false;
-      this.router.navigate(['/p2p/marketplace']);
-    }, 500);
   }
 
   checkAuthStatus(): void {

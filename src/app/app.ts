@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, ActivatedRoute } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
 import { Drawer as PDrawer } from 'primeng/drawer'
 import { DialogModule as PDialogModule } from 'primeng/dialog';
@@ -12,9 +12,8 @@ import { DividerModule as PDividerModule } from 'primeng/divider';
 import { TextareaModule as PTextareaModule } from 'primeng/textarea';
 import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
 
-import { Sidebar as LayoutSidebar } from './layout/sidebar/sidebar'
 import { Header as LayoutHeader } from './layout/header/header'
-import { Footer as LayoutFooter } from './layout/footer/footer'
+import { Sidebar as LayoutSidebar } from './layout/sidebar/sidebar'
 
 @Component({
   selector: 'app-root',
@@ -30,9 +29,8 @@ import { Footer as LayoutFooter } from './layout/footer/footer'
     PDividerModule,
     PTextareaModule,
     PInputTextModule,
-    LayoutSidebar,
     LayoutHeader,
-    LayoutFooter
+    LayoutSidebar,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -45,11 +43,8 @@ export class App {
   isMobile = false;
 
   isGenerateDialogOpen = false;
-  isXteriumMode = false;
 
-  constructor(
-    private route: ActivatedRoute
-  ) { }
+  constructor() { }
 
   checkIfMobile() {
     this.isMobile = window.innerWidth < 768;
@@ -80,10 +75,5 @@ export class App {
 
     this.checkIfMobile();
     window.addEventListener('resize', this.checkIfMobile.bind(this));
-
-    // Check for xterium URL parameter
-    this.route.queryParams.subscribe(params => {
-      this.isXteriumMode = params['xterium'] === 'true';
-    });
   }
 }

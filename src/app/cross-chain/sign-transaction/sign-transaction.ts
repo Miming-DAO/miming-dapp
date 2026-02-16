@@ -9,15 +9,12 @@ import { ToastModule as PToastModule } from 'primeng/toast';
 import { ExecuteTransaction } from '../../../models/execute-transactions.model';
 import { PolkadotApiService } from '../../../services/polkadot-api/polkadot-api.service';
 
-import { Header } from '../layout/header/header';
-
 @Component({
   selector: 'app-sign-transaction',
   imports: [
     CommonModule,
     PProgressSpinnerModule,
-    PToastModule,
-    Header
+    PToastModule
   ],
   templateUrl: './sign-transaction.html',
   styleUrl: './sign-transaction.css',

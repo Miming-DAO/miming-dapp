@@ -35,8 +35,6 @@ import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.ser
 import { PolkadotXcmService } from '../../../services/polkadot-xcm/polkadot-xcm.service';
 import { PolkadotApiService } from '../../../services/polkadot-api/polkadot-api.service';
 
-import { Header } from '../layout/header/header';
-
 @Component({
   selector: 'app-teleport',
   imports: [
@@ -58,8 +56,7 @@ import { Header } from '../layout/header/header';
     PToastModule,
     PConfirmDialog,
     PDialogModule,
-    PTooltipModule,
-    Header,
+    PTooltipModule
   ],
   templateUrl: './teleport.html',
   styleUrl: './teleport.css',

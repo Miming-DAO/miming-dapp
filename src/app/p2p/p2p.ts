@@ -9,7 +9,8 @@ import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
 import { ButtonModule as PButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
 
-import { Header } from './layout/header/header';
+import { SubHeader } from './sub-header/sub-header';
+import { Footer as LayoutFooter } from './../layout/footer/footer';
 
 @Component({
   selector: 'app-p2p',
@@ -22,7 +23,8 @@ import { Header } from './layout/header/header';
     PInputTextModule,
     PButtonModule,
     PSelectModule,
-    Header
+    SubHeader,
+    LayoutFooter
   ],
   templateUrl: './p2p.html',
   styleUrl: './p2p.css',
