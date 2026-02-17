@@ -64,7 +64,6 @@
               <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">P2P Number
               </th>
               <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400">Price</th>
-              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Available</th>
               <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Limits</th>
               <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400 hidden xl:table-cell">Payments</th>
               <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400">Status</th>
@@ -124,13 +123,6 @@
                   <img [src]="'/images/tokens/usdt.png'" [alt]="ad.token_symbol" class="w-4 h-4 object-contain" />
                   <span class="text-xs text-slate-300 font-semibold">{{ ad.token_symbol || 'USDT' }}</span>
                 </div>
-              </td>
-
-              <!-- **************** -->
-              <!-- Available Amount -->
-              <!-- **************** -->
-              <td class="py-4 px-4 text-sm text-slate-300 hidden lg:table-cell text-right">
-                <div class="font-semibold text-white">{{ ad.available_amount | number:'1.0-6' }}</div>
               </td>
 
               <!-- ****** -->
@@ -266,10 +258,6 @@
         <!-- Info Grid -->
         <!-- ********* -->
         <div class="flex items-center gap-2 mb-3">
-          <div class="px-2">
-            <span class="text-xs text-slate-400 block mb-1">Available</span>
-            <div class="text-white font-bold text-sm">{{ ad.available_amount | number:'1.0-6' }}</div>
-          </div>
           <div class="px-2">
             <span class="text-xs text-slate-400 block mb-1">Limits</span>
             <div class="text-white font-bold text-sm">₱{{ ad.min_limit | number:'1.2-2' }} - ₱{{ ad.max_limit |
@@ -468,20 +456,6 @@
                   inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-lg font-bold text-right"
                   mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="p2pAdForm.price"
                   name="editPrice" placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);" />
-              </div>
-
-              <!-- **************** -->
-              <!-- Available Amount -->
-              <!-- **************** -->
-              <div>
-                <label class="text-xs text-slate-400 mb-2 block">
-                  Available Amount <span class="text-red-400">*</span>
-                </label>
-                <p-inputnumber class="w-full"
-                  inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
-                  [minFractionDigits]="2" [maxFractionDigits]="6" [(ngModel)]="p2pAdForm.available_amount"
-                  name="editAvailable" placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);" />
-                <div class="text-xs text-slate-500 mt-1">Total USDT available for trade</div>
               </div>
 
               <!-- ****** -->
@@ -746,7 +720,6 @@
       </div>
       <div class="text-sm text-slate-400">
         <div>Price: <span class="text-yellow-400 font-bold">₱{{ selectedP2pAdToDelete.price }}</span></div>
-        <div>Available: <span class="text-white">{{ selectedP2pAdToDelete.available_amount }}</span></div>
       </div>
     </div>
     }

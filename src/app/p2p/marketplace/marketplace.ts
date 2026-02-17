@@ -1,7 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
+import { MessageService as PMessageService } from 'primeng/api';
 import { TabsModule as PTabsModule } from 'primeng/tabs';
 import { DialogModule as PDialogModule } from 'primeng/dialog';
 import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
@@ -9,33 +11,17 @@ import { ButtonModule as PButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
 import { InputNumberModule as PInputNumberModule } from 'primeng/inputnumber';
 import { ToastModule as PToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 
-import { Chain } from '../../../models/chain.model';
 import { P2pAd } from '../../../models/p2p-ad.model';
 import { P2pAdPaymentType } from '../../../models/p2p-ad-payment-type.model';
 import { P2pPaymentType } from '../../../models/p2p-payment-type.model';
-import { CreateP2pOrderDto } from '../../../models/p2p-order.model';
+import { P2pOrder, CreateP2pOrderDto } from '../../../models/p2p-order.model';
 
 import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
 import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
 import { P2pPaymentTypesService } from '../../../services/p2p-payment-types/p2p-payment-types.service';
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { User } from '../../../models/user.model';
-
-interface Offer {
-  id: string;
-  type: string;
-  merchant: string;
-  orders: number;
-  completion: number;
-  price: number;
-  available: number;
-  asset: string;
-  minLimit: number;
-  maxLimit: number;
-  paymentMethods: string[];
-}
 
 @Component({
   selector: 'app-marketplace',
@@ -52,293 +38,248 @@ interface Offer {
   ],
   templateUrl: './marketplace.html',
   styleUrl: './marketplace.css',
-  providers: [MessageService],
+  providers: [PMessageService],
 })
 export class Marketplace {
-  @Input() activeTab: 'buy' | 'sell' = 'buy';
 
   constructor(
+    private router: Router,
     private p2pAdsService: P2pAdsService,
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
     private p2pPaymentTypesService: P2pPaymentTypesService,
     private p2pOrdersService: P2pOrdersService,
-    private messageService: MessageService
+    private pMessageService: PMessageService
   ) { }
 
   currentUser: User | null = null;
+
+  activeTab: 'buy' | 'sell' = 'buy';
+
+  p2pAds: P2pAd[] = [];
+  p2pAdPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+
+  selectedP2pAd: P2pAd | null = null;
 
   paymentTypes: P2pPaymentType[] = [];
   selectedPaymentType: P2pPaymentType | undefined;
 
   searchTerm: string = '';
 
-  allAds: P2pAd[] = [];
-  adPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+  showCreateOrderDialog: boolean = false;
+  p2pOrderForm: P2pOrder = {
+    id: "",
+    p2p_ad_id: "",
+    p2p_ad: undefined,
+    order_number: "",
+    order_type: "buy",
+    ordered_price: 0,
+    quantity: 0,
+    amount: 0,
+    p2p_payment_type_id: "",
+    p2p_payment_type: undefined,
+    ordered_by_user_id: "",
+    ordered_by_user: undefined,
+    status: "",
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+  orderInputMode: 'amount' | 'quantity' = 'amount';
+  isCreatingOrder: boolean = false;
+
+  tradingTerms: string = 'By proceeding with this trade, you agree to complete the transaction within the specified time frame. Ensure all payment details are accurate before confirmation. Disputes should be resolved through the platform\'s resolution center. Cancel or modify orders only if permitted by the advertiser. Both parties must comply with local regulations and platform policies.';
+
   isLoading: boolean = false;
 
-  buyOffers: Offer[] = [];
-  sellOffers: Offer[] = [];
+  get filteredOffers(): P2pAd[] {
+    let offers = this.p2pAds.filter(ad =>
+      ad.ordering_type === this.activeTab && ad.status === 'active'
+    );
 
-  // Computed filtered offers
-  get filteredOffers(): Offer[] {
-    let offers = this.activeTab === 'buy' ? this.buyOffers : this.sellOffers;
-
-    // Filter by payment type
     if (this.selectedPaymentType) {
-      offers = offers.filter(offer =>
-        offer.paymentMethods.includes(this.selectedPaymentType!.name)
-      );
+      offers = offers.filter(ad => {
+        const adPaymentTypes = this.getAdPaymentTypes(ad.id);
+        return adPaymentTypes.some(pt =>
+          pt.p2p_payment_type?.name === this.selectedPaymentType!.name
+        );
+      });
     }
 
-    // Filter by search term
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase();
-      offers = offers.filter(offer =>
-        offer.merchant.toLowerCase().includes(searchLower) ||
-        offer.paymentMethods.some(pm => pm.toLowerCase().includes(searchLower))
-      );
+      offers = offers.filter(ad => {
+        const merchantMatch = ad.name?.toLowerCase().includes(searchLower);
+        const adPaymentTypes = this.getAdPaymentTypes(ad.id);
+        const paymentMatch = adPaymentTypes.some(pt =>
+          pt.p2p_payment_type?.name?.toLowerCase().includes(searchLower)
+        );
+        return merchantMatch || paymentMatch;
+      });
     }
 
     return offers;
   }
 
-  // Order creation dialog
-  showCreateOrderDialog: boolean = false;
-  selectedOffer: Offer | null = null;
-  orderAmount: number = 0;
-  orderQuantity: number = 0;
-  inputMode: 'amount' | 'quantity' = 'amount';
-  selectedPaymentTypeId: string = '';
-  selectedAdPaymentTypes: P2pAdPaymentType[] = [];
-  isCreatingOrder: boolean = false;
-  tradingTerms: string = 'By proceeding with this trade, you agree to complete the transaction within the specified time frame. Ensure all payment details are accurate before confirmation. Disputes should be resolved through the platform\'s resolution center. Cancel or modify orders only if permitted by the advertiser. Both parties must comply with local regulations and platform policies.';
-
-  loadAds(): void {
+  loadP2pAds(): void {
     this.isLoading = true;
+
     this.p2pAdsService.getP2pAds().subscribe({
-      next: (ads) => {
-        this.allAds = ads;
-
-        // Load payment types for each ad
-        let completedRequests = 0;
-        const totalAds = ads.length;
-
-        if (totalAds === 0) {
-          this.transformAds();
-          this.isLoading = false;
-          return;
-        }
-
-        ads.forEach(ad => {
-          this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(ad.id).subscribe({
+      next: (p2pAds) => {
+        this.p2pAds = p2pAds;
+        p2pAds.forEach(p2pAd => {
+          this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAd.id).subscribe({
             next: (paymentTypes) => {
-              this.adPaymentTypesMap.set(ad.id, paymentTypes);
-              completedRequests++;
-
-              if (completedRequests === totalAds) {
-                this.transformAds();
-                this.isLoading = false;
-              }
+              this.p2pAdPaymentTypesMap.set(p2pAd.id, paymentTypes);
             },
             error: (error) => {
-              console.error('Error loading payment types for ad', ad.id, error);
-              completedRequests++;
-
-              if (completedRequests === totalAds) {
-                this.transformAds();
-                this.isLoading = false;
-              }
+              console.error('Error loading payment types for ad', p2pAd.id, error);
             }
           });
         });
+
+        this.loadP2pPaymentTypes();
+
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading ads:', error);
+        this.pMessageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load your advertisements. Please try again.'
+        });
         this.isLoading = false;
       }
     });
   }
 
-  loadPaymentTypes(): void {
+  getAdPaymentTypes(p2pAdId: string): P2pAdPaymentType[] {
+    return this.p2pAdPaymentTypesMap.get(p2pAdId) || [];
+  }
+
+  loadP2pPaymentTypes(): void {
     this.p2pPaymentTypesService.getP2pPaymentTypes().subscribe({
-      next: (paymentTypes) => {
-        this.paymentTypes = paymentTypes;
-        // Set first payment type as default
-        if (paymentTypes.length > 0) {
-          this.selectedPaymentType = paymentTypes[0];
-        }
+      next: (p2pPaymentTypes) => {
+        this.paymentTypes = p2pPaymentTypes;
+        this.selectedPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
       },
       error: (error) => {
-        console.error('Error loading payment types:', error);
+        this.pMessageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load payment types. Please try again.'
+        });
       }
     });
   }
 
-  transformAds(): void {
-    this.buyOffers = this.allAds
-      .filter(ad => ad.type === 'buy' && ad.status === 'active')
-      .map(ad => this.transformAdToOffer(ad));
-
-    this.sellOffers = this.allAds
-      .filter(ad => ad.type === 'sell' && ad.status === 'active')
-      .map(ad => this.transformAdToOffer(ad));
-  }
-
-  transformAdToOffer(ad: P2pAd): Offer {
-    const paymentTypes = this.adPaymentTypesMap.get(ad.id) || [];
-    const paymentMethods = paymentTypes.map(pt =>
-      pt.p2p_payment_type?.name || 'Unknown'
-    );
-
-    const completionRate = ad.total_orders > 0
-      ? Math.round((ad.completed_orders / ad.total_orders) * 100)
-      : 0;
-
-    return {
-      id: ad.id,
-      type: ad.type,
-      merchant: ad.name || 'Unknown Merchant',
-      orders: ad.total_orders,
-      completion: completionRate,
-      price: ad.price,
-      available: ad.available_amount,
-      asset: ad.token_symbol || 'USDT',
-      minLimit: ad.min_limit,
-      maxLimit: ad.max_limit,
-      paymentMethods: paymentMethods
+  getStatusBadgeClass(status: string): string {
+    const classes: any = {
+      'active': 'bg-green-500/20 text-green-400 border-green-500/30',
+      'paused': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      'inactive': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+      'pending': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      'paid': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      'completed': 'bg-green-500/20 text-green-400 border-green-500/30',
+      'cancelled': 'bg-red-500/20 text-red-400 border-red-500/30',
+      'disputed': 'bg-orange-500/20 text-orange-400 border-orange-500/30'
     };
+
+    return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
   }
 
-  openCreateOrderDialog(offer: Offer): void {
-    this.selectedOffer = offer;
-    this.inputMode = 'amount';
-    this.orderAmount = offer.minLimit;
-    this.orderQuantity = 0;
-    this.calculateQuantity();
-    this.selectedPaymentTypeId = '';
+  resetP2pOrderForm(): void {
+    this.p2pOrderForm = {
+      id: "",
+      p2p_ad_id: "",
+      p2p_ad: undefined,
+      order_number: "",
+      order_type: "buy",
+      ordered_price: 0,
+      quantity: 0,
+      amount: 0,
+      p2p_payment_type_id: "",
+      p2p_payment_type: undefined,
+      ordered_by_user_id: "",
+      ordered_by_user: undefined,
+      status: "",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
 
-    // Load payment types for this ad
-    const adPaymentTypes = this.adPaymentTypesMap.get(offer.id) || [];
-    this.selectedAdPaymentTypes = adPaymentTypes;
+    this.selectedP2pAd = null;
+    this.selectedPaymentType = this.paymentTypes.length > 0 ? this.paymentTypes[0] : undefined;
+  }
 
-    if (adPaymentTypes.length > 0) {
-      this.selectedPaymentTypeId = adPaymentTypes[0].p2p_payment_type_id;
+  createOrder(ad: P2pAd): void {
+    this.resetP2pOrderForm();
+
+    this.selectedP2pAd = ad;
+    this.orderInputMode = 'amount';
+
+    if (this.selectedPaymentType) {
+      this.p2pOrderForm.p2p_payment_type_id = this.selectedPaymentType?.id;
     }
+
+    this.p2pOrderForm.amount = ad.min_limit;
+    this.p2pOrderForm.quantity = 0;
+
+    this.calculateQuantity();
 
     this.showCreateOrderDialog = true;
   }
 
-  closeCreateOrderDialog(): void {
-    this.showCreateOrderDialog = false;
-    this.selectedOffer = null;
-    this.orderAmount = 0;
-    this.orderQuantity = 0;
-    this.inputMode = 'amount';
-    this.selectedPaymentTypeId = '';
-    this.selectedAdPaymentTypes = [];
-  }
-
   calculateQuantity(): void {
-    if (this.selectedOffer && this.orderAmount > 0) {
-      if (this.activeTab === 'buy') {
-        // Buy: User enters USD, calculate USDT quantity
-        this.orderQuantity = this.orderAmount / this.selectedOffer.price;
-      } else {
-        // Sell: User enters USDT, calculate USD quantity
-        this.orderQuantity = this.orderAmount * this.selectedOffer.price;
-      }
+    if (this.selectedP2pAd && this.selectedP2pAd.price > 0) {
+      this.p2pOrderForm.quantity = this.p2pOrderForm.amount / this.selectedP2pAd.price;
     } else {
-      this.orderQuantity = 0;
+      this.p2pOrderForm.quantity = 0;
     }
   }
 
   calculateAmount(): void {
-    if (this.selectedOffer && this.orderQuantity > 0) {
-      this.orderAmount = this.orderQuantity * this.selectedOffer.price;
+    if (this.selectedP2pAd) {
+      this.p2pOrderForm.amount = this.p2pOrderForm.quantity * this.selectedP2pAd.price;
     }
   }
 
-  isOrderValid(): boolean {
-    if (!this.selectedOffer || !this.selectedPaymentTypeId) {
-      return false;
+  confirmCreateOrder(): void {
+    if (!this.selectedP2pAd) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'No Advertisement Selected',
+        detail: 'Please select an advertisement to create an order'
+      });
+      return;
+    };
+
+    if (this.p2pOrderForm.amount <= 0) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Invalid Quantity or Amount',
+        detail: 'Please enter a valid amount'
+      });
+      return;
     }
 
-    if (this.orderAmount <= 0 || this.orderQuantity <= 0) {
-      return false;
+    if (this.p2pOrderForm.amount < this.selectedP2pAd.min_limit) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Invalid Quantity or Amount',
+        detail: `Minimum amount is ${this.selectedP2pAd.min_limit} USD`
+      });
+      return;
     }
 
-    if (this.orderAmount < this.selectedOffer.minLimit || this.orderAmount > this.selectedOffer.maxLimit) {
-      return false;
+    if (this.p2pOrderForm.amount > this.selectedP2pAd.max_limit) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Invalid Quantity or Amount',
+        detail: `Maximum amount is ${this.selectedP2pAd.max_limit} USD`
+      });
+      return;
     }
 
-    return true;
-  }
-
-  createOrder(): void {
-    if (!this.selectedOffer) return;
-
-    // Validation
-    if (this.activeTab === 'buy') {
-      // Buy: Validate USD amount
-      if (this.orderAmount < this.selectedOffer.minLimit) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Invalid Amount',
-          detail: `Minimum amount is ${this.selectedOffer.minLimit} USD`
-        });
-        return;
-      }
-
-      if (this.orderAmount > this.selectedOffer.maxLimit) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Invalid Amount',
-          detail: `Maximum amount is ${this.selectedOffer.maxLimit} USD`
-        });
-        return;
-      }
-    } else {
-      // Sell: Validate USDT amount
-      if (this.orderAmount <= 0) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Invalid Amount',
-          detail: 'Please enter a valid USDT amount'
-        });
-        return;
-      }
-
-      if (this.orderAmount > this.selectedOffer.available) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Insufficient Available Amount',
-          detail: `Maximum available is ${this.selectedOffer.available} USDT`
-        });
-        return;
-      }
-
-      // Check if calculated USD amount meets limits
-      if (this.orderQuantity < this.selectedOffer.minLimit) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Invalid Amount',
-          detail: `Calculated USD amount (${this.orderQuantity.toFixed(2)}) is below minimum limit of ${this.selectedOffer.minLimit} USD`
-        });
-        return;
-      }
-
-      if (this.orderQuantity > this.selectedOffer.maxLimit) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Invalid Amount',
-          detail: `Calculated USD amount (${this.orderQuantity.toFixed(2)}) exceeds maximum limit of ${this.selectedOffer.maxLimit} USD`
-        });
-        return;
-      }
-    }
-
-    if (!this.selectedPaymentTypeId) {
-      this.messageService.add({
+    if (!this.selectedPaymentType) {
+      this.pMessageService.add({
         severity: 'error',
         summary: 'Payment Type Required',
         detail: 'Please select a payment type'
@@ -349,27 +290,29 @@ export class Marketplace {
     this.isCreatingOrder = true;
 
     const createOrderDto: CreateP2pOrderDto = {
-      p2p_ad_id: this.selectedOffer.id,
-      order_type: this.selectedOffer.type,
-      ordered_price: this.selectedOffer.price,
-      quantity: this.orderQuantity,
-      amount: this.orderAmount,
-      p2p_payment_type_id: this.selectedPaymentTypeId,
+      p2p_ad_id: this.selectedP2pAd.id,
+      order_type: this.selectedP2pAd.ordering_type,
+      ordered_price: this.selectedP2pAd.price,
+      quantity: this.p2pOrderForm.quantity,
+      amount: this.p2pOrderForm.amount,
+      p2p_payment_type_id: this.p2pOrderForm.p2p_payment_type_id,
       ordered_by_user_id: this.currentUser?.id || ''
     };
 
     this.p2pOrdersService.createP2pOrder(createOrderDto).subscribe({
       next: (order) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'success',
           summary: 'Order Created',
           detail: `Order ${order.order_number} created successfully`
         });
-        this.closeCreateOrderDialog();
-        this.isCreatingOrder = false;
+
+        setTimeout(() => {
+          this.router.navigate(['/p2p/order-details', order.id]);
+        }, 1000);
       },
       error: (error) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: error.error?.error || 'Error',
           detail: error.error?.message || 'Failed to create order'
@@ -377,6 +320,12 @@ export class Marketplace {
         this.isCreatingOrder = false;
       }
     });
+  }
+
+  closeCreateOrderDialog(): void {
+    this.resetP2pOrderForm();
+    this.showCreateOrderDialog = false;
+    this.orderInputMode = 'amount';
   }
 
   checkAuthStatus(): void {
@@ -405,7 +354,6 @@ export class Marketplace {
 
   ngOnInit(): void {
     this.checkAuthStatus();
-    this.loadPaymentTypes();
-    this.loadAds();
+    this.loadP2pAds();
   }
 }

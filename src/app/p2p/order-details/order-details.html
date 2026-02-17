@@ -32,7 +32,7 @@
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 flex-1 min-w-0">
           <div
-            [class]="p2pOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+            [class]="p2pOrder.order_type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
             class="w-10 h-10 rounded-full flex items-center justify-center shrink-0">
             <i class="pi pi-shopping-cart text-white"></i>
           </div>
@@ -143,7 +143,7 @@
           <div>
             <div class="flex items-center gap-2 mb-2">
               <div
-                [class]="p2pOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+                [class]="p2pOrder.order_type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
                 class="w-10 h-10 rounded-full flex items-center justify-center">
                 <i class="pi pi-shopping-cart text-white"></i>
               </div>
@@ -166,8 +166,8 @@
         <!-- Order Type Badge -->
         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-700/30 border border-slate-600/30">
           <i
-            [class]="p2pOrder.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down text-green-400' : 'pi pi-arrow-up text-purple-400'"></i>
-          <span class="text-sm font-semibold text-white uppercase">{{ p2pOrder.p2p_ad?.type }}</span>
+            [class]="p2pOrder.order_type === 'buy' ? 'pi pi-arrow-down text-green-400' : 'pi pi-arrow-up text-purple-400'"></i>
+          <span class="text-sm font-semibold text-white uppercase">{{ p2pOrder.order_type }}</span>
         </div>
       </div>
 
@@ -185,7 +185,7 @@
             <h3 class="text-lg font-bold text-white">Waiting for Payment</h3>
 
             @if (viewType === 'my-orders') {
-            @if (p2pOrder.p2p_ad?.type === 'buy') {
+            @if (p2pOrder.order_type === 'buy') {
             <p class="text-sm text-slate-300 leading-relaxed">
               You are buying <span class="font-bold text-yellow-400">{{ p2pOrder.quantity | number:'1.2-6' }}
                 USDT</span>.
@@ -227,7 +227,7 @@
             <h3 class="text-lg font-bold text-white">Payment Submitted</h3>
 
             @if (viewType === 'my-orders') {
-            @if (p2pOrder.p2p_ad?.type === 'buy') {
+            @if (p2pOrder.order_type === 'buy') {
             <p class="text-sm text-slate-300 leading-relaxed">
               Your payment proof has been uploaded. Waiting for the seller to verify and release
               <span class="font-bold text-blue-400">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</span>.
@@ -351,7 +351,7 @@
       <!-- ************** -->
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <div class="flex flex-wrap gap-3">
-          @if (viewType === 'my-orders' && p2pOrder.p2p_ad?.type === 'buy' && p2pOrder.status === 'pending') {
+          @if (viewType === 'my-orders' && p2pOrder.order_type === 'buy' && p2pOrder.status === 'pending') {
           <button type="button" (click)="openPaymentProofDialog()"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
             <i class="pi pi-upload"></i>
@@ -359,7 +359,7 @@
           </button>
           }
 
-          @if (viewType === 'my-ad-orders' && p2pOrder.p2p_ad?.type === 'sell' && p2pOrder.status === 'paid') {
+          @if (viewType === 'my-ad-orders' && p2pOrder.order_type === 'sell' && p2pOrder.status === 'paid') {
           <button type="button" (click)="confirmPaymentReceived(p2pOrder.id)"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
             <i class="pi pi-check-circle"></i>
@@ -537,7 +537,7 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        [class]="p2pOrder && p2pOrder.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+        [class]="p2pOrder && p2pOrder.order_type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
         class="w-10 h-10 rounded-full flex items-center justify-center">
         <i class="pi pi-shopping-cart text-white text-lg"></i>
       </div>
@@ -558,7 +558,7 @@
         <div class="flex-1 space-y-1">
           <h3 class="text-base font-bold text-white">Waiting for Payment</h3>
           @if (viewType === 'my-orders') {
-          @if (p2pOrder.p2p_ad?.type === 'buy') {
+          @if (p2pOrder.order_type === 'buy') {
           <p class="text-sm text-slate-300">
             Pay <span class="font-bold text-yellow-400">₱{{ p2pOrder.amount | number:'1.2-2' }} PHP</span> and upload
             proof.
@@ -570,7 +570,7 @@
           </p>
           }
           } @else {
-          @if (p2pOrder.p2p_ad?.type === 'sell') {
+          @if (p2pOrder.order_type === 'sell') {
           <p class="text-sm text-slate-300">
             Waiting for buyer to pay <span class="font-bold text-yellow-400">₱{{ p2pOrder.amount | number:'1.2-2' }}
               PHP</span>.
@@ -615,7 +615,7 @@
 
     <!-- Action Buttons -->
     <div class="space-y-2">
-      @if (viewType === 'my-orders' && p2pOrder.p2p_ad?.type === 'buy' && p2pOrder.status === 'pending') {
+      @if (viewType === 'my-orders' && p2pOrder.order_type === 'buy' && p2pOrder.status === 'pending') {
       <button type="button" (click)="openPaymentProofDialog(); showMobileOrderDetails = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
         <i class="pi pi-upload"></i>
@@ -623,7 +623,7 @@
       </button>
       }
 
-      @if (viewType === 'my-ad-orders' && p2pOrder.p2p_ad?.type === 'sell' && p2pOrder.status === 'paid') {
+      @if (viewType === 'my-ad-orders' && p2pOrder.order_type === 'sell' && p2pOrder.status === 'paid') {
       <button type="button" (click)="confirmPaymentReceived(p2pOrder.id); showMobileOrderDetails = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
         <i class="pi pi-check-circle"></i>

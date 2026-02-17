@@ -102,6 +102,19 @@ export class SubHeader {
     }
   }
 
+  updateActiveMenuFromRoute(): void {
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('/p2p/marketplace')) {
+      this.activeMenu = 'marketplace';
+    } else if (currentUrl.includes('/p2p/orders')) {
+      this.activeMenu = 'orders';
+    } else if (currentUrl.includes('/p2p/my-ads')) {
+      this.activeMenu = 'my-ads';
+    } else if (currentUrl.includes('/p2p/admin')) {
+      this.activeMenu = 'admin';
+    }
+  }
+
   navigateToAdminConsole(): void {
     this.router.navigate(['/p2p/admin']);
   }
@@ -319,10 +332,15 @@ export class SubHeader {
   }
 
   ngOnInit() {
+    this.router.events.subscribe(() => {
+      this.updateActiveMenuFromRoute();
+    });
+
     this.route.queryParams.subscribe(params => {
       this.isXteriumMode = params['xterium'] === 'true';
     });
 
     this.checkAuthStatus();
+    this.updateActiveMenuFromRoute();
   }
 }

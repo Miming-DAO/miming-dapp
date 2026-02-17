@@ -2,12 +2,12 @@ export class P2pAd {
   id: string = "";
   user_id: string = "";
   type: 'buy' | 'sell' = 'buy';
+  ordering_type: 'buy' | 'sell' = 'buy';
   p2p_number: string = "";
   logo_url: string = "";
   name: string = "";
   token_symbol: string = "";
   price: number = 0;
-  available_amount: number = 0;
   min_limit: number = 0;
   max_limit: number = 0;
   payment_instructions: string = "";
@@ -25,7 +25,6 @@ export class CreateP2pAdDto {
   name: string = "";
   token_symbol: string = "";
   price: number = 0;
-  available_amount: number = 0;
   min_limit: number = 0;
   max_limit: number = 0;
   payment_instructions: string = "";
@@ -38,7 +37,6 @@ export class UpdateP2pAdDto {
   name?: string = "";
   token_symbol?: string = "";
   price?: number = 0;
-  available_amount?: number = 0;
   min_limit?: number = 0;
   max_limit?: number = 0;
   payment_instructions?: string = "";

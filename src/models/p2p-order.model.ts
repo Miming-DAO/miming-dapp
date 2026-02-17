@@ -7,7 +7,7 @@ export class P2pOrder {
   p2p_ad_id: string = "";
   p2p_ad: P2pAd | undefined;
   order_number: string = "";
-  order_type: string = "";
+  order_type: 'buy' | 'sell' = 'buy';
   ordered_price: number = 0;
   quantity: number = 0;
   amount: number = 0;
