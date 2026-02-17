@@ -66,6 +66,51 @@ export class OrderDetails implements OnInit {
     return this.currentUser.id === this.p2pOrder.ordered_by_user_id ? 'my-orders' : 'my-ad-orders';
   }
 
+  get isBuyer(): boolean {
+    if (!this.currentUser || !this.p2pOrder) return false;
+    return this.currentUser.id === this.p2pOrder.ordered_by_user_id;
+  }
+
+  get isSeller(): boolean {
+    if (!this.currentUser || !this.p2pOrder) return false;
+    return this.currentUser.id !== this.p2pOrder.ordered_by_user_id;
+  }
+
+  // PENDING status buttons
+  get showUploadProofButton(): boolean {
+    return this.isBuyer && this.p2pOrder?.status === 'pending';
+  }
+
+  get showCancelButtonForPending(): boolean {
+    if (!this.p2pOrder || this.p2pOrder.status !== 'pending') return false;
+    return true; // Both buyer and seller can cancel during pending
+  }
+
+  // PAID status buttons
+  get showNotifyUSDTSentButton(): boolean {
+    return this.isSeller && this.p2pOrder?.status === 'paid';
+  }
+
+  get showConfirmUSDTReceivedButton(): boolean {
+    return this.isBuyer && this.p2pOrder?.status === 'paid';
+  }
+
+  get showCancelButtonForPaid(): boolean {
+    if (!this.p2pOrder || this.p2pOrder.status !== 'paid') return false;
+    return this.isBuyer; // Only buyer can cancel when paid
+  }
+
+  // COMPLETED/CANCELLED - no cancel button
+  get showCancelButton(): boolean {
+    if (!this.p2pOrder) return false;
+    if (this.p2pOrder.status === 'completed' || this.p2pOrder.status === 'cancelled') return false;
+
+    if (this.p2pOrder.status === 'pending') return true;
+    if (this.p2pOrder.status === 'paid') return this.isBuyer;
+
+    return false;
+  }
+
   loadOrderDetails(): void {
     this.isLoading = true;
 
@@ -192,6 +237,16 @@ export class OrderDetails implements OnInit {
       summary: 'Payment Confirmed',
       detail: 'Payment has been confirmed. The order is now complete.'
     });
+    this.loadOrderDetails();
+  }
+
+  notifyUSDTSent(orderId: string): void {
+    this.pMessageService.add({
+      severity: 'success',
+      summary: 'Notification Sent',
+      detail: 'Buyer has been notified that USDT was sent.'
+    });
+    // TODO: Implement backend call to update order status and notify buyer
     this.loadOrderDetails();
   }
 
