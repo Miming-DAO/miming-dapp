@@ -118,7 +118,7 @@
               <td class="py-4 px-4 text-right">
                 <div
                   class="font-bold text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap">
-                  ${{ ad.price | number:'1.2-2' }}
+                  ₱{{ ad.price | number:'1.2-2' }}
                 </div>
                 <div class="flex items-end justify-end gap-1">
                   <img [src]="'/images/tokens/usdt.png'" [alt]="ad.token_symbol" class="w-4 h-4 object-contain" />
@@ -138,7 +138,7 @@
               <!-- ****** -->
               <td class="py-4 px-4 text-sm hidden lg:table-cell text-right">
                 <div class="font-semibold text-white whitespace-nowrap">
-                  ${{ ad.min_limit | number:'1.2-2' }} ~ ${{ ad.max_limit | number:'1.2-2' }}
+                  ₱{{ ad.min_limit | number:'1.2-2' }} ~ ₱{{ ad.max_limit | number:'1.2-2' }}
                 </div>
               </td>
 
@@ -253,7 +253,7 @@
         <div class="border-b border-slate-700/50 mb-3 pb-3">
           <div class="flex items-center gap-2 px-2">
             <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-              ${{ ad.price | number:'1.2-2' }}
+              ₱{{ ad.price | number:'1.2-2' }}
             </div>
             <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700/50">
               <img [src]="'/images/tokens/usdt.png'" [alt]="ad.token_symbol" class="w-4 h-4 object-contain">
@@ -272,7 +272,7 @@
           </div>
           <div class="px-2">
             <span class="text-xs text-slate-400 block mb-1">Limits</span>
-            <div class="text-white font-bold text-sm">${{ ad.min_limit | number:'1.2-2' }} - ${{ ad.max_limit |
+            <div class="text-white font-bold text-sm">₱{{ ad.min_limit | number:'1.2-2' }} - ₱{{ ad.max_limit |
               number:'1.2-2' }}</div>
           </div>
         </div>
@@ -462,7 +462,7 @@
               <!-- ********** -->
               <div>
                 <label class="text-xs text-slate-400 mb-2 block">
-                  Unit Price (USD) <span class="text-red-400">*</span>
+                  Unit Price (PHP) <span class="text-red-400">*</span>
                 </label>
                 <p-inputnumber class="w-full"
                   inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-lg font-bold text-right"
@@ -490,7 +490,7 @@
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="text-xs text-slate-400 mb-2 block">
-                    Min Limit (USD) <span class="text-red-400">*</span>
+                    Min Limit (PHP) <span class="text-red-400">*</span>
                   </label>
                   <p-inputnumber class="w-full"
                     inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
@@ -499,7 +499,7 @@
                 </div>
                 <div>
                   <label class="text-xs text-slate-400 mb-2 block">
-                    Max Limit (USD) <span class="text-red-400">*</span>
+                    Max Limit (PHP) <span class="text-red-400">*</span>
                   </label>
                   <p-inputnumber class="w-full"
                     inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
@@ -745,7 +745,7 @@
         <span class="text-white font-semibold">{{ selectedP2pAdToDelete.name }}</span>
       </div>
       <div class="text-sm text-slate-400">
-        <div>Price: <span class="text-yellow-400 font-bold">${{ selectedP2pAdToDelete.price }}</span></div>
+        <div>Price: <span class="text-yellow-400 font-bold">₱{{ selectedP2pAdToDelete.price }}</span></div>
         <div>Available: <span class="text-white">{{ selectedP2pAdToDelete.available_amount }}</span></div>
       </div>
     </div>

@@ -32,43 +32,49 @@ export class P2pOrdersService {
     return headers;
   }
 
-  getOrders(): Observable<P2pOrder[]> {
+  getP2pOrders(): Observable<P2pOrder[]> {
     return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}`, {
       headers: this.getHeaders()
     });
   }
 
-  getOrdersByAuthUser(): Observable<P2pOrder[]> {
-    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/auth-user`, {
+  getP2pMyOrdersByAuthUser(): Observable<P2pOrder[]> {
+    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/my-orders/auth-user`, {
       headers: this.getHeaders()
     });
   }
 
-  getOrdersByP2pAd(p2p_ad_id: string): Observable<P2pOrder[]> {
+  getP2pMyAdOrdersByAuthUser(): Observable<P2pOrder[]> {
+    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/my-ad-orders/auth-user`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getP2pOrdersByP2pAd(p2p_ad_id: string): Observable<P2pOrder[]> {
     return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/p2p-ad/${p2p_ad_id}`, {
       headers: this.getHeaders()
     });
   }
 
-  createOrder(createDto: CreateP2pOrderDto): Observable<P2pOrder> {
+  createP2pOrder(createDto: CreateP2pOrderDto): Observable<P2pOrder> {
     return this.http.post<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}`, createDto, {
       headers: this.getHeaders()
     });
   }
 
-  getOrderById(id: string): Observable<P2pOrder> {
+  getP2pOrderById(id: string): Observable<P2pOrder> {
     return this.http.get<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
-  updateOrder(id: string, updateDto: UpdateP2pOrderDto): Observable<P2pOrder> {
+  updatP2pOrder(id: string, updateDto: UpdateP2pOrderDto): Observable<P2pOrder> {
     return this.http.patch<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
       headers: this.getHeaders()
     });
   }
 
-  deleteOrder(id: string): Observable<void> {
+  deleteP2pOrder(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });

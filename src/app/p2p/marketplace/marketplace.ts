@@ -358,7 +358,7 @@ export class Marketplace {
       ordered_by_user_id: this.currentUser?.id || ''
     };
 
-    this.p2pOrdersService.createOrder(createOrderDto).subscribe({
+    this.p2pOrdersService.createP2pOrder(createOrderDto).subscribe({
       next: (order) => {
         this.messageService.add({
           severity: 'success',

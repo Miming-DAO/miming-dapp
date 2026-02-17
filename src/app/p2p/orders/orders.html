@@ -10,7 +10,9 @@
         <p class="text-sm md:text-base text-slate-400">Track your P2P transactions</p>
       </div>
 
+      <!-- *************************************** -->
       <!-- View Toggle (My Orders vs My Ad Orders) -->
+      <!-- *************************************** -->
       <div class="flex gap-2">
         <button (click)="activeViewTab = 'my-orders'"
           [class]="activeViewTab === 'my-orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
@@ -129,24 +131,19 @@
             <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
 
               <!-- ********************* -->
-              <!-- Order Number + Ad Info -->
+              <!-- Order Number + Type Chip -->
               <!-- ********************* -->
               <td class="py-4 px-4">
                 <div class="flex items-center gap-3">
-                  <div
-                    [class]="order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
-                    class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
-                  </div>
                   <div class="min-w-0">
-                    <div class="font-semibold text-white truncate">{{ order.order_number }}</div>
-                    <div class="text-xs text-slate-400 mt-0.5 truncate">{{ order.p2p_ad?.name }}</div>
+                    <div class="font-semibold text-white truncate mb-2">{{ order.order_number }}</div>
                     <span
-                      [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-                      class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold border uppercase lg:hidden">
+                      [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-600 text-white border-green-500' : 'bg-pink-600 text-white border-pink-500'"
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border uppercase"
+                      [attr.aria-label]="order.p2p_ad?.type === 'buy' ? 'Buy order' : 'Sell order'">
                       <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
-                        class="mr-1"></i>
-                      {{ order.p2p_ad?.type }}
+                        class="mr-1.5"></i>
+                      {{ order.p2p_ad?.type === 'buy' ? 'Buy' : 'Sell' }}
                     </span>
                   </div>
                 </div>
@@ -165,7 +162,7 @@
               <!-- ************ -->
               <td class="py-4 px-4 text-right">
                 <div class="font-bold text-base text-slate-200 whitespace-nowrap">
-                  ${{ order.ordered_price | number:'1.2-2' }}
+                  ₱{{ order.ordered_price | number:'1.2-2' }}
                 </div>
                 <div class="text-xs text-slate-400 mt-0.5">per unit</div>
               </td>
@@ -184,7 +181,7 @@
               <td class="py-4 px-4 text-right">
                 <div
                   class="font-bold text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap">
-                  ${{ order.amount | number:'1.2-2' }}
+                  ₱{{ order.amount | number:'1.2-2' }}
                 </div>
               </td>
 
@@ -247,10 +244,11 @@
         <!-- **************************** -->
         <div class="flex items-center justify-between mb-3">
           <span
-            [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
-            class="px-3 py-1 rounded-full text-xs font-bold border uppercase">
-            <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
-            {{ order.p2p_ad?.type }}
+            [class]="order.p2p_ad?.type === 'buy' ? 'bg-green-600 text-white border-green-500' : 'bg-pink-600 text-white border-pink-500'"
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border uppercase"
+            [attr.aria-label]="order.p2p_ad?.type === 'buy' ? 'Buy order' : 'Sell order'">
+            <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1.5"></i>
+            {{ order.p2p_ad?.type === 'buy' ? 'Buy' : 'Sell' }}
           </span>
           <span [class]="getStatusBadgeClass(order.status)"
             class="px-2 py-1 rounded-full text-xs font-semibold border uppercase">
@@ -259,17 +257,11 @@
         </div>
 
         <!-- ******************* -->
-        <!-- Order Number + Name -->
+        <!-- Order Number + Date -->
         <!-- ******************* -->
         <div class="flex items-center gap-3 mb-3 px-2">
-          <div
-            [class]="order.p2p_ad?.type === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
-            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0">
-            <i [class]="order.p2p_ad?.type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
-          </div>
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-white truncate">{{ order.order_number }}</h3>
-            <p class="text-xs text-slate-400 truncate">{{ order.p2p_ad?.name }}</p>
             <p class="text-xs text-slate-400">{{ order.created_at | date:'MMM d, y h:mm a' }}</p>
           </div>
         </div>
@@ -281,13 +273,13 @@
           <div class="flex items-center justify-between px-2 mb-2">
             <span class="text-xs text-slate-400">Unit Price</span>
             <div class="font-bold text-base text-slate-200">
-              ${{ order.ordered_price | number:'1.2-2' }}
+              ₱{{ order.ordered_price | number:'1.2-2' }}
             </div>
           </div>
           <div class="flex items-center justify-between px-2">
             <span class="text-xs text-slate-400">Total Amount</span>
             <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-              ${{ order.amount | number:'1.2-2' }}
+              ₱{{ order.amount | number:'1.2-2' }}
             </div>
           </div>
         </div>
@@ -318,84 +310,6 @@
     }
   </div>
 </div>
-
-<!-- ********************************************** -->
-<!-- Upload Proof of Payment Dialog                -->
-<!-- ********************************************** -->
-<p-dialog [(visible)]="showPaymentProofDialog" [modal]="true" [closable]="true" [draggable]="false"
-  [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem'  }">
-  <ng-template #header>
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-linear-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
-        <i class="pi pi-upload text-white text-lg"></i>
-      </div>
-      <span class="text-lg font-bold text-white">Upload Proof of Payment</span>
-    </div>
-  </ng-template>
-
-  <div class="space-y-5 py-4">
-    <!-- Payment Information -->
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
-      <div class="space-y-3 text-sm">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400">Amount to Pay</span>
-          <span class="text-white font-bold text-lg">${{ selectedOrder?.amount | number:'1.2-2' }} USD</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400">You Will Receive</span>
-          <span class="text-white font-semibold">{{ selectedOrder?.quantity | number:'1.2-6' }} USDT</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- File Upload Area -->
-    <div class="space-y-2">
-      <label class="text-sm font-semibold text-white">Payment Proof (Screenshot/Receipt)</label>
-      <div class="relative">
-        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,.pdf" class="hidden" />
-        <div (click)="fileInput.click()"
-          class="border-2 border-dashed border-slate-600 rounded-3xl p-8 text-center cursor-pointer hover:border-purple-500/50 hover:bg-purple-500/5 transition-all duration-200">
-          @if (!selectedFile) {
-          <div class="space-y-3">
-            <i class="pi pi-cloud-upload text-4xl text-slate-500"></i>
-            <div class="space-y-1">
-              <p class="text-white font-semibold">Click to upload</p>
-              <p class="text-xs text-slate-400">PNG, JPG, PDF up to 10MB</p>
-            </div>
-          </div>
-          } @else {
-          <div class="space-y-2">
-            <i class="pi pi-file text-3xl text-green-400"></i>
-            <p class="text-white font-semibold">{{ selectedFile.name }}</p>
-            <p class="text-xs text-slate-400">{{ (selectedFile.size / 1024).toFixed(2) }} KB</p>
-          </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Reference Number (Optional) -->
-    <div class="space-y-2">
-      <label class="text-sm font-semibold text-white">Transaction Reference (Optional)</label>
-      <input type="text" [(ngModel)]="paymentReference" pInputText placeholder="Enter transaction reference number"
-        class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 focus:bg-slate-800" />
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="flex gap-3 pt-2">
-      <button type="button" (click)="uploadPaymentProof()" [disabled]="!selectedFile" [class.opacity-50]="!selectedFile"
-        [class.cursor-not-allowed]="!selectedFile"
-        class="flex-1 px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg">
-        <i class="pi pi-check"></i>
-        <span>Submit Proof</span>
-      </button>
-      <button type="button" (click)="closePaymentProofDialog()"
-        class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
-        Cancel
-      </button>
-    </div>
-  </div>
-</p-dialog>
 
 <!-- ***** -->
 <!-- Toast -->

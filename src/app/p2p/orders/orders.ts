@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { TabsModule } from 'primeng/tabs';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
+import { MessageService as PMessageService } from 'primeng/api';
+import { TabsModule as PTabsModule } from 'primeng/tabs';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
+import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
+import { ButtonModule as PButtonModule } from 'primeng/button';
 import { SelectModule as PSelectModule } from 'primeng/select';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
-import { StepperModule } from 'primeng/stepper';
+import { StepperModule as PStepperModule } from 'primeng/stepper';
+import { ToastModule as PToastModule } from 'primeng/toast';
 
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { P2pOrder } from '../../../models/p2p-order.model';
@@ -20,42 +20,33 @@ import { P2pOrder } from '../../../models/p2p-order.model';
   imports: [
     CommonModule,
     FormsModule,
-    TabsModule,
-    DialogModule,
-    InputTextModule,
-    ButtonModule,
+    PTabsModule,
+    PDialogModule,
+    PInputTextModule,
+    PButtonModule,
     PSelectModule,
-    ToastModule,
-    StepperModule,
+    PStepperModule,
+    PToastModule,
   ],
   templateUrl: './orders.html',
   styleUrl: './orders.css',
-  providers: [MessageService],
+  providers: [PMessageService],
 })
 export class Orders {
 
   constructor(
     private router: Router,
     private p2pOrdersService: P2pOrdersService,
-    private messageService: MessageService
+    private pMessageService: PMessageService
   ) { }
 
   activeViewTab: 'my-orders' | 'my-ad-orders' = 'my-orders';
   activeStatusTab: 'in-progress' | 'completed' | 'cancelled' = 'in-progress';
-  showOrderDetailsDialog: boolean = false;
-  showOrderChatDialog: boolean = false;
-  showPaymentProofDialog: boolean = false;
-  isLoading: boolean = false;
+
   searchTerm: string = '';
 
-  selectedOrder: P2pOrder | null = null;
-  selectedFile: File | null = null;
-  paymentReference: string = '';
-  chatMessage: string = '';
-  chatMessages: Array<{ sender: string; senderName: string; message: string; timestamp: string }> = [];
-
-  myOrders: P2pOrder[] = []; // Orders I placed on others' ads
-  myAdOrders: P2pOrder[] = []; // Orders others placed on my ads
+  p2pMyOrders: P2pOrder[] = [];
+  p2pMyAdOrders: P2pOrder[] = [];
 
   statusOptions = [
     { label: 'In Progress', value: 'in-progress', icon: 'pi pi-clock text-yellow-400' },
@@ -63,21 +54,21 @@ export class Orders {
     { label: 'Cancelled', value: 'cancelled', icon: 'pi pi-times-circle text-red-400' }
   ];
 
+  isLoading: boolean = false;
+
   get orders(): P2pOrder[] {
-    return this.activeViewTab === 'my-orders' ? this.myOrders : this.myAdOrders;
+    return this.activeViewTab === 'my-orders' ? this.p2pMyOrders : this.p2pMyAdOrders;
   }
 
   get filteredOrders(): P2pOrder[] {
     let filtered = this.orders;
 
-    // Filter by status
     if (this.activeStatusTab === 'in-progress') {
       filtered = filtered.filter(order => order.status === 'pending' || order.status === 'paid');
     } else {
       filtered = filtered.filter(order => order.status === this.activeStatusTab);
     }
 
-    // Filter by search term
     if (this.searchTerm && this.searchTerm.trim()) {
       const search = this.searchTerm.toLowerCase().trim();
       filtered = filtered.filter(order =>
@@ -94,14 +85,13 @@ export class Orders {
   loadOrders(): void {
     this.isLoading = true;
 
-    // Load both my orders and my ad orders
-    this.p2pOrdersService.getOrdersByAuthUser().subscribe({
-      next: (orders: P2pOrder[]) => {
-        this.myOrders = orders;
+    this.p2pOrdersService.getP2pMyOrdersByAuthUser().subscribe({
+      next: (p2pMyOrders: P2pOrder[]) => {
+        this.p2pMyOrders = p2pMyOrders;
         this.isLoading = false;
       },
       error: (error: any) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load orders.'
@@ -110,152 +100,22 @@ export class Orders {
       }
     });
 
-    // TODO: Add API call to load orders on my ads (where I'm the ad owner)
-    // this.p2pOrdersService.getOrdersOnMyAds().subscribe({
-    //   next: (orders: P2pOrder[]) => {
-    //     this.myAdOrders = orders;
-    //   },
-    //   error: (error: any) => {
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: error.error.error || 'Error',
-    //       detail: error.error.message || 'Failed to load ad orders.'
-    //     });
-    //   }
-    // });
-  }
-
-  openOrderChat(order: P2pOrder) {
-    this.selectedOrder = order;
-    this.showOrderChatDialog = true;
-    // load placeholder chat messages (use available order fields)
-    this.chatMessages = [
-      { sender: 'merchant', senderName: order.ordered_by_user?.full_name || 'User', message: `Hello! Please proceed with payment for ${order.order_number}.`, timestamp: new Date(Date.now() - 3600000).toISOString() },
-      { sender: 'user', senderName: 'You', message: 'Payment sent! TXN123456', timestamp: new Date(Date.now() - 1800000).toISOString() }
-    ];
-  }
-
-  openOrderDetails(order: P2pOrder) {
-    this.router.navigate(['/p2p/order-details', order.id], {
-      queryParams: {
-        view: this.activeViewTab
-      }
-    });
-  }
-
-  closeOrderDetails() {
-    this.showOrderDetailsDialog = false;
-    this.selectedOrder = null;
-  }
-
-  openPaymentProofDialog(): void {
-    this.showPaymentProofDialog = true;
-  }
-
-  closePaymentProofDialog(): void {
-    this.showPaymentProofDialog = false;
-    this.selectedFile = null;
-    this.paymentReference = '';
-  }
-
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        this.messageService.add({
+    this.p2pOrdersService.getP2pMyAdOrdersByAuthUser().subscribe({
+      next: (p2pAdOrders: P2pOrder[]) => {
+        this.p2pMyAdOrders = p2pAdOrders;
+      },
+      error: (error: any) => {
+        this.pMessageService.add({
           severity: 'error',
-          summary: 'File Too Large',
-          detail: 'Please upload a file smaller than 10MB.'
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load ad orders.'
         });
-        return;
       }
-      this.selectedFile = file;
-    }
-  }
-
-  uploadPaymentProof(): void {
-    if (!this.selectedFile || !this.selectedOrder) return;
-
-    // TODO: Implement actual file upload to backend
-    // For now, simulate the upload and status change
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Proof Uploaded',
-      detail: 'Your payment proof has been submitted. The seller will verify your payment.'
     });
-
-    // Close dialogs and reload orders
-    this.closePaymentProofDialog();
-    this.closeOrderDetails();
-    this.loadOrders();
   }
 
-  confirmPaymentReceived(orderId: string): void {
-    // TODO: Implement API call to confirm payment and complete order
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Payment Confirmed',
-      detail: 'You have confirmed payment received. The crypto will be released to the buyer.'
-    });
-
-    // Reload orders to reflect status change
-    this.loadOrders();
-    this.closeOrderDetails();
-  }
-
-  cancelOrder(orderId: string): void {
-    // TODO: Implement API call to cancel order
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Order Cancelled',
-      detail: 'The order has been cancelled successfully.'
-    });
-
-    // Reload orders to reflect status change
-    this.loadOrders();
-    this.closeOrderDetails();
-  }
-
-  getPaymentAccountName(): string {
-    if (!this.selectedOrder?.p2p_ad?.id) return '';
-    // In a real scenario, you'd need to fetch the ad payment types from the API
-    // For now, we return a placeholder
-    return 'Account Name from Ad Payment Types';
-  }
-
-  getPaymentAccountNumber(): string {
-    if (!this.selectedOrder?.p2p_ad?.id) return '';
-    // In a real scenario, you'd need to fetch the ad payment types from the API
-    // For now, we return a placeholder
-    return 'Account Number from Ad Payment Types';
-  }
-
-  getPaymentOtherDetails(): string {
-    if (!this.selectedOrder?.p2p_ad?.id) return '';
-    // In a real scenario, you'd need to fetch the ad payment types from the API
-    // For now, we return a placeholder
-    return '';
-  }
-
-  closeOrderChat() {
-    this.showOrderChatDialog = false;
-    this.selectedOrder = null;
-    this.chatMessages = [];
-    this.chatMessage = '';
-  }
-
-  sendChatMessage() {
-    const msg = this.chatMessage;
-    if (msg && msg.trim()) {
-      this.chatMessages.push({ sender: 'user', senderName: 'You', message: msg, timestamp: new Date().toISOString() });
-      this.chatMessage = '';
-    }
-  }
-
-  formatMessageTime(timestamp: string): string {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  openOrderDetails(p2pOrder: P2pOrder) {
+    this.router.navigate(['/p2p/order-details', p2pOrder.id]);
   }
 
   getStatusBadgeClass(status: string): string {

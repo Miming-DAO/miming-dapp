@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { MessageService } from 'primeng/api';
+import { MessageService as PMessageService } from 'primeng/api';
 import { DialogModule as PDialogModule } from 'primeng/dialog';
 import { SelectModule as PSelectModule } from 'primeng/select';
 import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
@@ -14,7 +14,7 @@ import { User } from '../../../models/user.model';
 import { Token } from '../../../models/token.model';
 import { P2pAd, CreateP2pAdDto, UpdateP2pAdDto } from '../../../models/p2p-ad.model';
 import { P2pPaymentType } from '../../../models/p2p-payment-type.model'
-import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto, UpdateP2pAdPaymentTypeDto } from '../../../models/p2p-ad-payment-type.model';
+import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto } from '../../../models/p2p-ad-payment-type.model';
 
 import { TokensService } from '../../../services/tokens/tokens.service';
 import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
@@ -35,7 +35,7 @@ import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types
   ],
   templateUrl: './my-ads.html',
   styleUrl: './my-ads.css',
-  providers: [MessageService],
+  providers: [PMessageService],
 })
 export class MyAds {
 
@@ -44,7 +44,7 @@ export class MyAds {
     private p2pAdsService: P2pAdsService,
     private p2pPaymentTypesService: P2pPaymentTypesService,
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
-    private messageService: MessageService
+    private pMessageService: PMessageService
   ) { }
 
   currentUser: User | null = null;
@@ -125,7 +125,7 @@ export class MyAds {
         this.isLoading = false;
       },
       error: (error) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load your advertisements. Please try again.'
@@ -157,7 +157,7 @@ export class MyAds {
         }
       },
       error: (error) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load tokens. Please try again.'
@@ -173,7 +173,7 @@ export class MyAds {
         this.selectedPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
       },
       error: (error) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load payment types. Please try again.'
@@ -287,7 +287,7 @@ export class MyAds {
 
   saveP2pPaymentType(): void {
     if (!this.selectedPaymentType?.id || !this.p2pAdPaymentTypeForm.account_name || !this.p2pAdPaymentTypeForm.account_number) {
-      this.messageService.add({
+      this.pMessageService.add({
         severity: 'warn',
         summary: 'Validation Error',
         detail: 'Please fill in payment type, account name, and account number.'
@@ -301,7 +301,7 @@ export class MyAds {
       );
 
       if (isDuplicate) {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'warn',
           summary: 'Duplicate Payment Type',
           detail: 'This payment type has already been added. Each payment type can only be added once.'
@@ -325,7 +325,7 @@ export class MyAds {
 
       this.p2pAdPaymentTypes.push(newPaymentType);
 
-      this.messageService.add({
+      this.pMessageService.add({
         severity: 'info',
         summary: 'Draft',
         detail: 'Payment method added. Click Update to save changes.'
@@ -343,7 +343,7 @@ export class MyAds {
         );
 
         if (isDuplicate) {
-          this.messageService.add({
+          this.pMessageService.add({
             severity: 'warn',
             summary: 'Duplicate Payment Type',
             detail: 'This payment type has already been added. Each payment type can only be added once.'
@@ -361,7 +361,7 @@ export class MyAds {
         this.p2pAdPaymentTypes[index] = this.p2pAdPaymentTypeForm;
       }
 
-      this.messageService.add({
+      this.pMessageService.add({
         severity: 'info',
         summary: 'Draft',
         detail: 'Payment method updated. Click Update to save changes.'
@@ -382,7 +382,7 @@ export class MyAds {
 
   deleteP2pPaymentType(id: string): void {
     this.p2pAdPaymentTypes = this.p2pAdPaymentTypes.filter(pt => pt.id !== id);
-    this.messageService.add({
+    this.pMessageService.add({
       severity: 'info',
       summary: 'Draft',
       detail: 'Payment method marked for deletion. Click Update to save changes.'
@@ -410,7 +410,7 @@ export class MyAds {
         this.p2pAdPaymentTypes = JSON.parse(JSON.stringify(payments));
       },
       error: (error) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load advertisement payment types. Please try again.'
@@ -421,7 +421,7 @@ export class MyAds {
 
   saveP2pAd(): void {
     if (this.p2pAdPaymentTypes.length === 0) {
-      this.messageService.add({
+      this.pMessageService.add({
         severity: 'warn',
         summary: 'Validation Error',
         detail: 'Please add at least one payment method.'
@@ -461,7 +461,7 @@ export class MyAds {
               this.loadP2pAds();
               this.closeP2pAdDetailsDialog();
 
-              this.messageService.add({
+              this.pMessageService.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Advertisement created successfully!'
@@ -469,7 +469,7 @@ export class MyAds {
               this.isLoading = false;
             },
             error: (error) => {
-              this.messageService.add({
+              this.pMessageService.add({
                 severity: 'error',
                 summary: 'Error',
                 detail: 'Failed to create payment methods: ' + (error.error?.message || 'Unknown error')
@@ -479,7 +479,7 @@ export class MyAds {
           });
         },
         error: (error) => {
-          this.messageService.add({
+          this.pMessageService.add({
             severity: 'error',
             summary: error.error.error || 'Error',
             detail: error.error.message || 'Failed to create advertisement. Please try again.'
@@ -518,7 +518,7 @@ export class MyAds {
                   this.loadP2pAds();
                   this.closeP2pAdDetailsDialog();
 
-                  this.messageService.add({
+                  this.pMessageService.add({
                     severity: 'success',
                     summary: 'Success',
                     detail: 'Advertisement updated successfully!'
@@ -526,7 +526,7 @@ export class MyAds {
                   this.isLoading = false;
                 },
                 error: (error) => {
-                  this.messageService.add({
+                  this.pMessageService.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Failed to create payment methods: ' + (error.error?.message || 'Unknown error')
@@ -536,7 +536,7 @@ export class MyAds {
               });
             },
             error: (error) => {
-              this.messageService.add({
+              this.pMessageService.add({
                 severity: 'error',
                 summary: 'Error',
                 detail: 'Failed to delete old payment methods: ' + (error.error?.message || 'Unknown error')
@@ -546,7 +546,7 @@ export class MyAds {
           });
         },
         error: (error) => {
-          this.messageService.add({
+          this.pMessageService.add({
             severity: 'error',
             summary: error.error.error || 'Error',
             detail: error.error.message || 'Failed to update advertisement. Please try again.'
@@ -576,7 +576,7 @@ export class MyAds {
 
     this.p2pAdsService.deleteP2pAd(this.selectedP2pAdToDelete.id).subscribe({
       next: () => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'success',
           summary: 'Success',
           detail: 'Advertisement deleted successfully!'
@@ -588,7 +588,7 @@ export class MyAds {
         this.isLoading = false;
       },
       error: (error) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: 'Error',
           detail: 'Failed to delete advertisement. Please try again.'

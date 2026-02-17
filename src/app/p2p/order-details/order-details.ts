@@ -3,28 +3,30 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
+import { MessageService as PMessageService } from 'primeng/api';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
+import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
+import { ButtonModule as PButtonModule } from 'primeng/button';
+import { ToastModule as PToastModule } from 'primeng/toast';
+
+import { User } from '../../../models/user.model';
+import { P2pOrder } from '../../../models/p2p-order.model';
 
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
-import { P2pOrder } from '../../../models/p2p-order.model';
 
 @Component({
   selector: 'app-order-details',
   imports: [
     CommonModule,
     FormsModule,
-    DialogModule,
-    InputTextModule,
-    ButtonModule,
-    ToastModule,
+    PDialogModule,
+    PInputTextModule,
+    PButtonModule,
+    PToastModule,
   ],
   templateUrl: './order-details.html',
   styleUrl: './order-details.css',
-  providers: [MessageService],
+  providers: [PMessageService],
 })
 export class OrderDetails implements OnInit {
 
@@ -32,21 +34,22 @@ export class OrderDetails implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private p2pOrdersService: P2pOrdersService,
-    private messageService: MessageService
+    private pMessageService: PMessageService
   ) { }
 
-  orderId: string = '';
-  viewType: 'my-orders' | 'my-ad-orders' = 'my-orders';
-  order: P2pOrder | null = null;
+  currentUser: User | null = null;
+
+  paramsOrderId: string = '';
+  p2pOrder: P2pOrder | null = null;
+
   isLoading: boolean = false;
+
   showMobileOrderDetails: boolean = false;
 
-  // Payment proof upload
   showPaymentProofDialog: boolean = false;
   selectedFile: File | null = null;
   paymentReference: string = '';
 
-  // Chat
   chatMessage: string = '';
   chatMessages: Array<{
     sender: 'me' | 'other';
@@ -56,31 +59,23 @@ export class OrderDetails implements OnInit {
     avatar?: string;
   }> = [];
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.orderId = params['id'];
-      if (this.orderId) {
-        this.loadOrderDetails();
-        this.loadChatMessages();
-      }
-    });
-
-    this.route.queryParams.subscribe(params => {
-      this.viewType = params['view'] || 'my-orders';
-    });
+  get viewType(): 'my-orders' | 'my-ad-orders' {
+    if (!this.currentUser || !this.p2pOrder) {
+      return 'my-orders';
+    }
+    return this.currentUser.id === this.p2pOrder.ordered_by_user_id ? 'my-orders' : 'my-ad-orders';
   }
 
   loadOrderDetails(): void {
     this.isLoading = true;
-    // TODO: Implement actual API call
-    // For now, using the existing service
-    this.p2pOrdersService.getOrdersByAuthUser().subscribe({
-      next: (orders: P2pOrder[]) => {
-        this.order = orders.find(o => o.id === this.orderId) || null;
+
+    this.p2pOrdersService.getP2pOrderById(this.paramsOrderId).subscribe({
+      next: (p2pOrder: P2pOrder) => {
+        this.p2pOrder = p2pOrder;
         this.isLoading = false;
       },
       error: (error: any) => {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: 'Error',
           detail: 'Failed to load order details.'
@@ -92,22 +87,42 @@ export class OrderDetails implements OnInit {
 
   loadChatMessages(): void {
     // TODO: Load actual chat messages from backend
-    // Mock data for now
-    this.chatMessages = [
-      {
-        sender: 'other',
-        senderName: 'John Seller',
-        message: 'Hello! Thanks for your order. Please proceed with the payment.',
-        timestamp: new Date(Date.now() - 3600000),
-        avatar: ''
-      },
-      {
-        sender: 'me',
-        senderName: 'You',
-        message: 'Payment sent! Reference: TXN123456',
-        timestamp: new Date(Date.now() - 1800000)
-      }
-    ];
+    // Mock data for now - adjust based on viewType
+    if (this.viewType === 'my-orders') {
+      // User is the buyer
+      this.chatMessages = [
+        {
+          sender: 'other',
+          senderName: 'Seller',
+          message: 'Hello! Thanks for your order. Please proceed with the payment.',
+          timestamp: new Date(Date.now() - 3600000),
+          avatar: ''
+        },
+        {
+          sender: 'me',
+          senderName: 'You',
+          message: 'Payment sent! Reference: TXN123456',
+          timestamp: new Date(Date.now() - 1800000)
+        }
+      ];
+    } else {
+      // User is the seller (viewing order on their ad)
+      this.chatMessages = [
+        {
+          sender: 'me',
+          senderName: 'You',
+          message: 'Hello! Thanks for your order. Please proceed with the payment.',
+          timestamp: new Date(Date.now() - 3600000),
+          avatar: ''
+        },
+        {
+          sender: 'other',
+          senderName: 'Buyer',
+          message: 'Payment sent! Reference: TXN123456',
+          timestamp: new Date(Date.now() - 1800000)
+        }
+      ];
+    }
   }
 
   sendMessage(): void {
@@ -147,7 +162,7 @@ export class OrderDetails implements OnInit {
     const file = event.target.files[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        this.messageService.add({
+        this.pMessageService.add({
           severity: 'error',
           summary: 'File Too Large',
           detail: 'Please upload a file smaller than 10MB.'
@@ -159,9 +174,9 @@ export class OrderDetails implements OnInit {
   }
 
   uploadPaymentProof(): void {
-    if (!this.selectedFile || !this.order) return;
+    if (!this.selectedFile || !this.p2pOrder) return;
 
-    this.messageService.add({
+    this.pMessageService.add({
       severity: 'success',
       summary: 'Proof Uploaded',
       detail: 'Your payment proof has been submitted successfully.'
@@ -172,7 +187,7 @@ export class OrderDetails implements OnInit {
   }
 
   confirmPaymentReceived(orderId: string): void {
-    this.messageService.add({
+    this.pMessageService.add({
       severity: 'success',
       summary: 'Payment Confirmed',
       detail: 'Payment has been confirmed. The order is now complete.'
@@ -181,7 +196,7 @@ export class OrderDetails implements OnInit {
   }
 
   cancelOrder(orderId: string): void {
-    this.messageService.add({
+    this.pMessageService.add({
       severity: 'warn',
       summary: 'Order Cancelled',
       detail: 'The order has been cancelled successfully.'
@@ -190,9 +205,7 @@ export class OrderDetails implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/p2p/orders'], {
-      queryParams: { view: this.viewType }
-    });
+    this.router.navigate(['/p2p/orders']);
   }
 
   formatMessageTime(timestamp: Date): string {
@@ -206,5 +219,41 @@ export class OrderDetails implements OnInit {
     if (hours > 0) return `${hours}h ago`;
     if (minutes > 0) return `${minutes}m ago`;
     return 'Just now';
+  }
+
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+        };
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
+    }
+  }
+
+  ngOnInit(): void {
+    this.checkAuthStatus();
+
+    this.route.params.subscribe(params => {
+      this.paramsOrderId = params['id'];
+      if (this.paramsOrderId) {
+        this.loadOrderDetails();
+        this.loadChatMessages();
+      }
+    });
   }
 }
