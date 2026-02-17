@@ -100,6 +100,9 @@ export class MyAds {
   showDeleteP2pAdDialog: boolean = false;
   selectedP2pAdToDelete: P2pAd | null = null;
 
+  showConfirmCreateAdDialog: boolean = false;
+  showConfirmUpdateAdDialog: boolean = false;
+
   isLoading: boolean = false;
 
   loadP2pAds(): void {
@@ -419,7 +422,7 @@ export class MyAds {
     });
   }
 
-  saveP2pAd(): void {
+  openConfirmCreateAdDialog(): void {
     if (this.p2pAdPaymentTypes.length === 0) {
       this.pMessageService.add({
         severity: 'warn',
@@ -429,6 +432,31 @@ export class MyAds {
       return;
     }
 
+    this.showConfirmCreateAdDialog = true;
+  }
+
+  closeConfirmCreateAdDialog(): void {
+    this.showConfirmCreateAdDialog = false;
+  }
+
+  openConfirmUpdateAdDialog(): void {
+    if (this.p2pAdPaymentTypes.length === 0) {
+      this.pMessageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please add at least one payment method.'
+      });
+      return;
+    }
+
+    this.showConfirmUpdateAdDialog = true;
+  }
+
+  closeConfirmUpdateAdDialog(): void {
+    this.showConfirmUpdateAdDialog = false;
+  }
+
+  saveP2pAd(): void {
     this.isLoading = true;
 
     if (this.p2pAdDetailsDialogMode === 'create') {
@@ -458,6 +486,7 @@ export class MyAds {
           this.p2pAdPaymentTypesService.createManyP2pAdPaymentTypes(paymentTypes).subscribe({
             next: () => {
               this.loadP2pAds();
+              this.closeConfirmCreateAdDialog();
               this.closeP2pAdDetailsDialog();
 
               this.pMessageService.add({
@@ -514,6 +543,7 @@ export class MyAds {
               this.p2pAdPaymentTypesService.createManyP2pAdPaymentTypes(paymentTypes).subscribe({
                 next: () => {
                   this.loadP2pAds();
+                  this.closeConfirmUpdateAdDialog();
                   this.closeP2pAdDetailsDialog();
 
                   this.pMessageService.add({

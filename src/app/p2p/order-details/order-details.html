@@ -3,7 +3,7 @@
   <!-- Back Button & Header -->
   <div class="mb-4 md:mb-6">
     <button (click)="goBack()"
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-700/50 transition-all duration-200">
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-700/50 transition-all duration-200 cursor-pointer">
       <i class="pi pi-arrow-left"></i>
       <span class="text-sm font-medium">Back to Orders</span>
     </button>
@@ -42,7 +42,7 @@
           </div>
         </div>
         <button (click)="showMobileOrderDetailsDialog = true" type="button"
-          class="px-3 py-2 rounded-3xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-all duration-200 shrink-0">
+          class="px-3 py-2 rounded-3xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-all duration-200 shrink-0 cursor-pointer">
           <i class="pi pi-info-circle mr-1.5"></i>
           Details
         </button>
@@ -359,7 +359,7 @@
           <!-- PENDING: Buyer Upload Proof Button -->
           @if (showUploadProofButton) {
           <button type="button" (click)="openPaymentProofDialog()"
-            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
+            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-upload"></i>
             <span>Pay & Upload Proof</span>
           </button>
@@ -367,8 +367,8 @@
 
           <!-- PAID: Seller Notify USDT Sent Button -->
           @if (showNotifyUSDTSentButton) {
-          <button type="button" (click)="notifyUSDTSent(p2pOrder.id)"
-            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
+          <button type="button" (click)="openNotifyUSDTDialog()"
+            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-send"></i>
             <span>Notify USDT Sent</span>
           </button>
@@ -376,8 +376,8 @@
 
           <!-- PAID: Buyer Confirm USDT Received Button -->
           @if (showConfirmUSDTReceivedButton) {
-          <button type="button" (click)="confirmPaymentReceived(p2pOrder.id)"
-            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md">
+          <button type="button" (click)="openConfirmReceivedDialog()"
+            class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-check-circle"></i>
             <span>Confirm USDT Received</span>
           </button>
@@ -385,8 +385,8 @@
 
           <!-- Cancel Button (conditional based on status) -->
           @if (showCancelButton) {
-          <button type="button" (click)="cancelOrder(p2pOrder.id)"
-            class="px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200 flex items-center gap-2">
+          <button type="button" (click)="openCancelOrderDialog()"
+            class="px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200 flex items-center gap-2 cursor-pointer">
             <i class="pi pi-times-circle"></i>
             <span>Cancel Order</span>
           </button>
@@ -456,6 +456,7 @@
         </div>
 
         <!-- Chat Input -->
+        @if (p2pOrder.status !== 'completed' && p2pOrder.status !== 'cancelled') {
         <div class="p-4 border-t border-slate-700/50 bg-slate-900/50">
           <div class="flex gap-2">
             <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
@@ -463,11 +464,19 @@
             <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
               [class.opacity-50]="!chatMessage || !chatMessage.trim()"
               [class.cursor-not-allowed]="!chatMessage || !chatMessage.trim()"
-              class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200">
+              class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200 cursor-pointer">
               <i class="pi pi-send"></i>
             </button>
           </div>
         </div>
+        }
+        @if (p2pOrder.status === 'completed' || p2pOrder.status === 'cancelled') {
+        <div class="p-4 border-t border-slate-700/50 bg-slate-900/50">
+          <div class="text-center py-2">
+            <p class="text-xs text-slate-500">Chat is disabled for {{ p2pOrder.status }} orders</p>
+          </div>
+        </div>
+        }
       </div>
     </div>
   </div>
@@ -512,48 +521,54 @@
     </div>
 
     <div class="space-y-2">
-      <label class="text-sm font-semibold text-white">Payment Proof (Screenshot/Receipt)</label>
+      <label class="text-sm font-semibold text-white">Payment Proof (Screenshot/Receipt) - Up to 3 files</label>
       <div class="relative">
-        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,.pdf" class="hidden" />
-        <div (click)="fileInput.click()"
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,.pdf" class="hidden" multiple />
+
+        @if (selectedFiles.length < maxFiles) { <div (click)="fileInput.click()"
           class="border-2 border-dashed border-slate-600 rounded-3xl p-8 text-center cursor-pointer hover:border-purple-500/50 hover:bg-purple-500/5 transition-all duration-200">
-          @if (!selectedFile) {
           <div class="space-y-3">
             <i class="pi pi-cloud-upload text-4xl text-slate-500"></i>
             <div class="space-y-1">
-              <p class="text-white font-semibold">Click to upload</p>
-              <p class="text-xs text-slate-400">PNG, JPG, PDF up to 10MB</p>
+              <p class="text-white font-semibold">Click to upload ({{ selectedFiles.length }}/{{ maxFiles }})</p>
+              <p class="text-xs text-slate-400">PNG, JPG, PDF up to 10MB each</p>
             </div>
           </div>
-          } @else {
-          <div class="space-y-2">
-            <i class="pi pi-file text-3xl text-green-400"></i>
-            <p class="text-white font-semibold">{{ selectedFile.name }}</p>
-            <p class="text-xs text-slate-400">{{ (selectedFile.size / 1024).toFixed(2) }} KB</p>
-          </div>
-          }
-        </div>
       </div>
-    </div>
+      }
 
-    <div class="space-y-2">
-      <label class="text-sm font-semibold text-white">Transaction Reference (Optional)</label>
-      <input type="text" [(ngModel)]="paymentReference" pInputText placeholder="Enter transaction reference number"
-        class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 focus:bg-slate-800" />
+      @if (selectedFiles.length > 0) {
+      <div class="space-y-2 mt-3">
+        @for (file of selectedFiles; track $index) {
+        <div class="flex items-center gap-3 bg-slate-800/30 border border-slate-700/50 rounded-2xl p-3">
+          <i class="pi pi-file text-2xl text-green-400"></i>
+          <div class="flex-1 min-w-0">
+            <p class="text-white font-semibold text-sm truncate">{{ file.name }}</p>
+            <p class="text-xs text-slate-400">{{ (file.size / 1024).toFixed(2) }} KB</p>
+          </div>
+          <button type="button" (click)="removeFile($index)"
+            class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 flex items-center justify-center transition-all duration-200 cursor-pointer">
+            <i class="pi pi-times text-sm"></i>
+          </button>
+        </div>
+        }
+      </div>
+      }
     </div>
+  </div>
 
-    <div class="flex gap-3 pt-2">
-      <button type="button" (click)="uploadPaymentProof()" [disabled]="!selectedFile" [class.opacity-50]="!selectedFile"
-        [class.cursor-not-allowed]="!selectedFile"
-        class="flex-1 px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg">
-        <i class="pi pi-check"></i>
-        <span>Submit Proof</span>
-      </button>
-      <button type="button" (click)="closePaymentProofDialog()"
-        class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200">
-        Cancel
-      </button>
-    </div>
+  <div class="flex gap-3 pt-2">
+    <button type="button" (click)="uploadPaymentProof()" [disabled]="selectedFiles.length === 0"
+      [class.opacity-50]="selectedFiles.length === 0" [class.cursor-not-allowed]="selectedFiles.length === 0"
+      class="flex-1 px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+      <i class="pi pi-check"></i>
+      <span>Submit Proof ({{ selectedFiles.length }})</span>
+    </button>
+    <button type="button" (click)="closePaymentProofDialog()"
+      class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+      Cancel
+    </button>
+  </div>
   </div>
 </p-dialog>
 
@@ -644,7 +659,7 @@
       <!-- PENDING: Buyer Upload Proof Button -->
       @if (showUploadProofButton) {
       <button type="button" (click)="openPaymentProofDialog(); showMobileOrderDetailsDialog = false"
-        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
+        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-upload"></i>
         <span>Pay & Upload Proof</span>
       </button>
@@ -652,8 +667,8 @@
 
       <!-- PAID: Seller Notify USDT Sent Button -->
       @if (showNotifyUSDTSentButton) {
-      <button type="button" (click)="notifyUSDTSent(p2pOrder.id); showMobileOrderDetailsDialog = false"
-        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
+      <button type="button" (click)="openNotifyUSDTDialog(); showMobileOrderDetailsDialog = false"
+        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-send"></i>
         <span>Notify USDT Sent</span>
       </button>
@@ -661,8 +676,8 @@
 
       <!-- PAID: Buyer Confirm USDT Received Button -->
       @if (showConfirmUSDTReceivedButton) {
-      <button type="button" (click)="confirmPaymentReceived(p2pOrder.id); showMobileOrderDetailsDialog = false"
-        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
+      <button type="button" (click)="openConfirmReceivedDialog(); showMobileOrderDetailsDialog = false"
+        class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-check-circle"></i>
         <span>Confirm USDT Received</span>
       </button>
@@ -670,8 +685,8 @@
 
       <!-- Cancel Button (conditional based on status) -->
       @if (showCancelButton) {
-      <button type="button" (click)="cancelOrder(p2pOrder.id); showMobileOrderDetailsDialog = false"
-        class="w-full px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200">
+      <button type="button" (click)="openCancelOrderDialog(); showMobileOrderDetailsDialog = false"
+        class="w-full px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200 cursor-pointer">
         <i class="pi pi-times-circle mr-1.5"></i>
         Cancel Order
       </button>
@@ -679,6 +694,150 @@
     </div>
   </div>
   }
+</p-dialog>
+
+<!-- Confirm USDT Received Dialog -->
+<p-dialog [(visible)]="showConfirmReceivedDialog" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center">
+        <i class="pi pi-check-circle text-white text-lg"></i>
+      </div>
+      <span class="text-lg font-bold text-white">Confirm USDT Received</span>
+    </div>
+  </ng-template>
+  <div class="space-y-4 py-4">
+    <div class="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-exclamation-triangle text-yellow-400 text-xl mt-0.5"></i>
+        <div class="space-y-2">
+          <p class="text-white font-semibold text-sm">Please verify before confirming:</p>
+          <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+            <li>You have received the USDT in your wallet</li>
+            <li>The amount matches the order quantity</li>
+            <li>This action cannot be undone</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    @if (p2pOrder) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Expected Amount</span>
+          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</span>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-3 pt-2">
+      <button type="button" (click)="confirmPaymentReceived()"
+        class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+        <i class="pi pi-check"></i>
+        <span>Yes, I Received USDT</span>
+      </button>
+      <button type="button" (click)="closeConfirmReceivedDialog()"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Notify USDT Sent Dialog -->
+<p-dialog [(visible)]="showNotifyUSDTDialog" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+        <i class="pi pi-send text-white text-lg"></i>
+      </div>
+      <span class="text-lg font-bold text-white">Notify USDT Sent</span>
+    </div>
+  </ng-template>
+  <div class="space-y-4 py-4">
+    <div class="bg-blue-500/10 border-2 border-blue-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-info-circle text-blue-400 text-xl mt-0.5"></i>
+        <div class="space-y-2">
+          <p class="text-white font-semibold text-sm">Confirm USDT notification:</p>
+          <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+            <li>This will notify the buyer that USDT has been sent</li>
+            <li>Make sure you have actually sent the USDT</li>
+            <li>The buyer will be able to confirm receipt</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    @if (p2pOrder) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-400">USDT Amount</span>
+          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Buyer</span>
+          <span class="text-white font-semibold">{{ p2pOrder.ordered_by_user?.full_name || 'Unknown' }}</span>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-3 pt-2">
+      <button type="button" (click)="notifyUSDTSent()"
+        class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+        <i class="pi pi-check"></i>
+        <span>Yes, Notify Buyer</span>
+      </button>
+      <button type="button" (click)="closeNotifyUSDTDialog()"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Cancel Order Dialog -->
+<p-dialog [(visible)]="showCancelOrderDialog" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-red-500 to-red-600 flex items-center justify-center">
+        <i class="pi pi-times-circle text-white text-lg"></i>
+      </div>
+      <span class="text-lg font-bold text-white">Cancel Order</span>
+    </div>
+  </ng-template>
+  <div class="space-y-4 py-4">
+    <div class="bg-red-500/10 border-2 border-red-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-exclamation-triangle text-red-400 text-xl mt-0.5"></i>
+        <div class="space-y-2">
+          <p class="text-white font-semibold text-sm">Are you sure you want to cancel this order?</p>
+          <p class="text-xs text-slate-300">This action cannot be undone. The order will be permanently cancelled.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-3 pt-2">
+      <button type="button" (click)="cancelOrder()"
+        class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+        <i class="pi pi-times"></i>
+        <span>Yes, Cancel Order</span>
+      </button>
+      <button type="button" (click)="closeCancelOrderDialog()"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Keep Order
+      </button>
+    </div>
+  </ng-template>
 </p-dialog>
 
 <!-- Toast -->

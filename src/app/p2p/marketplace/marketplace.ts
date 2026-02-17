@@ -66,6 +66,7 @@ export class Marketplace {
   searchTerm: string = '';
 
   showCreateOrderDialog: boolean = false;
+  showConfirmOrderDialog: boolean = false;
   p2pOrderForm: P2pOrder = {
     id: "",
     p2p_ad_id: "",
@@ -241,7 +242,7 @@ export class Marketplace {
     }
   }
 
-  confirmCreateOrder(): void {
+  openConfirmOrderDialog(): void {
     if (!this.selectedP2pAd) {
       this.pMessageService.add({
         severity: 'error',
@@ -286,6 +287,16 @@ export class Marketplace {
       });
       return;
     }
+
+    this.showConfirmOrderDialog = true;
+  }
+
+  closeConfirmOrderDialog(): void {
+    this.showConfirmOrderDialog = false;
+  }
+
+  confirmCreateOrder(): void {
+    if (!this.selectedP2pAd) return;
 
     this.isCreatingOrder = true;
 

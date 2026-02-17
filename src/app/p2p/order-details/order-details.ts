@@ -47,8 +47,12 @@ export class OrderDetails implements OnInit {
   showMobileOrderDetailsDialog: boolean = false;
 
   showPaymentProofDialog: boolean = false;
-  selectedFile: File | null = null;
-  paymentReference: string = '';
+  selectedFiles: File[] = [];
+  maxFiles: number = 3;
+
+  showConfirmReceivedDialog: boolean = false;
+  showCancelOrderDialog: boolean = false;
+  showNotifyUSDTDialog: boolean = false;
 
   isLoading: boolean = false;
 
@@ -194,63 +198,109 @@ export class OrderDetails implements OnInit {
 
   closePaymentProofDialog(): void {
     this.showPaymentProofDialog = false;
-    this.selectedFile = null;
-    this.paymentReference = '';
+    this.selectedFiles = [];
   }
 
   onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
+    const files = Array.from(event.target.files) as File[];
+
+    if (this.selectedFiles.length + files.length > this.maxFiles) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Too Many Files',
+        detail: `You can only upload up to ${this.maxFiles} files.`
+      });
+      return;
+    }
+
+    for (const file of files) {
       if (file.size > 10 * 1024 * 1024) {
         this.pMessageService.add({
           severity: 'error',
           summary: 'File Too Large',
-          detail: 'Please upload a file smaller than 10MB.'
+          detail: `${file.name} is larger than 10MB.`
         });
-        return;
+        continue;
       }
-      this.selectedFile = file;
+      this.selectedFiles.push(file);
     }
   }
 
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
   uploadPaymentProof(): void {
-    if (!this.selectedFile || !this.p2pOrder) return;
+    if (this.selectedFiles.length === 0 || !this.p2pOrder) return;
 
     this.pMessageService.add({
       severity: 'success',
       summary: 'Proof Uploaded',
-      detail: 'Your payment proof has been submitted successfully.'
+      detail: `${this.selectedFiles.length} file(s) submitted successfully.`
     });
 
     this.closePaymentProofDialog();
     this.loadOrderDetails();
   }
 
-  confirmPaymentReceived(orderId: string): void {
+  openConfirmReceivedDialog(): void {
+    this.showConfirmReceivedDialog = true;
+  }
+
+  closeConfirmReceivedDialog(): void {
+    this.showConfirmReceivedDialog = false;
+  }
+
+  confirmPaymentReceived(): void {
+    if (!this.p2pOrder) return;
+
     this.pMessageService.add({
       severity: 'success',
       summary: 'Payment Confirmed',
       detail: 'Payment has been confirmed. The order is now complete.'
     });
+    this.closeConfirmReceivedDialog();
     this.loadOrderDetails();
   }
 
-  notifyUSDTSent(orderId: string): void {
+  openNotifyUSDTDialog(): void {
+    this.showNotifyUSDTDialog = true;
+  }
+
+  closeNotifyUSDTDialog(): void {
+    this.showNotifyUSDTDialog = false;
+  }
+
+  notifyUSDTSent(): void {
+    if (!this.p2pOrder) return;
+
     this.pMessageService.add({
       severity: 'success',
       summary: 'Notification Sent',
       detail: 'Buyer has been notified that USDT was sent.'
     });
+    this.closeNotifyUSDTDialog();
     // TODO: Implement backend call to update order status and notify buyer
     this.loadOrderDetails();
   }
 
-  cancelOrder(orderId: string): void {
+  openCancelOrderDialog(): void {
+    this.showCancelOrderDialog = true;
+  }
+
+  closeCancelOrderDialog(): void {
+    this.showCancelOrderDialog = false;
+  }
+
+  cancelOrder(): void {
+    if (!this.p2pOrder) return;
+
     this.pMessageService.add({
       severity: 'warn',
       summary: 'Order Cancelled',
       detail: 'The order has been cancelled successfully.'
     });
+    this.closeCancelOrderDialog();
     this.loadOrderDetails();
   }
 

@@ -122,11 +122,9 @@
                   <div class="min-w-0">
                     <div class="font-semibold text-white truncate mb-2">{{ order.order_number }}</div>
                     <span
-                      [class]="order.order_type === 'buy' ? 'bg-green-600 text-white border-green-500' : 'bg-pink-600 text-white border-pink-500'"
-                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border uppercase"
-                      [attr.aria-label]="order.order_type === 'buy' ? 'Buy order' : 'Sell order'">
-                      <i [class]="order.order_type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
-                        class="mr-1.5"></i>
+                      [class]="order.order_type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border uppercase">
+                      <i [class]="order.order_type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
                       {{ order.order_type === 'buy' ? 'Buy' : 'Sell' }}
                     </span>
                   </div>
@@ -210,10 +208,9 @@
         <!-- Header: Type Badge + Status -->
         <div class="flex items-center justify-between mb-3">
           <span
-            [class]="order.order_type === 'buy' ? 'bg-green-600 text-white border-green-500' : 'bg-pink-600 text-white border-pink-500'"
-            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border uppercase"
-            [attr.aria-label]="order.order_type === 'buy' ? 'Buy order' : 'Sell order'">
-            <i [class]="order.order_type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1.5"></i>
+            [class]="order.order_type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border uppercase">
+            <i [class]="order.order_type === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
             {{ order.order_type === 'buy' ? 'Buy' : 'Sell' }}
           </span>
           <span [class]="getStatusBadgeClass(order.status)"
