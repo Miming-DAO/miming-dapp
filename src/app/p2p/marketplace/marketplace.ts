@@ -265,7 +265,7 @@ export class Marketplace {
       this.pMessageService.add({
         severity: 'error',
         summary: 'Invalid Quantity or Amount',
-        detail: `Minimum amount is ${this.selectedP2pAd.min_limit} USD`
+        detail: `Minimum amount is ${this.selectedP2pAd.min_limit} PHP`
       });
       return;
     }
@@ -274,7 +274,7 @@ export class Marketplace {
       this.pMessageService.add({
         severity: 'error',
         summary: 'Invalid Quantity or Amount',
-        detail: `Maximum amount is ${this.selectedP2pAd.max_limit} USD`
+        detail: `Maximum amount is ${this.selectedP2pAd.max_limit} PHP`
       });
       return;
     }

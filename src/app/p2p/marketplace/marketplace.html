@@ -340,19 +340,19 @@
         <button type="button" (click)="orderInputMode = 'amount'"
           [class]="orderInputMode === 'amount' ? 'text-purple-400 border-purple-400' : 'text-slate-400 border-transparent'"
           class="flex-1 pb-2 border-b-2 font-semibold text-sm transition-colors cursor-pointer">
-          {{ activeTab === 'buy' ? 'I will pay (PHP)' : 'I will pay (USDT)' }}
+          Amount
         </button>
         <button type="button" (click)="orderInputMode = 'quantity'"
           [class]="orderInputMode === 'quantity' ? 'text-purple-400 border-purple-400' : 'text-slate-400 border-transparent'"
           class="flex-1 pb-2 border-b-2 font-semibold text-sm transition-colors cursor-pointer">
-          {{ activeTab === 'buy' ? 'I will receive (USDT)' : 'I will receive (PHP)' }}
+          Quantity
         </button>
       </div>
 
       @if (orderInputMode === 'amount') {
       <div>
         <label class="text-sm text-slate-400 mb-2 block">
-          {{ activeTab === 'buy' ? 'Amount (PHP)' : 'Amount (USDT)' }} <span class="text-red-400">*</span>
+          Amount <span class="text-red-400">*</span>
         </label>
         <p-inputnumber class="w-full"
           inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
@@ -360,15 +360,15 @@
           placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);"
           (ngModelChange)="calculateQuantity()" />
         <div class="text-xs text-slate-500 mt-1">
-          {{ activeTab === 'buy' ? 'You will receive approximately' : 'You will receive' }} {{ p2pOrderForm.quantity |
-          number:'1.6-6' }} {{ activeTab === 'buy' ? (selectedP2pAd?.token_symbol || 'USDT') : 'PHP' }}
+          {{ activeTab === 'buy' ? 'You will receive approximately' : 'You will sell approximately' }}
+          {{ p2pOrderForm.quantity | number:'1.6-6' }}
+          {{ selectedP2pAd?.token_symbol || 'USDT' }}
         </div>
       </div>
       } @else {
       <div>
         <label class="text-sm text-slate-400 mb-2 block">
-          {{ activeTab === 'buy' ? 'Quantity (' + (selectedP2pAd?.token_symbol || 'USDT') + ')' : 'Amount (PHP)' }}
-          <span class="text-red-400">*</span>
+          Quantity <span class="text-red-400">*</span>
         </label>
         <p-inputnumber class="w-full"
           inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
@@ -376,7 +376,8 @@
           placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);"
           (ngModelChange)="calculateAmount()" />
         <div class="text-xs text-slate-500 mt-1">
-          {{ activeTab === 'buy' ? 'Total amount:' : 'You will receive:' }} ₱{{ p2pOrderForm.amount | number:'1.2-2' }}
+          {{ activeTab === 'buy' ? 'Total cost will be approximately' : 'You will receive approximately' }}
+          ₱{{ p2pOrderForm.amount | number:'1.2-2' }} PHP
         </div>
       </div>
       }
@@ -452,7 +453,9 @@
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">Quantity</span>
-          <span class="text-white font-semibold">{{ p2pOrderForm.quantity | number:'1.2-6' }} USDT</span>
+          <span class="text-white font-semibold">
+            {{ p2pOrderForm.quantity | number:'1.2-6' }} {{ selectedP2pAd.token_symbol }}
+          </span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">Payment Method</span>

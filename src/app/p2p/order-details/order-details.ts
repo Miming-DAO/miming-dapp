@@ -52,7 +52,7 @@ export class OrderDetails implements OnInit {
 
   showConfirmReceivedDialog: boolean = false;
   showCancelOrderDialog: boolean = false;
-  showNotifyUSDTDialog: boolean = false;
+  showNotifyTokenDialog: boolean = false;
 
   isLoading: boolean = false;
 
@@ -86,11 +86,11 @@ export class OrderDetails implements OnInit {
   }
 
   // PAID status buttons
-  get showNotifyUSDTSentButton(): boolean {
+  get showNotifyTokenSentButton(): boolean {
     return this.isMerchant && this.p2pOrder?.status === 'paid';
   }
 
-  get showConfirmUSDTReceivedButton(): boolean {
+  get showConfirmTokenReceivedButton(): boolean {
     return this.isUser && this.p2pOrder?.status === 'paid';
   }
 
@@ -263,23 +263,23 @@ export class OrderDetails implements OnInit {
     this.loadOrderDetails();
   }
 
-  openNotifyUSDTDialog(): void {
-    this.showNotifyUSDTDialog = true;
+  openNotifyTokenDialog(): void {
+    this.showNotifyTokenDialog = true;
   }
 
-  closeNotifyUSDTDialog(): void {
-    this.showNotifyUSDTDialog = false;
+  closeNotifyTokenDialog(): void {
+    this.showNotifyTokenDialog = false;
   }
 
-  notifyUSDTSent(): void {
+  notifyTokenSent(): void {
     if (!this.p2pOrder) return;
 
     this.pMessageService.add({
       severity: 'success',
       summary: 'Notification Sent',
-      detail: 'User has been notified that USDT was sent.'
+      detail: 'User has been notified that Token was sent.'
     });
-    this.closeNotifyUSDTDialog();
+    this.closeNotifyTokenDialog();
     // TODO: Implement backend call to update order status and notify user
     this.loadOrderDetails();
   }

@@ -177,7 +177,7 @@
             <p class="text-sm text-slate-300 leading-relaxed">
               You are buying
               <span class="font-bold text-yellow-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
               </span>.
               Please send
               <span class="font-bold text-yellow-400">
@@ -187,7 +187,7 @@
             </p>
             } @else {
             <p class="text-sm text-slate-300 leading-relaxed">
-              You are selling USDT at a price of
+              You are selling {{ p2pOrder.p2p_ad?.token_symbol }} at a price of
               <span class="font-bold text-yellow-400">
                 ₱{{ p2pOrder.ordered_price | number:'1.2-2' }} PHP
               </span>
@@ -197,7 +197,7 @@
               </span>.
               Please send
               <span class="font-bold text-yellow-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
               </span>
               to the merchant and upload your proof of payment.
             </p>
@@ -217,7 +217,7 @@
             <p class="text-sm text-slate-300 leading-relaxed">
               Waiting for the user to send
               <span class="font-bold text-yellow-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} Token
               </span>
               and upload their proof of payment.
             </p>
@@ -247,14 +247,14 @@
               </span>
               payment and send you
               <span class="font-bold text-blue-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
               </span>.
             </p>
             } @else {
             <p class="text-sm text-slate-300 leading-relaxed">
               Your payment proof has been uploaded. Waiting for the merchant to verify your
               <span class="font-bold text-blue-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
               </span>
               payment and send you
               <span class="font-bold text-blue-400">
@@ -273,7 +273,7 @@
               </span>
               and send
               <span class="font-bold text-blue-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
               </span>
               to complete the order.
             </p>
@@ -281,7 +281,7 @@
             <p class="text-sm text-slate-300 leading-relaxed">
               The user has uploaded their payment proof. Please verify you received
               <span class="font-bold text-blue-400">
-                {{ p2pOrder.quantity | number:'1.2-6' }} USDT
+                {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
               </span>
               and send
               <span class="font-bold text-blue-400">
@@ -339,13 +339,15 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
-            <p class="text-xs text-slate-400">Price per USDT</p>
+            <p class="text-xs text-slate-400">Price per Token</p>
             <p class="text-lg font-bold text-white">${{ p2pOrder.ordered_price | number:'1.2-2' }}</p>
           </div>
 
           <div class="space-y-1">
             <p class="text-xs text-slate-400">Quantity</p>
-            <p class="text-lg font-bold text-white">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</p>
+            <p class="text-lg font-bold text-white">
+              {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
+            </p>
           </div>
 
           <div class="space-y-1">
@@ -401,21 +403,21 @@
           </button>
           }
 
-          <!-- PAID: Merchant Notify USDT Sent Button -->
-          @if (showNotifyUSDTSentButton) {
-          <button type="button" (click)="openNotifyUSDTDialog()"
+          <!-- PAID: Merchant Notify Token Sent Button -->
+          @if (showNotifyTokenSentButton) {
+          <button type="button" (click)="openNotifyTokenDialog()"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-send"></i>
-            <span>Notify USDT Sent</span>
+            <span>Notify {{ p2pOrder.p2p_ad?.token_symbol }} Sent</span>
           </button>
           }
 
-          <!-- PAID: User Confirm USDT Received Button -->
-          @if (showConfirmUSDTReceivedButton) {
+          <!-- PAID: User Confirm Token Received Button -->
+          @if (showConfirmTokenReceivedButton) {
           <button type="button" (click)="openConfirmReceivedDialog()"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-check-circle"></i>
-            <span>Confirm USDT Received</span>
+            <span>Confirm {{ p2pOrder.p2p_ad?.token_symbol }} Received</span>
           </button>
           }
 
@@ -542,12 +544,12 @@
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-400">You Will Receive</span>
-          <span class="text-white font-semibold">{{ p2pOrder?.quantity | number:'1.2-6' }} USDT</span>
+          <span class="text-white font-semibold">{{ p2pOrder?.quantity | number:'1.2-6' }} Token</span>
         </div>
         } @else {
         <div class="flex justify-between items-center">
           <span class="text-slate-400">You Will Send</span>
-          <span class="text-white font-bold text-lg">{{ p2pOrder?.quantity | number:'1.2-6' }} USDT</span>
+          <span class="text-white font-bold text-lg">{{ p2pOrder?.quantity | number:'1.2-6' }} Token</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-slate-400">You Will Receive</span>
@@ -644,7 +646,7 @@
           } @else {
           <p class="text-sm text-slate-300">
             Wait for user to send <span class="font-bold text-yellow-400">{{ p2pOrder.quantity | number:'1.2-6' }}
-              USDT</span>.
+              Token</span>.
           </p>
           }
           } @else {
@@ -656,7 +658,7 @@
           } @else {
           <p class="text-sm text-slate-300">
             Waiting for user to send <span class="font-bold text-yellow-400">{{ p2pOrder.quantity | number:'1.2-6' }}
-              USDT</span>.
+              Token</span>.
           </p>
           }
           }
@@ -675,7 +677,9 @@
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">Quantity</span>
-          <span class="text-white font-semibold">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</span>
+          <span class="text-white font-semibold">
+            {{ p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}
+          </span>
         </div>
         <div class="flex justify-between pt-2 border-t border-slate-700/50">
           <span class="text-slate-400 font-semibold">Total Amount</span>
@@ -702,21 +706,21 @@
       </button>
       }
 
-      <!-- PAID: Merchant Notify USDT Sent Button -->
-      @if (showNotifyUSDTSentButton) {
-      <button type="button" (click)="openNotifyUSDTDialog(); showMobileOrderDetailsDialog = false"
+      <!-- PAID: Merchant Notify Token Sent Button -->
+      @if (showNotifyTokenSentButton) {
+      <button type="button" (click)="openNotifyTokenDialog(); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-send"></i>
-        <span>Notify USDT Sent</span>
+        <span>Notify {{ p2pOrder.p2p_ad?.token_symbol }} Sent</span>
       </button>
       }
 
-      <!-- PAID: User Confirm USDT Received Button -->
-      @if (showConfirmUSDTReceivedButton) {
+      <!-- PAID: User Confirm Token Received Button -->
+      @if (showConfirmTokenReceivedButton) {
       <button type="button" (click)="openConfirmReceivedDialog(); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-check-circle"></i>
-        <span>Confirm USDT Received</span>
+        <span>Confirm {{ p2pOrder.p2p_ad?.token_symbol }} Received</span>
       </button>
       }
 
@@ -733,7 +737,7 @@
   }
 </p-dialog>
 
-<!-- Confirm USDT Received Dialog -->
+<!-- Confirm Token Received Dialog -->
 <p-dialog [(visible)]="showConfirmReceivedDialog" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
   <ng-template #header>
@@ -741,7 +745,7 @@
       <div class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center">
         <i class="pi pi-check-circle text-white text-lg"></i>
       </div>
-      <span class="text-lg font-bold text-white">Confirm USDT Received</span>
+      <span class="text-lg font-bold text-white">Confirm Token Received</span>
     </div>
   </ng-template>
   <div class="space-y-4 py-4">
@@ -751,7 +755,7 @@
         <div class="space-y-2">
           <p class="text-white font-semibold text-sm">Please verify before confirming:</p>
           <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-            <li>You have received the USDT in your wallet</li>
+            <li>You have received the Token in your wallet</li>
             <li>The amount matches the order quantity</li>
             <li>This action cannot be undone</li>
           </ul>
@@ -763,7 +767,8 @@
       <div class="space-y-2 text-sm">
         <div class="flex justify-between">
           <span class="text-slate-400">Expected Amount</span>
-          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</span>
+          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} {{
+            p2pOrder.p2p_ad?.token_symbol }}</span>
         </div>
       </div>
     </div>
@@ -774,7 +779,7 @@
       <button type="button" (click)="confirmPaymentReceived()"
         class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
         <i class="pi pi-check"></i>
-        <span>Yes, I Received USDT</span>
+        <span>Yes, I Received {{ p2pOrder?.p2p_ad?.token_symbol }}</span>
       </button>
       <button type="button" (click)="closeConfirmReceivedDialog()"
         class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
@@ -784,15 +789,15 @@
   </ng-template>
 </p-dialog>
 
-<!-- Notify USDT Sent Dialog -->
-<p-dialog [(visible)]="showNotifyUSDTDialog" [modal]="true" [closable]="true" [draggable]="false"
+<!-- Notify Token Sent Dialog -->
+<p-dialog [(visible)]="showNotifyTokenDialog" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
         <i class="pi pi-send text-white text-lg"></i>
       </div>
-      <span class="text-lg font-bold text-white">Notify USDT Sent</span>
+      <span class="text-lg font-bold text-white">Notify Token Sent</span>
     </div>
   </ng-template>
   <div class="space-y-4 py-4">
@@ -800,10 +805,10 @@
       <div class="flex items-start gap-3">
         <i class="pi pi-info-circle text-blue-400 text-xl mt-0.5"></i>
         <div class="space-y-2">
-          <p class="text-white font-semibold text-sm">Confirm USDT notification:</p>
+          <p class="text-white font-semibold text-sm">Confirm Token notification:</p>
           <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-            <li>This will notify the user that USDT has been sent</li>
-            <li>Make sure you have actually sent the USDT</li>
+            <li>This will notify the user that Token has been sent</li>
+            <li>Make sure you have actually sent the Token</li>
             <li>The user will be able to confirm receipt</li>
           </ul>
         </div>
@@ -814,8 +819,8 @@
     <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
       <div class="space-y-2 text-sm">
         <div class="flex justify-between">
-          <span class="text-slate-400">USDT Amount</span>
-          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} USDT</span>
+          <span class="text-slate-400">Token Amount</span>
+          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} Token</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">User</span>
@@ -827,12 +832,12 @@
   </div>
   <ng-template #footer>
     <div class="flex gap-3 pt-2">
-      <button type="button" (click)="notifyUSDTSent()"
+      <button type="button" (click)="notifyTokenSent()"
         class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
         <i class="pi pi-check"></i>
         <span>Yes, Notify User</span>
       </button>
-      <button type="button" (click)="closeNotifyUSDTDialog()"
+      <button type="button" (click)="closeNotifyTokenDialog()"
         class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
         Cancel
       </button>
