@@ -35,7 +35,7 @@ export class Sidebar {
     {
       label: 'Chart',
       icon: 'pi pi-chart-line',
-      routerLink: ['/dex-screener'],
+      routerLink: ['/chart'],
     },
   ];
 

@@ -11,10 +11,6 @@ export const routes: Routes = [{
       loadComponent: () => import('./teleport/teleport').then(m => m.Teleport)
     },
     {
-      path: "xterium-accounts",
-      loadComponent: () => import('./xterium-accounts/xterium-accounts').then(m => m.XteriumAccounts)
-    },
-    {
       path: "sign-transaction",
       loadComponent: () => import('./sign-transaction/sign-transaction').then(m => m.SignTransaction)
     },

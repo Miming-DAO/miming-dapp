@@ -5,15 +5,15 @@ import { SubHeader } from './sub-header/sub-header';
 import { Footer as LayoutFooter } from './../layout/footer/footer';
 
 @Component({
-  selector: 'app-auth',
+  selector: 'app-chart',
   imports: [
     RouterModule,
     SubHeader,
     LayoutFooter
   ],
-  templateUrl: './auth.html',
-  styleUrl: './auth.css',
+  templateUrl: './chart.html',
+  styleUrl: './chart.css',
 })
-export class Auth {
+export class Chart {
 
 }

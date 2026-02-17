@@ -159,7 +159,7 @@ export class SubHeader {
   async connectXteriumWallet() {
     try {
       if (this.isMobileDevice) {
-        const callbackUrl = window.location.origin + '/cross-chain/xterium-accounts';
+        const callbackUrl = window.location.origin + '/auth/xterium-accounts';
         window.location.href = 'https://deeplink.xterium.app/web3/connect-accounts?origin=' + encodeURIComponent(window.location.origin) + '&callbackUrl=' + encodeURIComponent(callbackUrl);
       } else {
         const results = await this.polkadotJsService.connectToWallet('xterium');

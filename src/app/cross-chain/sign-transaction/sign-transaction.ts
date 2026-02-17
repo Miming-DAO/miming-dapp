@@ -103,6 +103,8 @@ export class SignTransaction {
             details: "Your teleport transaction has been submitted.",
             status: "Completed"
           };
+
+          localStorage.removeItem('ledger_id')
         }
       },
       error: executionError => {

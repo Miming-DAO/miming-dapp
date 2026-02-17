@@ -41,7 +41,9 @@
   background: linear-gradient(135deg, rgba(30, 27, 75, 0.6) 0%, rgba(88, 28, 135, 0.6) 100%);
   border-radius: 1rem;
   border: 1px solid rgba(168, 85, 247, 0.3);
-  box-shadow: 0 20px 60px rgba(168, 85, 247, 0.15), 0 0 0 1px rgba(168, 85, 247, 0.1),
+  box-shadow:
+    0 20px 60px rgba(168, 85, 247, 0.15),
+    0 0 0 1px rgba(168, 85, 247, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   overflow: hidden;
@@ -71,3 +73,4 @@
     padding: 0.75rem;
   }
 }
+

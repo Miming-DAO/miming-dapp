@@ -1,0 +1,128 @@
+<!-- ******************* -->
+<!-- Full Page Container -->
+<!-- ******************* -->
+<div class="min-h-screen bg-linear-to-br from-slate-900 via-purple-900/20 to-slate-900 p-4 pt-8">
+  <div class="w-full max-w-lg mx-auto">
+
+    <!-- ********** -->
+    <!-- Page Title -->
+    <!-- ********** -->
+    <div class="text-center mb-6">
+      <div class="flex items-center justify-center gap-3 mb-2">
+        <div
+          class="w-16 h-16 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+          @if (isVerified) {
+          <i class="pi pi-check text-white text-3xl"></i>
+          } @else {
+          <i class="pi pi-shield text-white text-2xl"></i>
+          }
+        </div>
+      </div>
+      <h1
+        class="font-bold text-2xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+        @if (isVerified) {
+        Verified Successfully
+        } @else {
+        Verify Signature
+        }
+      </h1>
+      <p class="text-slate-400 text-sm mt-2">
+        @if (isVerified) {
+        Your signature has been verified
+        } @else {
+        Confirm your wallet signature
+        }
+      </p>
+    </div>
+
+    <!-- ************** -->
+    <!-- Content Panel -->
+    <!-- ************** -->
+    <div class="backdrop-blur-lg bg-slate-800/80 rounded-3xl border border-purple-500/20 p-6">
+
+      <!-- Account Info -->
+      @if (walletAddress) {
+      <div class="mb-6 p-4 rounded-2xl bg-slate-900/50 border border-purple-500/10">
+        <div class="flex items-center gap-3">
+          <app-polkadot-identicon-util [address]="walletAddress" [size]="48"></app-polkadot-identicon-util>
+          <div class="flex flex-col flex-1">
+            <span class="font-bold text-lg text-white">{{ walletName }}</span>
+            <span class="text-sm text-slate-400">
+              {{ walletAddress.slice(0, 8) }}...{{ walletAddress.slice(-8) }}
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Signature Info -->
+      @if (signature) {
+      <div class="mb-6">
+        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wide mb-2">
+          Signature
+        </label>
+        <div class="p-4 rounded-2xl bg-slate-900/50 border border-purple-500/10">
+          <p class="text-slate-300 text-sm font-mono break-all leading-relaxed">
+            {{ signature }}
+          </p>
+        </div>
+      </div>
+      }
+
+      <!-- Nonce Info -->
+      @if (nonce) {
+      <div class="mb-6">
+        <label class="block text-xs font-semibold text-purple-400 uppercase tracking-wide mb-2">
+          Message
+        </label>
+        <div class="p-4 rounded-2xl bg-slate-900/50 border border-purple-500/10">
+          <p class="text-slate-300 text-sm font-mono break-all leading-relaxed">
+            {{ nonce }}
+          </p>
+        </div>
+      </div>
+      }
+
+      <!-- Status Message -->
+      @if (isVerified) {
+      <div class="mb-6 p-4 rounded-2xl bg-green-500/10 border border-green-500/20">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+            <i class="pi pi-check text-green-400 text-sm"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-green-300 text-sm leading-relaxed">
+              Your signature has been verified successfully. Redirecting to dashboard...
+            </p>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Action Buttons -->
+      @if (!isVerified) {
+      <div class="flex gap-2">
+        <button [disabled]="isProcessing || !signature" (click)="verifySignature()"
+          class="flex-1 px-4 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 border-0 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (isProcessing) {
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Verifying...</span>
+          } @else {
+          <i class="pi pi-check"></i>
+          <span>Verify</span>
+          }
+        </button>
+        <button [disabled]="isProcessing" (click)="cancel()"
+          class="flex-1 px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 disabled:bg-slate-700/30 text-slate-200 hover:text-white disabled:text-slate-500 font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer disabled:cursor-not-allowed">
+          Cancel
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ***** -->
+<!-- Toast -->
+<!-- ***** -->
+<p-toast />

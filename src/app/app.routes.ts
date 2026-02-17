@@ -15,7 +15,7 @@ export const routes: Routes = [
     loadChildren: () => import('./p2p/p2p.routes').then((m) => m.routes),
   },
   {
-    path: 'dex-screener',
-    loadChildren: () => import('./dex-screener/dex-screener.routes').then((m) => m.routes),
+    path: 'chart',
+    loadChildren: () => import('./chart/chart.routes').then((m) => m.routes),
   },
 ];
