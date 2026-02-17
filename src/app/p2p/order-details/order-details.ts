@@ -65,38 +65,38 @@ export class OrderDetails implements OnInit {
     avatar?: string;
   }> = [];
 
-  get isBuyer(): boolean {
+  get isUser(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
     return this.currentUser.id === this.p2pOrder.ordered_by_user_id;
   }
 
-  get isSeller(): boolean {
+  get isMerchant(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
     return this.currentUser.id !== this.p2pOrder.ordered_by_user_id;
   }
 
   // PENDING status buttons
   get showUploadProofButton(): boolean {
-    return this.isBuyer && this.p2pOrder?.status === 'pending';
+    return this.isUser && this.p2pOrder?.status === 'pending';
   }
 
   get showCancelButtonForPending(): boolean {
     if (!this.p2pOrder || this.p2pOrder.status !== 'pending') return false;
-    return true; // Both buyer and seller can cancel during pending
+    return true; // Both user and merchant can cancel during pending
   }
 
   // PAID status buttons
   get showNotifyUSDTSentButton(): boolean {
-    return this.isSeller && this.p2pOrder?.status === 'paid';
+    return this.isMerchant && this.p2pOrder?.status === 'paid';
   }
 
   get showConfirmUSDTReceivedButton(): boolean {
-    return this.isBuyer && this.p2pOrder?.status === 'paid';
+    return this.isUser && this.p2pOrder?.status === 'paid';
   }
 
   get showCancelButtonForPaid(): boolean {
     if (!this.p2pOrder || this.p2pOrder.status !== 'paid') return false;
-    return this.isBuyer; // Only buyer can cancel when paid
+    return this.isUser; // Only user can cancel when paid
   }
 
   // COMPLETED/CANCELLED - no cancel button
@@ -105,7 +105,7 @@ export class OrderDetails implements OnInit {
     if (this.p2pOrder.status === 'completed' || this.p2pOrder.status === 'cancelled') return false;
 
     if (this.p2pOrder.status === 'pending') return true;
-    if (this.p2pOrder.status === 'paid') return this.isBuyer;
+    if (this.p2pOrder.status === 'paid') return this.isUser;
 
     return false;
   }
@@ -133,11 +133,11 @@ export class OrderDetails implements OnInit {
     // TODO: Load actual chat messages from backend
     // Mock data for now - adjust based on viewType
     if (this.paramsViewType === 'my-orders') {
-      // User is the buyer
+      // User is the user
       this.chatMessages = [
         {
           sender: 'other',
-          senderName: 'Seller',
+          senderName: 'Merchant',
           message: 'Hello! Thanks for your order. Please proceed with the payment.',
           timestamp: new Date(Date.now() - 3600000),
           avatar: ''
@@ -150,7 +150,7 @@ export class OrderDetails implements OnInit {
         }
       ];
     } else {
-      // User is the seller (viewing order on their ad)
+      // User is the merchant (viewing order on their ad)
       this.chatMessages = [
         {
           sender: 'me',
@@ -161,7 +161,7 @@ export class OrderDetails implements OnInit {
         },
         {
           sender: 'other',
-          senderName: 'Buyer',
+          senderName: 'User',
           message: 'Payment sent! Reference: TXN123456',
           timestamp: new Date(Date.now() - 1800000)
         }
@@ -277,10 +277,10 @@ export class OrderDetails implements OnInit {
     this.pMessageService.add({
       severity: 'success',
       summary: 'Notification Sent',
-      detail: 'Buyer has been notified that USDT was sent.'
+      detail: 'User has been notified that USDT was sent.'
     });
     this.closeNotifyUSDTDialog();
-    // TODO: Implement backend call to update order status and notify buyer
+    // TODO: Implement backend call to update order status and notify user
     this.loadOrderDetails();
   }
 
