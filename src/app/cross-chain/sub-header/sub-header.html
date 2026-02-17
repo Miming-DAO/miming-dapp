@@ -8,9 +8,7 @@
       </button>
       }
 
-      <!-- ********** -->
       <!-- Page Title -->
-      <!-- ********** -->
       <div
         class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center">
         <i class="pi pi-arrow-right-arrow-left text-white text-lg md:text-xl"></i>
@@ -21,9 +19,7 @@
       </div>
     </div>
 
-    <!-- ************************** -->
     <!-- Wallet & User Info Section -->
-    <!-- ************************** -->
     <div class="flex items-center gap-2 h-11">
       @if (!isLoggedIn && !isXteriumMode) {
       <button (click)="login()"
@@ -33,9 +29,7 @@
       </button>
       }
 
-      <!-- ************************** -->
       <!-- User Info for Wallet Login -->
-      <!-- ************************** -->
       @if (isLoggedIn && currentUser?.auth_type === 'wallet') {
       <div
         class="group relative flex items-center gap-3 px-5 py-2 h-14 rounded-full bg-linear-to-r from-slate-800/80 via-slate-700/80 to-slate-800/80 hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 transition-all duration-300 border border-slate-600/50 hover:border-purple-500/50 cursor-pointer shadow-lg shadow-slate-900/50 hover:shadow-purple-500/20 hover:scale-105"
@@ -69,9 +63,7 @@
   </div>
 </div>
 
-<!-- ************************ -->
 <!-- Available Wallets Dialog -->
-<!-- ************************ -->
 <p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true"
   [style]="{ width: '25rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -120,9 +112,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ******************************* -->
 <!-- Polkadot Wallet Accounts Dialog -->
-<!-- ******************************* -->
 <p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true"
   [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -180,9 +170,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ************************************** -->
 <!-- Polkadot Wallet Account Details Dialog -->
-<!-- ************************************** -->
 <p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true"
   [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -234,7 +222,5 @@
   </ng-template>
 </p-dialog>
 
-<!-- ***** -->
 <!-- Toast -->
-<!-- ***** -->
 <p-toast />

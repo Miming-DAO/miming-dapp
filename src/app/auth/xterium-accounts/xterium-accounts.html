@@ -1,12 +1,7 @@
-<!-- ******************* -->
-<!-- Full Page Container -->
-<!-- ******************* -->
 <div class="min-h-screen bg-linear-to-br from-slate-900 via-purple-900/20 to-slate-900 p-4 pt-8">
   <div class="w-full max-w-lg mx-auto">
 
-    <!-- ********** -->
     <!-- Page Title -->
-    <!-- ********** -->
     <div class="text-center mb-6">
       <div class="flex items-center justify-center gap-3 mb-2">
         <div
@@ -21,9 +16,7 @@
       <p class="text-slate-400 text-sm mt-2">Select a wallet account to continue</p>
     </div>
 
-    <!-- ************* -->
     <!-- Accounts List -->
-    <!-- ************* -->
     <div class="backdrop-blur-lg bg-slate-800/80 rounded-3xl border border-purple-500/20 p-6">
       <div class="flex flex-col gap-3">
         @for (account of polkadotWalletAccounts; track account.address) {
@@ -70,9 +63,7 @@
   </div>
 </div>
 
-<!-- *************************** -->
 <!-- Xterium Sign Payload Dialog -->
-<!-- *************************** -->
 <p-dialog [(visible)]="showXteriumSignDialog" [modal]="true" [style]="{ width: '25rem', 'border-radius': '1.5rem' }"
   [dismissableMask]="false" [closable]="false" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -145,7 +136,5 @@
   </ng-template>
 </p-dialog>
 
-<!-- ***** -->
 <!-- Toast -->
-<!-- ***** -->
 <p-toast />

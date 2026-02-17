@@ -8,9 +8,7 @@
       </button>
       }
 
-      <!-- ********** -->
       <!-- Page Title -->
-      <!-- ********** -->
       <div
         class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center">
         <i class="pi pi-shopping-bag text-white text-lg md:text-xl"></i>
@@ -23,9 +21,7 @@
       </div>
     </div>
 
-    <!-- ************************** -->
     <!-- Wallet & User Info Section -->
-    <!-- ************************** -->
     <div class="flex items-center gap-2 h-11">
       @if (!isLoggedIn && !isXteriumMode) {
       <button (click)="login()"
@@ -35,9 +31,7 @@
       </button>
       }
 
-      <!-- ************************** -->
       <!-- User Info for Wallet Login -->
-      <!-- ************************** -->
       @if (isLoggedIn && currentUser?.auth_type === 'wallet') {
       <div
         class="group relative flex items-center gap-3 px-5 py-2 h-14 rounded-full bg-linear-to-r from-slate-800/80 via-slate-700/80 to-slate-800/80 hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 transition-all duration-300 border border-slate-600/50 hover:border-purple-500/50 cursor-pointer shadow-lg shadow-slate-900/50 hover:shadow-purple-500/20 hover:scale-105"
@@ -68,9 +62,7 @@
       </div>
       }
 
-      <!-- ************************** -->
       <!-- User Info for Google Login -->
-      <!-- ************************** -->
       @if (isLoggedIn && currentUser?.auth_type === 'google') {
       <div class="flex items-center gap-2 md:gap-3">
         <div class="text-right hidden md:block">
@@ -97,20 +89,14 @@
     </div>
   </div>
 
-  <!-- ****************************************** -->
   <!-- P2P Navigation (shown only when logged in) -->
-  <!-- ****************************************** -->
   @if (isLoggedIn) {
   <div class="border-t border-purple-500/20">
 
-    <!-- ****************** -->
     <!-- Desktop Navigation -->
-    <!-- ****************** -->
     <div class="px-4 md:px-6 lg:py-3 flex items-center justify-between">
 
-      <!-- ******************************** -->
       <!-- Left Section: Navigation Buttons -->
-      <!-- ******************************** -->
       <div class="hidden md:flex items-center space-x-1">
         <button (click)="setActiveMenu('marketplace')"
           [class]="activeMenu === 'marketplace' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
@@ -132,14 +118,10 @@
         </button>
       </div>
 
-      <!-- **************************** -->
       <!-- Right Section: Stats + Admin -->
-      <!-- **************************** -->
       <div class="hidden lg:flex items-center gap-2">
 
-        <!-- ****************** -->
         <!-- Quick Stats Button -->
-        <!-- ****************** -->
         <button (click)="showStatsDialog = true"
           class="flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
           <i class="pi pi-chart-line text-sm"></i>
@@ -153,16 +135,12 @@
       </div>
     </div>
 
-    <!-- *********** -->
     <!-- Mobile Menu -->
-    <!-- *********** -->
     @if (navMenuOpen) {
     <div class="md:hidden border-t border-purple-500/20 p-3">
       <div class="space-y-2">
 
-        <!-- *********************** -->
         <!-- Mobile Navigation Links -->
-        <!-- *********************** -->
         <button (click)="setActiveMenu('marketplace')"
           [class]="activeMenu === 'marketplace' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
           class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
@@ -201,9 +179,7 @@
           <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
         </button>
 
-        <!-- ************ -->
         <!-- Mobile Stats -->
-        <!-- ************ -->
         <div class="pt-3 mt-3 border-t border-purple-500/20">
           <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Quick Stats</div>
           <div class="grid grid-cols-3 gap-2">
@@ -222,9 +198,7 @@
           </div>
         </div>
 
-        <!-- ******************* -->
         <!-- Mobile Admin Button -->
-        <!-- ******************* -->
         <button (click)="navigateToAdminConsole()"
           class="w-full mt-3 flex items-center gap-3 px-4 py-3 rounded-3xl bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white transition-all shadow-md cursor-pointer">
           <i class="pi pi-shield"></i>
@@ -240,9 +214,7 @@
   }
 </div>
 
-<!-- ***************************** -->
 <!-- Login Method Selection Dialog -->
-<!-- ***************************** -->
 <p-dialog [(visible)]="showAuthMethodDialog" [modal]="true"
   [style]="{ 'width': '500px', 'max-width': '90vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
   [closable]="true">
@@ -263,9 +235,7 @@
   </ng-template>
   <div class="py-4 flex flex-col gap-3">
 
-    <!-- ***************** -->
     <!-- Web3 Wallet Login -->
-    <!-- ***************** -->
     <button (click)="selectAuthMethod('wallet')"
       class="w-full flex items-center gap-4 p-5 rounded-3xl bg-slate-800/50 hover:bg-linear-to-r hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 border border-slate-600/30 hover:border-purple-500/50 transition-all duration-200 cursor-pointer group">
       <div
@@ -279,9 +249,7 @@
       <i class="pi pi-chevron-right text-slate-400 group-hover:text-purple-400 transition-colors"></i>
     </button>
 
-    <!-- ************ -->
     <!-- Google Login -->
-    <!-- ************ -->
     <button (click)="selectAuthMethod('google')"
       class="w-full flex items-center gap-4 p-5 rounded-3xl bg-slate-800/50 hover:bg-linear-to-r hover:from-blue-500/20 hover:via-red-500/20 hover:to-yellow-500/20 border border-slate-600/30 hover:border-blue-500/50 transition-all duration-200 cursor-pointer group">
       <div
@@ -306,9 +274,7 @@
   </div>
 </p-dialog>
 
-<!-- ************************ -->
 <!-- Available Wallets Dialog -->
-<!-- ************************ -->
 <p-dialog [(visible)]="showAvailableWalletsDialog" [modal]="true"
   [style]="{ width: '25rem', 'border-radius': '1.5rem' }" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -357,9 +323,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ******************************* -->
 <!-- Polkadot Wallet Accounts Dialog -->
-<!-- ******************************* -->
 <p-dialog [(visible)]="showPolkadotWalletAccountsDialog" [modal]="true"
   [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -417,9 +381,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ************************************** -->
 <!-- Polkadot Wallet Account Details Dialog -->
-<!-- ************************************** -->
 <p-dialog [(visible)]="showPolkadotWalletAccountDialog" [modal]="true"
   [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }" [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -471,10 +433,7 @@
   </ng-template>
 </p-dialog>
 
-
-<!-- *********************** -->
 <!-- Quick Stats Dialog -->
-<!-- *********************** -->
 <p-dialog [(visible)]="showStatsDialog" [modal]="true" [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }"
   [dismissableMask]="true" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -526,7 +485,5 @@
   </div>
 </p-dialog>
 
-<!-- ***** -->
 <!-- Toast -->
-<!-- ***** -->
 <p-toast />

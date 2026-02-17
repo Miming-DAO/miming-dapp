@@ -1,15 +1,11 @@
-<!-- ******************* -->
 <!-- Cover Photo Section -->
-<!-- ******************* -->
 <div class="w-full h-65 md:h-80 overflow-hidden bg-slate-900 relative">
   <img src="/images/backgrounds/miming-cover.png" alt="Cover" class="w-full h-full object-cover blur-[2px]"
     style="object-position: center center" />
   <div class="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/90 via-black/50 to-transparent"></div>
 </div>
 
-<!-- ********************** -->
 <!-- Main Content Container -->
-<!-- ********************** -->
 <div class="px-4 -mt-60 md:-mt-70 lg:-mt-70 sm:px-6 lg:px-8 pb-12">
   <div class="max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
@@ -21,9 +17,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              <!-- ************ -->
               <!-- Source Chain -->
-              <!-- ************ -->
               <div class="space-y-2">
                 <label class="block text-lg font-semibold text-white"> Source Chain </label>
                 <p-select [options]="sourceChains" [(ngModel)]="selectedSourceChain" optionLabel="name"
@@ -47,9 +41,7 @@
                 </p-select>
               </div>
 
-              <!-- ************ -->
               <!-- Target Chain -->
-              <!-- ************ -->
               <div class="space-y-2">
                 <label class="block text-lg font-semibold text-white"> Target Chain </label>
                 <p-select [options]="targetChains" [(ngModel)]="selectedTargetChain" optionLabel="name" class="w-full"
@@ -74,9 +66,7 @@
               </div>
             </div>
 
-            <!-- ***************** -->
             <!-- Recipient Address -->
-            <!-- ***************** -->
             <div class="space-y-2">
               <label class="block text-lg font-semibold text-white">
                 {{ selectedTargetChain?.name || 'Target' }} Recipient Address
@@ -96,9 +86,7 @@
               </div>
             </div>
 
-            <!-- ********************** -->
             <!-- Token and Quantity Row -->
-            <!-- ********************** -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-2">
                 <label class="block text-lg font-semibold text-white"> Token </label>
@@ -124,9 +112,7 @@
                 </p-select>
               </div>
 
-              <!-- ******** -->
               <!-- Quantity -->
-              <!-- ******** -->
               <div class="space-y-2">
                 <label class="block text-lg font-semibold text-white"> Quantity </label>
                 <p-inputnumber class="w-full bg-black rounded-full border border-gray-100/30 hover:border-gray-100/40"
@@ -136,9 +122,7 @@
               </div>
             </div>
 
-            <!-- ********************** -->
             <!-- Asset Received Display -->
-            <!-- ********************** -->
             <div class="space-y-2">
               <label class="block text-lg font-semibold text-white"> Asset Received </label>
               <div
@@ -160,9 +144,7 @@
               </div>
             </div>
 
-            <!-- ********* -->
             <!-- Info Note -->
-            <!-- ********* -->
             <div class="mt-6 p-4 rounded-3xl bg-purple-500/10 border border-purple-500/20">
               <div class="flex items-start gap-3">
                 <i class="pi pi-info-circle text-purple-400 text-xl shrink-0"></i>
@@ -177,9 +159,7 @@
               </div>
             </div>
 
-            <!-- *************** -->
             <!-- Teleport Button -->
-            <!-- *************** -->
             <button (click)="teleport()" [disabled]="isProcessing"
               class="w-full py-5 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-bold text-xl shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed disabled:shadow-none cursor-pointer flex items-center justify-center gap-3">
               <i class="pi pi-send text-2xl"></i>
@@ -193,9 +173,7 @@
   </div>
 </div>
 
-<!-- ******************* -->
 <!-- Initializing Dialog -->
-<!-- ******************* -->
 <p-dialog [(visible)]="showInitializingDialog" [modal]="true" [style]="{ width: '25rem', 'border-radius': '1.5rem' }"
   [dismissableMask]="false" [closable]="false" [draggable]="false" [resizable]="false" styleClass="cosmic-dialog">
   <ng-template pTemplate="header">
@@ -229,9 +207,7 @@
   </div>
 </p-dialog>
 
-<!-- ***************** -->
 <!-- Processing Dialog -->
-<!-- ***************** -->
 <p-dialog [(visible)]="showProcessingDialog" [modal]="true" [style]="{ width: '25rem', 'border-radius': '1.5rem' }"
   [dismissableMask]="false" [closable]="false" [draggable]="false" [resizable]="false" styleClass="cosmic-dialog">
   <ng-template pTemplate="header">
@@ -312,9 +288,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ******************************* -->
 <!-- Xterium Sign Transaction Dialog -->
-<!-- ******************************* -->
 <p-dialog [(visible)]="showXteriumSignDialog" [modal]="true" [style]="{ width: '25rem', 'border-radius': '1.5rem' }"
   [dismissableMask]="false" [closable]="false" styleClass="cosmic-dialog">
   <ng-template #header>
@@ -385,8 +359,6 @@
   </ng-template>
 </p-dialog>
 
-<!-- ************************ -->
 <!-- Confirm Dialog and Toast -->
-<!-- ************************ -->
 <p-confirmDialog [style]="{ width: '450px' }" />
 <p-toast />

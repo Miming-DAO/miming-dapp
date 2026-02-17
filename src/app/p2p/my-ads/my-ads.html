@@ -1,9 +1,7 @@
 <div class="max-w-7xl mx-auto">
   <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
 
-    <!-- ************ -->
     <!-- Panel Header -->
-    <!-- ************ -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">My Advertisements</h2>
@@ -16,9 +14,7 @@
       </button>
     </div>
 
-    <!-- ************* -->
     <!-- Loading State -->
-    <!-- ************* -->
     @if (isLoading) {
     <div class="flex justify-center items-center py-12">
       <div class="flex flex-col items-center gap-4">
@@ -28,9 +24,7 @@
     </div>
     }
 
-    <!-- *********** -->
     <!-- Empty State -->
-    <!-- *********** -->
     @if (!isLoading && p2pAds.length === 0) {
     <div class="text-center py-12">
       <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-purple-500/10 flex items-center justify-center">
@@ -46,14 +40,10 @@
     </div>
     }
 
-    <!-- ******** -->
     <!-- Ads List -->
-    <!-- ******** -->
     @if (!isLoading && p2pAds.length > 0) {
 
-    <!-- ****************** -->
     <!-- Desktop Table View -->
-    <!-- ****************** -->
     <div
       class="hidden md:block backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
       <div class="overflow-x-auto">
@@ -74,11 +64,10 @@
             @for (ad of p2pAds; track ad.id) {
             <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
 
-              <!-- ********************** -->
               <!-- Ad Name + Type + Image -->
-              <!-- ********************** -->
               <td class="py-4 px-4">
                 <div class="flex items-center gap-3">
+
                   <!-- Image/Initials -->
                   @if (ad.logo_url) {
                   <img [src]="ad.logo_url" [alt]="ad.name" class="w-12 h-12 rounded-full object-cover shrink-0" />
@@ -103,17 +92,13 @@
                 </div>
               </td>
 
-              <!-- ***************** -->
               <!-- P2P Number + Date -->
-              <!-- ***************** -->
               <td class="py-4 px-4 hidden lg:table-cell">
                 <div class="text-sm text-slate-300">{{ ad.p2p_number }}</div>
                 <div class="text-xs text-slate-400 mt-1">{{ ad.created_at | date:'MMM d, y' }}</div>
               </td>
 
-              <!-- ************* -->
               <!-- Price + Token -->
-              <!-- ************* -->
               <td class="py-4 px-4 text-right">
                 <div
                   class="font-bold text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap">
@@ -125,18 +110,14 @@
                 </div>
               </td>
 
-              <!-- ****** -->
               <!-- Limits -->
-              <!-- ****** -->
               <td class="py-4 px-4 text-sm hidden lg:table-cell text-right">
                 <div class="font-semibold text-white whitespace-nowrap">
                   ₱{{ ad.min_limit | number:'1.2-2' }} ~ ₱{{ ad.max_limit | number:'1.2-2' }}
                 </div>
               </td>
 
-              <!-- *************** -->
               <!-- Payment Methods -->
-              <!-- *************** -->
               <td class="py-4 px-4 hidden xl:table-cell">
                 <div class="flex flex-wrap gap-1 max-w-xs justify-start">
                   @if (getAdPaymentTypes(ad.id).length > 0) {
@@ -158,9 +139,7 @@
                 </div>
               </td>
 
-              <!-- ****** -->
               <!-- Status -->
-              <!-- ****** -->
               <td class="py-4 px-4 text-left">
                 <span [class]="getStatusBadgeClass(ad.status)"
                   class="px-2 py-1 rounded-full text-xs font-semibold border uppercase inline-block">
@@ -168,9 +147,7 @@
                 </span>
               </td>
 
-              <!-- ******* -->
               <!-- Actions -->
-              <!-- ******* -->
               <td class="py-4 px-4">
                 <div class="flex items-center justify-center gap-2">
                   <button (click)="editP2pAd(ad)" title="Edit"
@@ -190,17 +167,13 @@
       </div>
     </div>
 
-    <!-- **************** -->
     <!-- Mobile Card View -->
-    <!-- **************** -->
     <div class="md:hidden space-y-3">
       @for (ad of p2pAds; track ad.id) {
       <div
         class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 p-4 hover:border-purple-500/40 transition-all duration-200">
 
-        <!-- **************************** -->
         <!-- Header: Type Badge + Actions -->
-        <!-- **************************** -->
         <div class="flex items-center justify-between mb-3">
           <span
             [class]="ad.type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
@@ -220,9 +193,7 @@
           </div>
         </div>
 
-        <!-- ********************* -->
         <!-- Image/Initials + Name -->
-        <!-- ********************* -->
         <div class="flex items-center gap-3 mb-3 px-2">
           @if (ad.logo_url) {
           <img [src]="ad.logo_url" [alt]="ad.name" class="w-12 h-12 rounded-full object-cover shrink-0" />
@@ -239,9 +210,7 @@
           </div>
         </div>
 
-        <!-- ************* -->
         <!-- Price + Token -->
-        <!-- ************* -->
         <div class="border-b border-slate-700/50 mb-3 pb-3">
           <div class="flex items-center gap-2 px-2">
             <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
@@ -254,9 +223,7 @@
           </div>
         </div>
 
-        <!-- ********* -->
         <!-- Info Grid -->
-        <!-- ********* -->
         <div class="flex items-center gap-2 mb-3">
           <div class="px-2">
             <span class="text-xs text-slate-400 block mb-1">Limits</span>
@@ -265,9 +232,7 @@
           </div>
         </div>
 
-        <!-- *************** -->
         <!-- Payment Methods -->
-        <!-- *************** -->
         @if (getAdPaymentTypes(ad.id).length > 0) {
         <div class="border-b border-slate-700/50 mb-3 pb-3">
           <div class="px-2">
@@ -284,9 +249,7 @@
         </div>
         }
 
-        <!-- ****** -->
         <!-- Status -->
-        <!-- ****** -->
         <div class="flex justify-end">
           <span [class]="getStatusBadgeClass(ad.status)"
             class="px-2 py-1 rounded-full text-xs font-semibold border uppercase">
@@ -300,9 +263,7 @@
   </div>
 </div>
 
-<!-- ********************* -->
 <!-- P2P Ad Details Dialog -->
-<!-- ********************* -->
 <p-dialog [(visible)]="showP2pAdDetailsDialog" [modal]="true"
   [style]="{ 'width': '1100px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
   styleClass="cosmic-dialog">
@@ -328,14 +289,10 @@
     <form (ngSubmit)="saveP2pAd()" autocomplete="off">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <!-- ********************************* -->
         <!-- LEFT COLUMN: Basic Info & Pricing -->
-        <!-- ********************************* -->
         <div class="space-y-5">
 
-          <!-- **************************** -->
           <!-- Section 1: Basic Information -->
-          <!-- **************************** -->
           <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
             <div class="flex items-center gap-2 mb-4">
               <div
@@ -347,9 +304,7 @@
 
             <div class="space-y-4">
 
-              <!-- ******************* -->
               <!-- Advertisement Image -->
-              <!-- ******************* -->
               <div>
                 <label class="text-xs text-slate-400 mb-2 block">
                   Advertisement Image (Optional)
@@ -367,9 +322,7 @@
                 }
               </div>
 
-              <!-- ****************** -->
               <!-- Advertisement Name -->
-              <!-- ****************** -->
               <div>
                 <label class="text-xs text-slate-400 mb-2 block">
                   Advertisement Name <span class="text-red-400">*</span>
@@ -379,9 +332,7 @@
                   style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
               </div>
 
-              <!-- **************** -->
               <!-- Transaction Type -->
-              <!-- **************** -->
               <div>
                 <label class="text-xs text-slate-400 mb-2 block">I want to <span class="text-red-400">*</span></label>
                 <div class="flex gap-2">
@@ -403,9 +354,7 @@
                 </div>
               </div>
 
-              <!-- *************** -->
               <!-- Token Selection -->
-              <!-- *************** -->
               <div>
                 <label class="text-xs text-slate-400 mb-2 block">Token <span class="text-red-400">*</span></label>
                 <p-select [options]="tokens" [(ngModel)]="selectedToken" name="token" placeholder="Select Token"
@@ -431,9 +380,7 @@
             </div>
           </div>
 
-          <!-- *************************** -->
           <!-- Section 2: Pricing & Limits -->
-          <!-- *************************** -->
           <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
             <div class="flex items-center gap-2 mb-4">
               <div
@@ -445,9 +392,7 @@
 
             <div class="space-y-4">
 
-              <!-- ********** -->
               <!-- Unit Price -->
-              <!-- ********** -->
               <div>
                 <label class="text-xs text-slate-400 mb-2 block">
                   Unit Price (PHP) <span class="text-red-400">*</span>
@@ -458,9 +403,7 @@
                   name="editPrice" placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);" />
               </div>
 
-              <!-- ****** -->
               <!-- Limits -->
-              <!-- ****** -->
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="text-xs text-slate-400 mb-2 block">
@@ -485,19 +428,13 @@
           </div>
         </div>
 
-        <!-- ******************************************** -->
         <!-- RIGHT COLUMN: Payment Methods & Instructions -->
-        <!-- ******************************************** -->
         <div class="space-y-5">
 
-          <!-- ************************** -->
           <!-- Section 3: Payment Methods -->
-          <!-- ************************** -->
           <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
 
-            <!-- ********************** -->
             <!-- Payment Methods Header -->
-            <!-- ********************** -->
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div
@@ -515,9 +452,7 @@
               </button>
             </div>
 
-            <!-- ******************** -->
             <!-- Payment Methods List -->
-            <!-- ******************** -->
             @if (p2pAdPaymentTypes.length > 0) {
             <div class="space-y-2">
               @for (p2pAdPaymentType of p2pAdPaymentTypes; track p2pAdPaymentType.id; let i = $index) {
@@ -555,9 +490,7 @@
             }
           </div>
 
-          <!-- ******************************* -->
           <!-- Section 4: Payment Instructions -->
-          <!-- ******************************* -->
           <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
             <div class="flex items-center gap-2 mb-3">
               <div
@@ -592,9 +525,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ********************* -->
 <!-- Payment Method Dialog -->
-<!-- ********************* -->
 <p-dialog [(visible)]="showP2pAdPaymentTypeDetailsDialog" [modal]="true"
   [style]="{ 'width': '500px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
   styleClass="cosmic-dialog">
@@ -616,9 +547,8 @@
     </div>
   </ng-template>
   <div class="py-4 space-y-4">
-    <!-- ************ -->
+
     <!-- Payment Type -->
-    <!-- ************ -->
     <div>
       <label class="text-xs text-slate-400 mb-2 block">Payment Type <span class="text-red-400">*</span></label>
       <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="paymentType"
@@ -646,9 +576,7 @@
       </p-select>
     </div>
 
-    <!-- ************************ -->
     <!-- Payment Type Information -->
-    <!-- ************************ -->
     <div>
       <label class="text-xs text-slate-400 mb-2 block">Account Name <span class="text-red-400">*</span></label>
       <input type="text" pInputText [(ngModel)]="p2pAdPaymentTypeForm.account_name" name="accountName"
@@ -685,9 +613,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- ************************** -->
 <!-- Delete Confirmation Dialog -->
-<!-- ************************** -->
 <p-dialog [(visible)]="showDeleteP2pAdDialog" [modal]="true"
   [style]="{ 'width': '500px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
   styleClass="cosmic-dialog">
@@ -740,7 +666,5 @@
   </ng-template>
 </p-dialog>
 
-<!-- ***** -->
 <!-- Toast -->
-<!-- ***** -->
 <p-toast />

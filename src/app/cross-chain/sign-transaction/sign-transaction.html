@@ -1,12 +1,7 @@
-<!-- ******************* -->
-<!-- Full Page Container -->
-<!-- ******************* -->
 <div class="min-h-screen bg-linear-to-br from-slate-900 via-purple-900/20 to-slate-900 p-4 pt-8">
   <div class="w-full max-w-lg mx-auto">
 
-    <!-- ****************** -->
     <!-- Submit Button View -->
-    <!-- ****************** -->
     @if (showSubmitButton) {
     <div class="text-center mb-6">
       <div class="flex items-center justify-center gap-3 mb-2">
@@ -24,9 +19,7 @@
 
     <div class="backdrop-blur-lg bg-slate-800/80 rounded-3xl border border-purple-500/20 p-6">
 
-      <!-- **************** -->
       <!-- Transaction Info -->
-      <!-- **************** -->
       <div class="mb-6 p-4 rounded-3xl bg-purple-500/10 border border-purple-500/20">
         <div class="flex items-start gap-3">
           <i class="pi pi-info-circle text-purple-400 text-xl shrink-0 mt-1"></i>
@@ -39,9 +32,7 @@
         </div>
       </div>
 
-      <!-- ************************ -->
       <!-- Transaction Hash Preview -->
-      <!-- ************************ -->
       <div class="mb-6 space-y-2">
         <label class="block text-sm font-semibold text-slate-300"> Signed Transaction </label>
         <div class="p-4 rounded-3xl bg-slate-900/50 border border-slate-600/30">
@@ -51,9 +42,7 @@
         </div>
       </div>
 
-      <!-- ************** -->
       <!-- Action Buttons -->
-      <!-- ************** -->
       <div class="flex gap-2">
         <button (click)="submitTransaction()"
           class="flex-1 px-4 py-3 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-semibold transition-all duration-200 border-0 cursor-pointer flex items-center justify-center gap-2">
@@ -68,9 +57,7 @@
     </div>
     }
 
-    <!-- *************** -->
     <!-- Processing View -->
-    <!-- *************** -->
     @if (!showSubmitButton) {
     <div class="backdrop-blur-lg bg-slate-800/80 rounded-3xl border border-purple-500/20 p-8">
       <div class="text-center mb-6">
@@ -82,9 +69,7 @@
         </div>
       </div>
 
-      <!-- *********************** -->
       <!-- Transaction In-Progress -->
-      <!-- *********************** -->
       @if (processingStatus.status === 'In-Progress') {
       <div class="flex flex-col items-center text-center">
         <div class="relative mb-6">
@@ -106,9 +91,7 @@
         </div>
       </div>
 
-      <!-- ***************** -->
       <!-- Transaction Error -->
-      <!-- ***************** -->
       } @else if (processingStatus.status === 'Error') {
       <div class="flex flex-col items-center text-center">
         <div class="relative mb-6">
@@ -140,9 +123,7 @@
         </div>
       </div>
 
-      <!-- ********************* -->
       <!-- Transaction Completed -->
-      <!-- ********************* -->
       } @else if (processingStatus.status === 'Completed') {
       <div class="flex flex-col items-center text-center">
         <div class="relative mb-6">
@@ -175,7 +156,5 @@
   </div>
 </div>
 
-<!-- ***** -->
 <!-- Toast -->
-<!-- ***** -->
 <p-toast />
