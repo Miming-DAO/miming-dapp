@@ -45,7 +45,7 @@
             </span>
           </div>
         </div>
-        <button (click)="showMobileOrderDetails = true" type="button"
+        <button (click)="showMobileOrderDetailsDialog = true" type="button"
           class="px-3 py-2 rounded-3xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-all duration-200 shrink-0">
           <i class="pi pi-info-circle mr-1.5"></i>
           Details
@@ -63,7 +63,8 @@
           <i class="pi pi-comments text-purple-400"></i>
           Order Chat
         </h3>
-        <p class="text-xs text-slate-400 mt-1">Communicate with {{ viewType === 'my-orders' ? 'seller' : 'buyer' }}</p>
+        <p class="text-xs text-slate-400 mt-1">Communicate with {{ paramsViewType === 'my-orders' ? 'seller' : 'buyer'
+          }}</p>
       </div>
 
       <!-- Chat Messages -->
@@ -184,7 +185,7 @@
           <div class="flex-1 space-y-2">
             <h3 class="text-lg font-bold text-white">Waiting for Payment</h3>
 
-            @if (viewType === 'my-orders') {
+            @if (paramsViewType === 'my-orders') {
             @if (p2pOrder.order_type === 'buy') {
             <p class="text-sm text-slate-300 leading-relaxed">
               You are buying <span class="font-bold text-yellow-400">{{ p2pOrder.quantity | number:'1.2-6' }}
@@ -203,7 +204,7 @@
             }
             }
 
-            @if (viewType === 'my-ad-orders') {
+            @if (paramsViewType === 'ad-orders') {
             @if (p2pOrder.order_type === 'buy') {
             <p class="text-sm text-slate-300 leading-relaxed">
               Waiting for the buyer to send <span class="font-bold text-yellow-400">₱{{ p2pOrder.amount | number:'1.2-2'
@@ -234,7 +235,7 @@
           <div class="flex-1 space-y-2">
             <h3 class="text-lg font-bold text-white">Payment Submitted</h3>
 
-            @if (viewType === 'my-orders') {
+            @if (paramsViewType === 'my-orders') {
             @if (p2pOrder.order_type === 'buy') {
             <p class="text-sm text-slate-300 leading-relaxed">
               Your payment proof has been uploaded. Waiting for the seller to verify your <span
@@ -250,7 +251,7 @@
             }
             }
 
-            @if (viewType === 'my-ad-orders') {
+            @if (paramsViewType === 'ad-orders') {
             @if (p2pOrder.order_type === 'buy') {
             <p class="text-sm text-slate-300 leading-relaxed">
               The buyer has uploaded their payment proof. Please verify you received
@@ -352,7 +353,7 @@
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
           <i class="pi pi-user text-purple-400"></i>
-          {{ viewType === 'my-orders' ? 'Seller' : 'Buyer' }} Information
+          {{ paramsViewType === 'my-orders' ? 'Seller' : 'Buyer' }} Information
         </h3>
 
         <div class="flex items-center gap-3 p-3 rounded-3xl bg-slate-700/30">
@@ -434,7 +435,8 @@
             <i class="pi pi-comments text-purple-400"></i>
             Order Chat
           </h3>
-          <p class="text-xs text-slate-400 mt-1">Communicate with {{ viewType === 'my-orders' ? 'seller' : 'buyer' }}
+          <p class="text-xs text-slate-400 mt-1">Communicate with {{ paramsViewType === 'my-orders' ? 'seller' : 'buyer'
+            }}
           </p>
         </div>
 
@@ -587,7 +589,7 @@
 <!-- *************************** -->
 <!-- Mobile Order Details Dialog -->
 <!-- *************************** -->
-<p-dialog [(visible)]="showMobileOrderDetails" [modal]="true" [closable]="true" [draggable]="false"
+<p-dialog [(visible)]="showMobileOrderDetailsDialog" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '500px', 'border-radius': '1.5rem' }">
   <ng-template #header>
     <div class="flex items-center gap-3">
@@ -612,7 +614,7 @@
         </div>
         <div class="flex-1 space-y-1">
           <h3 class="text-base font-bold text-white">Waiting for Payment</h3>
-          @if (viewType === 'my-orders') {
+          @if (paramsViewType === 'my-orders') {
           @if (p2pOrder.order_type === 'buy') {
           <p class="text-sm text-slate-300">
             Send <span class="font-bold text-yellow-400">₱{{ p2pOrder.amount | number:'1.2-2' }} PHP</span> and upload
@@ -671,7 +673,7 @@
     <div class="space-y-2">
       <!-- PENDING: Buyer Upload Proof Button -->
       @if (showUploadProofButton) {
-      <button type="button" (click)="openPaymentProofDialog(); showMobileOrderDetails = false"
+      <button type="button" (click)="openPaymentProofDialog(); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
         <i class="pi pi-upload"></i>
         <span>Pay & Upload Proof</span>
@@ -680,7 +682,7 @@
 
       <!-- PAID: Seller Notify USDT Sent Button -->
       @if (showNotifyUSDTSentButton) {
-      <button type="button" (click)="notifyUSDTSent(p2pOrder.id); showMobileOrderDetails = false"
+      <button type="button" (click)="notifyUSDTSent(p2pOrder.id); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
         <i class="pi pi-send"></i>
         <span>Notify USDT Sent</span>
@@ -689,7 +691,7 @@
 
       <!-- PAID: Buyer Confirm USDT Received Button -->
       @if (showConfirmUSDTReceivedButton) {
-      <button type="button" (click)="confirmPaymentReceived(p2pOrder.id); showMobileOrderDetails = false"
+      <button type="button" (click)="confirmPaymentReceived(p2pOrder.id); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
         <i class="pi pi-check-circle"></i>
         <span>Confirm USDT Received</span>
@@ -698,7 +700,7 @@
 
       <!-- Cancel Button (conditional based on status) -->
       @if (showCancelButton) {
-      <button type="button" (click)="cancelOrder(p2pOrder.id); showMobileOrderDetails = false"
+      <button type="button" (click)="cancelOrder(p2pOrder.id); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-2.5 rounded-3xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-medium text-sm transition-all duration-200">
         <i class="pi pi-times-circle mr-1.5"></i>
         Cancel Order

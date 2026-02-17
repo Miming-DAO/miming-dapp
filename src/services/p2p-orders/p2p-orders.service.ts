@@ -44,8 +44,8 @@ export class P2pOrdersService {
     });
   }
 
-  getP2pMyAdOrdersByAuthUser(): Observable<P2pOrder[]> {
-    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/my-ad-orders/auth-user`, {
+  getP2pAdOrdersByAuthUser(): Observable<P2pOrder[]> {
+    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/ad-orders/auth-user`, {
       headers: this.getHeaders()
     });
   }

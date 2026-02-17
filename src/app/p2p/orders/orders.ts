@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { MessageService as PMessageService } from 'primeng/api';
 import { TabsModule as PTabsModule } from 'primeng/tabs';
@@ -36,17 +36,18 @@ export class Orders {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private p2pOrdersService: P2pOrdersService,
     private pMessageService: PMessageService
   ) { }
 
-  activeViewTab: 'my-orders' | 'my-ad-orders' = 'my-orders';
+  activeViewTab: 'my-orders' | 'ad-orders' = 'my-orders';
   activeStatusTab: 'in-progress' | 'completed' | 'cancelled' = 'in-progress';
 
   searchTerm: string = '';
 
   p2pMyOrders: P2pOrder[] = [];
-  p2pMyAdOrders: P2pOrder[] = [];
+  p2pAdOrders: P2pOrder[] = [];
 
   statusOptions = [
     { label: 'In Progress', value: 'in-progress', icon: 'pi pi-clock text-yellow-400' },
@@ -57,7 +58,7 @@ export class Orders {
   isLoading: boolean = false;
 
   get orders(): P2pOrder[] {
-    return this.activeViewTab === 'my-orders' ? this.p2pMyOrders : this.p2pMyAdOrders;
+    return this.activeViewTab === 'my-orders' ? this.p2pMyOrders : this.p2pAdOrders;
   }
 
   get filteredOrders(): P2pOrder[] {
@@ -100,9 +101,9 @@ export class Orders {
       }
     });
 
-    this.p2pOrdersService.getP2pMyAdOrdersByAuthUser().subscribe({
+    this.p2pOrdersService.getP2pAdOrdersByAuthUser().subscribe({
       next: (p2pAdOrders: P2pOrder[]) => {
-        this.p2pMyAdOrders = p2pAdOrders;
+        this.p2pAdOrders = p2pAdOrders;
       },
       error: (error: any) => {
         this.pMessageService.add({
@@ -115,7 +116,11 @@ export class Orders {
   }
 
   openOrderDetails(p2pOrder: P2pOrder) {
-    this.router.navigate(['/p2p/order-details', p2pOrder.id]);
+    this.router.navigate(['/p2p/order-details', p2pOrder.id], {
+      queryParams: {
+        viewType: this.activeViewTab === 'my-orders' ? 'my-orders' : 'ad-orders'
+      }
+    });
   }
 
   getStatusBadgeClass(status: string): string {
@@ -134,6 +139,15 @@ export class Orders {
   }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const viewType = params['viewType'];
+      if (viewType === 'my-orders') {
+        this.activeViewTab = 'my-orders';
+      } else if (viewType === 'ad-orders') {
+        this.activeViewTab = 'ad-orders';
+      }
+    });
+
     this.loadOrders();
   }
 }

@@ -40,15 +40,17 @@ export class OrderDetails implements OnInit {
   currentUser: User | null = null;
 
   paramsOrderId: string = '';
+  paramsViewType: 'my-orders' | 'ad-orders' = 'my-orders';
+
   p2pOrder: P2pOrder | null = null;
 
-  isLoading: boolean = false;
-
-  showMobileOrderDetails: boolean = false;
+  showMobileOrderDetailsDialog: boolean = false;
 
   showPaymentProofDialog: boolean = false;
   selectedFile: File | null = null;
   paymentReference: string = '';
+
+  isLoading: boolean = false;
 
   chatMessage: string = '';
   chatMessages: Array<{
@@ -58,13 +60,6 @@ export class OrderDetails implements OnInit {
     timestamp: Date;
     avatar?: string;
   }> = [];
-
-  get viewType(): 'my-orders' | 'my-ad-orders' {
-    if (!this.currentUser || !this.p2pOrder) {
-      return 'my-orders';
-    }
-    return this.currentUser.id === this.p2pOrder.ordered_by_user_id ? 'my-orders' : 'my-ad-orders';
-  }
 
   get isBuyer(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
@@ -133,7 +128,7 @@ export class OrderDetails implements OnInit {
   loadChatMessages(): void {
     // TODO: Load actual chat messages from backend
     // Mock data for now - adjust based on viewType
-    if (this.viewType === 'my-orders') {
+    if (this.paramsViewType === 'my-orders') {
       // User is the buyer
       this.chatMessages = [
         {
@@ -260,7 +255,11 @@ export class OrderDetails implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/p2p/orders']);
+    this.router.navigate(['/p2p/orders'], {
+      queryParams: {
+        viewType: this.paramsViewType
+      }
+    });
   }
 
   formatMessageTime(timestamp: Date): string {
@@ -301,6 +300,15 @@ export class OrderDetails implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const viewType = params['viewType'];
+      if (viewType === 'my-orders') {
+        this.paramsViewType = 'my-orders';
+      } else if (viewType === 'ad-orders') {
+        this.paramsViewType = 'ad-orders';
+      }
+    });
+
     this.checkAuthStatus();
 
     this.route.params.subscribe(params => {
