@@ -1,3 +1,6 @@
+import { P2pAdPaymentType } from "./p2p-ad-payment-type.model";
+import { P2pAdWalletAddress } from "./p2p-ad-wallet-address.model";
+
 export class P2pAd {
   id: string = "";
   user_id: string = "";

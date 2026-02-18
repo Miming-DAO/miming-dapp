@@ -11,8 +11,12 @@ import { ToastModule as PToastModule } from 'primeng/toast';
 
 import { User } from '../../../models/user.model';
 import { P2pOrder } from '../../../models/p2p-order.model';
+import { P2pAdPaymentType } from '../../../models/p2p-ad-payment-type.model';
+import { P2pAdWalletAddress } from '../../../models/p2p-ad-wallet-address.model';
 
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
+import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
+import { P2pAdWalletAddressesService } from '../../../services/p2p-ad-wallet-addresses/p2p-ad-wallet-addresses.service';
 
 @Component({
   selector: 'app-order-details',
@@ -34,6 +38,8 @@ export class OrderDetails implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private p2pOrdersService: P2pOrdersService,
+    private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
+    private p2pAdWalletAddressesService: P2pAdWalletAddressesService,
     private pMessageService: PMessageService
   ) { }
 
@@ -43,6 +49,8 @@ export class OrderDetails implements OnInit {
   paramsViewType: 'my-orders' | 'ad-orders' = 'my-orders';
 
   p2pOrder: P2pOrder | null = null;
+  adPaymentTypes: P2pAdPaymentType[] = [];
+  adWalletAddresses: P2pAdWalletAddress[] = [];
 
   showMobileOrderDetailsDialog: boolean = false;
 
@@ -73,6 +81,13 @@ export class OrderDetails implements OnInit {
   get isUser(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
     return this.currentUser.id === this.p2pOrder.ordered_by_user_id;
+  }
+
+  get selectedAdPaymentType(): P2pAdPaymentType | null {
+    if (!this.p2pOrder || !this.p2pOrder.p2p_payment_type_id || this.adPaymentTypes.length === 0) {
+      return null;
+    }
+    return this.adPaymentTypes.find(pt => pt.p2p_payment_type_id === this.p2pOrder!.p2p_payment_type_id) || null;
   }
 
   get showUploadProofButton(): boolean {
@@ -197,6 +212,11 @@ export class OrderDetails implements OnInit {
       next: (p2pOrder: P2pOrder) => {
         this.p2pOrder = p2pOrder;
         this.isLoading = false;
+
+        if (this.p2pOrder.p2p_ad_id) {
+          this.loadAdPaymentTypes(this.p2pOrder.p2p_ad_id);
+          this.loadAdWalletAddresses(this.p2pOrder.p2p_ad_id);
+        }
       },
       error: (error: any) => {
         this.pMessageService.add({
@@ -205,6 +225,28 @@ export class OrderDetails implements OnInit {
           detail: 'Failed to load order details.'
         });
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadAdPaymentTypes(p2pAdId: string): void {
+    this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAdId).subscribe({
+      next: (paymentTypes: P2pAdPaymentType[]) => {
+        this.adPaymentTypes = paymentTypes;
+      },
+      error: (error: any) => {
+        console.error('Failed to load ad payment types:', error);
+      }
+    });
+  }
+
+  loadAdWalletAddresses(p2pAdId: string): void {
+    this.p2pAdWalletAddressesService.getP2pAdWalletAddressesByP2pAd(p2pAdId).subscribe({
+      next: (walletAddresses: P2pAdWalletAddress[]) => {
+        this.adWalletAddresses = walletAddresses;
+      },
+      error: (error: any) => {
+        console.error('Failed to load ad wallet addresses:', error);
       }
     });
   }

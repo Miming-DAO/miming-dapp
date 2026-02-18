@@ -64,7 +64,6 @@
       </div>
     </div>
 
-
     <!-- Mobile Chat -->
     <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
       <!-- Chat Header -->
@@ -192,12 +191,40 @@
         </div>
       </div>
 
-      <!-- Transaction Details -->
+      <!-- Order Details with Merchant Info -->
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
-        <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
-          <i class="pi pi-file-edit text-purple-400"></i>
-          Transaction Details
-        </h3>
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-file-edit text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-white">
+              Order Details
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Comprehensive details of the order including price, quantity, total amount, and payment method.
+            </p>
+          </div>
+        </div>
+
+        <!-- Merchant Info -->
+        <div class="bg-slate-900/50 rounded-3xl p-4 mb-4 border border-purple-500/20">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
+              <i class="pi pi-user text-white"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-base font-semibold text-white">{{ p2pOrder.p2p_ad?.name }}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <img [src]="'/images/tokens/' + (p2pOrder.p2p_ad?.token_symbol || 'usdt').toLowerCase() + '.png'"
+                  [alt]="p2pOrder.p2p_ad?.token_symbol || 'USDT'" class="w-4 h-4 object-contain" />
+                <span class="text-sm text-slate-300">{{ p2pOrder.p2p_ad?.token_symbol }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
@@ -232,90 +259,141 @@
         </div>
       </div>
 
-      <!-- Counterparty Information -->
+      <!-- MERCHANT + BUY ORDER: User's USDT Delivery Address -->
+      @if (isMerchant && p2pOrder.order_type === 'buy' && p2pOrder.wallet_address) {
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
-        <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
-          <i class="pi pi-user text-purple-400"></i>
-          {{ paramsViewType === 'my-orders' ? 'Merchant' : 'User' }} Information
-        </h3>
-
-        <div class="flex items-center gap-3 p-3 rounded-3xl bg-slate-700/30">
-          <div
-            class="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-            <i class="pi pi-user text-white text-lg"></i>
-          </div>
-          <div>
-            <p class="text-base font-semibold text-white">{{ p2pOrder.ordered_by_user?.full_name || 'User' }}</p>
-            <p class="text-xs text-slate-400">{{ p2pOrder.p2p_ad?.name }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Wallet Address (for Buy Orders) -->
-      @if (p2pOrder.order_type === 'buy' && p2pOrder.wallet_address) {
-      <div class="backdrop-blur-xl bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4 md:p-6">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
             <i class="pi pi-wallet text-white"></i>
           </div>
           <div class="flex-1">
-            <h3 class="text-base font-bold text-green-300 mb-1">{{ p2pOrder.p2p_ad?.token_symbol }} Delivery Address
-            </h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              {{ paramsViewType === 'my-orders' ? 'Your wallet address to receive the tokens' : 'User\'s wallet address
-              to send the tokens' }}
-            </p>
+            <h3 class="text-base font-bold text-white">User's {{ p2pOrder.p2p_ad?.token_symbol }} Delivery Address</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">User's wallet address to send the tokens</p>
           </div>
         </div>
 
         <div class="space-y-3">
-          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-purple-500/20">
             <div class="flex items-start justify-between gap-3">
               <div class="flex-1 min-w-0">
-                <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Wallet
+                <label class="text-xs text-purple-400 font-semibold mb-2 block uppercase tracking-wide">Wallet
                   Address</label>
                 <p class="text-sm md:text-base font-mono text-white break-all leading-relaxed">
                   {{ p2pOrder.wallet_address }}
                 </p>
               </div>
               <button type="button" (click)="copyToClipboard(p2pOrder.wallet_address, 'Wallet address')"
-                class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                class="shrink-0 w-10 h-10 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
                 <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
               </button>
             </div>
           </div>
 
-          @if (paramsViewType === 'ad-orders') {
           <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-3">
             <div class="flex items-start gap-2">
               <i class="pi pi-info-circle text-blue-400 text-sm mt-0.5 shrink-0"></i>
               <p class="text-xs text-slate-300 leading-relaxed">
                 <strong class="text-blue-300">Important:</strong> Send exactly <strong class="text-white">{{
                   p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}</strong> to this address.
-                Double-check before sending as transactions cannot be reversed.
               </p>
             </div>
           </div>
-          }
         </div>
       </div>
       }
 
-      <!-- Account Details (for Sell Orders) -->
-      @if (p2pOrder.order_type === 'sell' && (p2pOrder.account_name || p2pOrder.account_number)) {
-      <div class="backdrop-blur-xl bg-purple-500/10 border-2 border-purple-500/30 rounded-3xl p-4 md:p-6">
+      <!-- MERCHANT + BUY ORDER: Your Receiving Payment Details -->
+      @if (isMerchant && p2pOrder.order_type === 'buy' && selectedAdPaymentType) {
+      <div class="backdrop-blur-xl bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4 md:p-6">
         <div class="flex items-start gap-3 mb-4">
           <div
-            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0">
+            class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
             <i class="pi pi-credit-card text-white"></i>
           </div>
           <div class="flex-1">
-            <h3 class="text-base font-bold text-purple-300 mb-1">Payment Receiving Details</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              {{ paramsViewType === 'my-orders' ? 'Your account details to receive payment' : 'User\'s account details
-              to send payment' }}
-            </p>
+            <h3 class="text-base font-bold text-green-300">Your Receiving Payment Details</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">Your payment account details where user sends payment</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+            <div class="space-y-3">
+              @if (selectedAdPaymentType.p2p_payment_type?.name) {
+              <div class="flex items-center gap-3 pb-3 border-b border-slate-700/50">
+                @if (selectedAdPaymentType.p2p_payment_type?.logo_url) {
+                <img [src]="selectedAdPaymentType.p2p_payment_type!.logo_url"
+                  [alt]="selectedAdPaymentType.p2p_payment_type!.name" class="w-8 h-8 object-contain shrink-0" />
+                }
+                <div class="flex-1">
+                  <label class="text-xs text-green-400 font-semibold block uppercase tracking-wide">Payment
+                    Method</label>
+                  <p class="text-sm md:text-base font-semibold text-white">
+                    {{ selectedAdPaymentType.p2p_payment_type?.name }}
+                  </p>
+                </div>
+              </div>
+              }
+
+              @if (selectedAdPaymentType.account_name) {
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1">
+                  <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Account
+                    Name</label>
+                  <p class="text-sm md:text-base font-semibold text-white">
+                    {{ selectedAdPaymentType.account_name }}
+                  </p>
+                </div>
+                <button type="button" (click)="copyToClipboard(selectedAdPaymentType.account_name, 'Account name')"
+                  class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                  <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+              }
+
+              @if (selectedAdPaymentType.account_number) {
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1">
+                  <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Account Number
+                    / Mobile</label>
+                  <p class="text-sm md:text-base font-mono text-white tracking-wide">
+                    {{ selectedAdPaymentType.account_number }}
+                  </p>
+                </div>
+                <button type="button" (click)="copyToClipboard(selectedAdPaymentType.account_number, 'Account number')"
+                  class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                  <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+              }
+
+              @if (selectedAdPaymentType.other_details) {
+              <div>
+                <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Other
+                  Details</label>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                  {{ selectedAdPaymentType.other_details }}
+                </p>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- MERCHANT + SELL ORDER: User's Payment Details -->
+      @if (isMerchant && p2pOrder.order_type === 'sell' && (p2pOrder.account_name || p2pOrder.account_number)) {
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-credit-card text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-white">User's Payment Details</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">User's account details to send payment</p>
           </div>
         </div>
 
@@ -364,7 +442,7 @@
                 class="w-8 h-8 object-contain shrink-0" />
               }
               <div class="flex-1">
-                <label class="text-xs text-purple-400 font-semibold mb-1 block uppercase tracking-wide">Payment
+                <label class="text-xs text-green-400 font-semibold mb-1 block uppercase tracking-wide">Payment
                   Method</label>
                 <p class="text-sm md:text-base font-semibold text-white">
                   {{ p2pOrder.p2p_payment_type?.name }}
@@ -373,16 +451,333 @@
             </div>
           </div>
           }
+        </div>
+      </div>
+      }
 
-          @if (paramsViewType === 'ad-orders') {
+      <!-- MERCHANT + SELL ORDER: Your Receiving Wallet Addresses -->
+      @if (isMerchant && p2pOrder.order_type === 'sell' && adWalletAddresses.length > 0) {
+      <div class="backdrop-blur-xl bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4 md:p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-wallet text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-green-300">Your Receiving Wallet Addresses</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Your {{ p2pOrder.p2p_ad?.token_symbol }} wallet addresses to receive tokens
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          @for (walletAddr of adWalletAddresses; track walletAddr.id) {
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+            <div class="space-y-3">
+              @if (walletAddr.wallet_name) {
+              <div class="pb-3 border-b border-slate-700/50">
+                <label class="text-xs text-green-400 font-semibold block uppercase tracking-wide mb-1">Wallet
+                  Name</label>
+                <p class="text-sm md:text-base font-semibold text-white">
+                  {{ walletAddr.wallet_name }}
+                </p>
+              </div>
+              }
+
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Wallet
+                    Address</label>
+                  <p class="text-sm md:text-base font-mono text-white break-all leading-relaxed">
+                    {{ walletAddr.wallet_address }}
+                  </p>
+                </div>
+                <button type="button" (click)="copyToClipboard(walletAddr.wallet_address, 'Wallet address')"
+                  class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                  <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+
+              @if (walletAddr.other_details) {
+              <div class="pt-2 border-t border-slate-700/50">
+                <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Other
+                  Details</label>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                  {{ walletAddr.other_details }}
+                </p>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- USER + BUY ORDER: Merchant's Payment Details -->
+      @if (isUser && p2pOrder.order_type === 'buy' && selectedAdPaymentType) {
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-credit-card text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-white">Merchant's Payment Details</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">Send your payment to this merchant account</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-purple-500/20">
+            <div class="space-y-3">
+              @if (selectedAdPaymentType.p2p_payment_type?.name) {
+              <div class="flex items-center gap-3 pb-3 border-b border-slate-700/50">
+                @if (selectedAdPaymentType.p2p_payment_type?.logo_url) {
+                <img [src]="selectedAdPaymentType.p2p_payment_type!.logo_url"
+                  [alt]="selectedAdPaymentType.p2p_payment_type!.name" class="w-8 h-8 object-contain shrink-0" />
+                }
+                <div class="flex-1">
+                  <label class="text-xs text-purple-400 font-semibold block uppercase tracking-wide">Payment
+                    Method</label>
+                  <p class="text-sm md:text-base font-semibold text-white">
+                    {{ selectedAdPaymentType.p2p_payment_type?.name }}
+                  </p>
+                </div>
+              </div>
+              }
+
+              @if (selectedAdPaymentType.account_name) {
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1">
+                  <label class="text-xs text-purple-400 font-semibold mb-2 block uppercase tracking-wide">Account
+                    Name</label>
+                  <p class="text-sm md:text-base font-semibold text-white">
+                    {{ selectedAdPaymentType.account_name }}
+                  </p>
+                </div>
+                <button type="button" (click)="copyToClipboard(selectedAdPaymentType.account_name, 'Account name')"
+                  class="shrink-0 w-10 h-10 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                  <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+              }
+
+              @if (selectedAdPaymentType.account_number) {
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1">
+                  <label class="text-xs text-purple-400 font-semibold mb-2 block uppercase tracking-wide">Account Number
+                    / Mobile</label>
+                  <p class="text-sm md:text-base font-mono text-white tracking-wide">
+                    {{ selectedAdPaymentType.account_number }}
+                  </p>
+                </div>
+                <button type="button" (click)="copyToClipboard(selectedAdPaymentType.account_number, 'Account number')"
+                  class="shrink-0 w-10 h-10 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                  <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+              }
+
+              @if (selectedAdPaymentType.other_details) {
+              <div>
+                <label class="text-xs text-purple-400 font-semibold mb-2 block uppercase tracking-wide">Other
+                  Details</label>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                  {{ selectedAdPaymentType.other_details }}
+                </p>
+              </div>
+              }
+            </div>
+          </div>
+
           <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-3">
             <div class="flex items-start gap-2">
               <i class="pi pi-info-circle text-blue-400 text-sm mt-0.5 shrink-0"></i>
               <p class="text-xs text-slate-300 leading-relaxed">
                 <strong class="text-blue-300">Important:</strong> Send exactly <strong class="text-white">₱{{
-                  p2pOrder.amount | number:'1.2-2' }}</strong> to the account details above using {{
-                p2pOrder.p2p_payment_type?.name }}. Ensure the account name matches before sending.
+                  p2pOrder.amount | number:'1.2-2' }}</strong> to this payment account. Upload your proof of payment
+                after sending.
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- USER + BUY ORDER: Your Receiving Wallet Address -->
+      @if (isUser && p2pOrder.order_type === 'buy' && p2pOrder.wallet_address) {
+      <div class="backdrop-blur-xl bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4 md:p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-wallet text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-green-300">Your Receiving Wallet Address</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Your wallet address to receive {{ p2pOrder.p2p_ad?.token_symbol }} tokens
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Wallet
+                  Address</label>
+                <p class="text-sm md:text-base font-mono text-white break-all leading-relaxed">
+                  {{ p2pOrder.wallet_address }}
+                </p>
+              </div>
+              <button type="button" (click)="copyToClipboard(p2pOrder.wallet_address, 'Wallet address')"
+                class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- USER + SELL ORDER: Merchant's Wallet Addresses -->
+      @if (isUser && p2pOrder.order_type === 'sell' && adWalletAddresses.length > 0) {
+      <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-wallet text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-white">Merchant's Wallet Addresses</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Send your {{ p2pOrder.p2p_ad?.token_symbol }} tokens to one of these merchant wallets
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          @for (walletAddr of adWalletAddresses; track walletAddr.id) {
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-purple-500/20">
+            <div class="space-y-3">
+              @if (walletAddr.wallet_name) {
+              <div class="pb-3 border-b border-slate-700/50">
+                <label class="text-xs text-purple-400 font-semibold block uppercase tracking-wide mb-1">Wallet
+                  Name</label>
+                <p class="text-sm md:text-base font-semibold text-white">
+                  {{ walletAddr.wallet_name }}
+                </p>
+              </div>
+              }
+
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <label class="text-xs text-purple-400 font-semibold mb-2 block uppercase tracking-wide">Wallet
+                    Address</label>
+                  <p class="text-sm md:text-base font-mono text-white break-all leading-relaxed">
+                    {{ walletAddr.wallet_address }}
+                  </p>
+                </div>
+                <button type="button" (click)="copyToClipboard(walletAddr.wallet_address, 'Wallet address')"
+                  class="shrink-0 w-10 h-10 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                  <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+                </button>
+              </div>
+
+              @if (walletAddr.other_details) {
+              <div class="pt-2 border-t border-slate-700/50">
+                <label class="text-xs text-purple-400 font-semibold mb-2 block uppercase tracking-wide">Other
+                  Details</label>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                  {{ walletAddr.other_details }}
+                </p>
+              </div>
+              }
+            </div>
+          </div>
+          }
+
+          <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-3">
+            <div class="flex items-start gap-2">
+              <i class="pi pi-info-circle text-blue-400 text-sm mt-0.5 shrink-0"></i>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                <strong class="text-blue-300">Important:</strong> Send exactly <strong class="text-white">{{
+                  p2pOrder.quantity | number:'1.2-6' }} {{ p2pOrder.p2p_ad?.token_symbol }}</strong> to one of the
+                wallet addresses above. Upload your proof of transfer after sending.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- USER + SELL ORDER: Your Receiving Payment Details -->
+      @if (isUser && p2pOrder.order_type === 'sell' && (p2pOrder.account_name || p2pOrder.account_number)) {
+      <div class="backdrop-blur-xl bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4 md:p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+            <i class="pi pi-credit-card text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-green-300">Your Receiving Payment Details</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">Your account details to receive payment</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          @if (p2pOrder.account_name) {
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Account
+                  Name</label>
+                <p class="text-sm md:text-base font-semibold text-white">
+                  {{ p2pOrder.account_name }}
+                </p>
+              </div>
+              <button type="button" (click)="copyToClipboard(p2pOrder.account_name, 'Account name')"
+                class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+              </button>
+            </div>
+          </div>
+          }
+
+          @if (p2pOrder.account_number) {
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <label class="text-xs text-green-400 font-semibold mb-2 block uppercase tracking-wide">Account Number /
+                  Mobile Number</label>
+                <p class="text-sm md:text-base font-mono text-white tracking-wide">
+                  {{ p2pOrder.account_number }}
+                </p>
+              </div>
+              <button type="button" (click)="copyToClipboard(p2pOrder.account_number, 'Account number')"
+                class="shrink-0 w-10 h-10 rounded-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 transition-all duration-200 flex items-center justify-center cursor-pointer group">
+                <i class="pi pi-copy group-hover:scale-110 transition-transform"></i>
+              </button>
+            </div>
+          </div>
+          }
+
+          @if (p2pOrder.p2p_payment_type?.name) {
+          <div class="bg-slate-900/50 rounded-3xl p-4 border border-green-500/20">
+            <div class="flex items-center gap-3">
+              @if (p2pOrder.p2p_payment_type?.logo_url) {
+              <img [src]="p2pOrder.p2p_payment_type!.logo_url" [alt]="p2pOrder.p2p_payment_type!.name"
+                class="w-8 h-8 object-contain shrink-0" />
+              }
+              <div class="flex-1">
+                <label class="text-xs text-green-400 font-semibold mb-1 block uppercase tracking-wide">Payment
+                  Method</label>
+                <p class="text-sm md:text-base font-semibold text-white">
+                  {{ p2pOrder.p2p_payment_type?.name }}
+                </p>
+              </div>
             </div>
           </div>
           }
@@ -439,6 +834,7 @@
     <div class="lg:col-span-1">
       <div
         class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden sticky top-4">
+
         <!-- Chat Header -->
         <div class="p-4 border-b border-slate-700/50 bg-slate-900/50">
           <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -602,12 +998,12 @@
     <div class="flex gap-3 pt-2">
       <button type="button" (click)="uploadPaymentProof()" [disabled]="selectedFiles.length === 0"
         [class.opacity-50]="selectedFiles.length === 0" [class.cursor-not-allowed]="selectedFiles.length === 0"
-        class="flex-1 px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+        class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
         <i class="pi pi-check"></i>
         <span>Submit Proof ({{ selectedFiles.length }})</span>
       </button>
       <button type="button" (click)="closePaymentProofDialog()"
-        class="flex-1 px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
         Cancel
       </button>
     </div>
@@ -644,10 +1040,35 @@
       </div>
     </div>
 
-    <!-- Transaction Details -->
+    <!-- Order Details -->
     <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
-      <h3 class="text-sm font-bold text-white mb-3">Transaction Details</h3>
-      <div class="space-y-2 text-sm">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-file-edit text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white">Order Details</h3>
+      </div>
+
+      <!-- Order info -->
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Order Number</span>
+          <span class="text-white font-semibold font-mono">{{ p2pOrder.id }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400">Merchant</span>
+          <div class="text-right">
+            <p class="text-white font-semibold">{{ p2pOrder.p2p_ad?.name || 'Anonymous' }}</p>
+            @if (p2pOrder.p2p_ad?.logo_url && p2pOrder.p2p_ad?.token_symbol) {
+            <div class="flex items-center gap-1 justify-end mt-0.5">
+              <img [src]="p2pOrder.p2p_ad!.logo_url" [alt]="p2pOrder.p2p_ad!.token_symbol"
+                class="w-4 h-4 object-contain" />
+              <span class="text-xs text-slate-400">{{ p2pOrder.p2p_ad?.token_symbol }}</span>
+            </div>
+            }
+          </div>
+        </div>
         <div class="flex justify-between">
           <span class="text-slate-400">Price</span>
           <span class="text-white font-semibold">₱{{ p2pOrder.ordered_price | number:'1.2-2' }} PHP</span>
@@ -671,31 +1092,30 @@
       </div>
     </div>
 
-    <!-- Wallet Address (for Buy Orders) - Mobile -->
-    @if (p2pOrder.order_type === 'buy' && p2pOrder.wallet_address) {
-    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+    <!-- Merchant BUY: User's USDT Delivery Address (slate theme) -->
+    @if (p2pOrder.order_type === 'buy' && paramsViewType === 'ad-orders' && p2pOrder.wallet_address) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
       <div class="flex items-center gap-2 mb-3">
         <div
-          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
           <i class="pi pi-wallet text-white text-sm"></i>
         </div>
-        <h3 class="text-sm font-bold text-green-300">{{ p2pOrder.p2p_ad?.token_symbol }} Delivery Address</h3>
+        <h3 class="text-sm font-bold text-white">
+          User's {{ p2pOrder.p2p_ad?.token_symbol || 'Token' }} Delivery Address
+        </h3>
       </div>
 
-      <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
-        <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Wallet Address</label>
+      <div class="bg-slate-900/50 rounded-2xl p-3 border border-purple-500/20">
+        <label class="text-xs text-purple-400 font-semibold mb-1.5 block uppercase tracking-wide">Wallet Address</label>
         <div class="flex items-start gap-2">
-          <p class="flex-1 text-xs font-mono text-white break-all leading-relaxed">
-            {{ p2pOrder.wallet_address }}
-          </p>
+          <p class="flex-1 text-xs font-mono text-white break-all leading-relaxed">{{ p2pOrder.wallet_address }}</p>
           <button type="button" (click)="copyToClipboard(p2pOrder.wallet_address, 'Wallet address')"
-            class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+            class="shrink-0 w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
             <i class="pi pi-copy text-sm"></i>
           </button>
         </div>
       </div>
 
-      @if (paramsViewType === 'ad-orders') {
       <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-2.5 mt-3">
         <div class="flex items-start gap-2">
           <i class="pi pi-info-circle text-blue-400 text-xs mt-0.5 shrink-0"></i>
@@ -705,19 +1125,89 @@
           </p>
         </div>
       </div>
+    </div>
+    }
+
+    <!-- Merchant BUY: Your receiving payment details (green theme, single payment only) -->
+    @if (p2pOrder.order_type === 'buy' && paramsViewType === 'ad-orders' && adPaymentTypes.length > 0) {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-green-300">Your Receiving Payment Details</h3>
+      </div>
+
+      @for (paymentType of adPaymentTypes; track paymentType.id; let i = $index) {
+      @if (paymentType.p2p_payment_type_id === p2pOrder.p2p_payment_type_id) {
+      <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
+        <div class="space-y-2.5">
+          @if (paymentType.p2p_payment_type?.name) {
+          <div class="flex items-center gap-2 pb-2.5 border-b border-slate-700/50">
+            @if (paymentType.p2p_payment_type?.logo_url) {
+            <img [src]="paymentType.p2p_payment_type!.logo_url" [alt]="paymentType.p2p_payment_type!.name"
+              class="w-6 h-6 object-contain shrink-0" />
+            }
+            <div class="flex-1">
+              <label class="text-xs text-green-400 font-semibold block uppercase tracking-wide">Payment Method</label>
+              <p class="text-sm font-semibold text-white">{{ paymentType.p2p_payment_type?.name }}</p>
+            </div>
+          </div>
+          }
+
+          @if (paymentType.account_name) {
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Account
+                Name</label>
+              <p class="text-sm font-semibold text-white">{{ paymentType.account_name }}</p>
+            </div>
+            <button type="button" (click)="copyToClipboard(paymentType.account_name, 'Account name')"
+              class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+              <i class="pi pi-copy text-sm"></i>
+            </button>
+          </div>
+          }
+
+          @if (paymentType.account_number) {
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Account
+                Number</label>
+              <p class="text-sm font-mono text-white">{{ paymentType.account_number }}</p>
+            </div>
+            <button type="button" (click)="copyToClipboard(paymentType.account_number, 'Account number')"
+              class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+              <i class="pi pi-copy text-sm"></i>
+            </button>
+          </div>
+          }
+
+          @if (paymentType.other_details) {
+          <div>
+            <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Other
+              Details</label>
+            <p class="text-xs text-slate-300 leading-relaxed">{{ paymentType.other_details }}</p>
+          </div>
+          }
+        </div>
+      </div>
+      }
       }
     </div>
     }
 
-    <!-- Account Details (for Sell Orders) - Mobile -->
-    @if (p2pOrder.order_type === 'sell' && (p2pOrder.account_name || p2pOrder.account_number)) {
-    <div class="bg-purple-500/10 border-2 border-purple-500/30 rounded-3xl p-4">
+    <!-- Merchant SELL: User's payment details (slate theme) -->
+    @if (p2pOrder.order_type === 'sell' && paramsViewType === 'ad-orders' && (p2pOrder.account_name ||
+    p2pOrder.account_number)) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
       <div class="flex items-center gap-2 mb-3">
         <div
-          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0">
-          <i class="pi pi-credit-card text-white text-sm"></i>
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-wallet text-white text-sm"></i>
         </div>
-        <h3 class="text-sm font-bold text-purple-300">Payment Details</h3>
+        <h3 class="text-sm font-bold text-white">User's Payment Details</h3>
       </div>
 
       <div class="space-y-2.5">
@@ -767,7 +1257,6 @@
         </div>
         }
 
-        @if (paramsViewType === 'ad-orders') {
         <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-2.5">
           <div class="flex items-start gap-2">
             <i class="pi pi-info-circle text-blue-400 text-xs mt-0.5 shrink-0"></i>
@@ -775,6 +1264,282 @@
               Send exactly <strong class="text-white">₱{{ p2pOrder.amount | number:'1.2-2' }}</strong> to the account
               above.
             </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Merchant SELL: Your receiving wallet addresses (green theme, list) -->
+    @if (p2pOrder.order_type === 'sell' && paramsViewType === 'ad-orders' && adWalletAddresses.length > 0) {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-wallet text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-green-300">
+          Your Receiving {{ p2pOrder.p2p_ad?.token_symbol || 'Token' }} Wallets
+        </h3>
+      </div>
+
+      <div class="space-y-2.5">
+        @for (walletAddr of adWalletAddresses; track walletAddr.id) {
+        <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
+          <div class="space-y-2.5">
+            @if (walletAddr.wallet_name) {
+            <div class="pb-2.5 border-b border-slate-700/50">
+              <label class="text-xs text-green-400 font-semibold block uppercase tracking-wide mb-1">Wallet Name</label>
+              <p class="text-sm font-semibold text-white">{{ walletAddr.wallet_name }}</p>
+            </div>
+            }
+
+            <div class="flex items-start gap-2">
+              <div class="flex-1 min-w-0">
+                <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Wallet
+                  Address</label>
+                <p class="text-xs font-mono text-white break-all leading-relaxed">{{ walletAddr.wallet_address }}</p>
+              </div>
+              <button type="button" (click)="copyToClipboard(walletAddr.wallet_address, 'Wallet address')"
+                class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+                <i class="pi pi-copy text-sm"></i>
+              </button>
+            </div>
+
+            @if (walletAddr.other_details) {
+            <div class="pt-2 border-t border-slate-700/50">
+              <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Other
+                Details</label>
+              <p class="text-xs text-slate-300 leading-relaxed">{{ walletAddr.other_details }}</p>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- User BUY: Merchant's payment details (slate theme, single payment only) -->
+    @if (p2pOrder.order_type === 'buy' && paramsViewType === 'my-orders' && adPaymentTypes.length > 0) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-file-edit text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white">Merchant Payment Details</h3>
+      </div>
+
+      @for (paymentType of adPaymentTypes; track paymentType.id) {
+      @if (paymentType.p2p_payment_type_id === p2pOrder.p2p_payment_type_id) {
+      <div class="bg-slate-900/50 rounded-2xl p-3 border border-purple-500/20">
+        <div class="space-y-2.5">
+          @if (paymentType.p2p_payment_type?.name) {
+          <div class="flex items-center gap-2 pb-2.5 border-b border-slate-700/50">
+            @if (paymentType.p2p_payment_type?.logo_url) {
+            <img [src]="paymentType.p2p_payment_type!.logo_url" [alt]="paymentType.p2p_payment_type!.name"
+              class="w-6 h-6 object-contain shrink-0" />
+            }
+            <div class="flex-1">
+              <label class="text-xs text-purple-400 font-semibold block uppercase tracking-wide">Payment Method</label>
+              <p class="text-sm font-semibold text-white">{{ paymentType.p2p_payment_type?.name }}</p>
+            </div>
+          </div>
+          }
+
+          @if (paymentType.account_name) {
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <label class="text-xs text-purple-400 font-semibold mb-1.5 block uppercase tracking-wide">Account
+                Name</label>
+              <p class="text-sm font-semibold text-white">{{ paymentType.account_name }}</p>
+            </div>
+            <button type="button" (click)="copyToClipboard(paymentType.account_name, 'Account name')"
+              class="shrink-0 w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+              <i class="pi pi-copy text-sm"></i>
+            </button>
+          </div>
+          }
+
+          @if (paymentType.account_number) {
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <label class="text-xs text-purple-400 font-semibold mb-1.5 block uppercase tracking-wide">Account
+                Number</label>
+              <p class="text-sm font-mono text-white">{{ paymentType.account_number }}</p>
+            </div>
+            <button type="button" (click)="copyToClipboard(paymentType.account_number, 'Account number')"
+              class="shrink-0 w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+              <i class="pi pi-copy text-sm"></i>
+            </button>
+          </div>
+          }
+
+          @if (paymentType.other_details) {
+          <div>
+            <label class="text-xs text-purple-400 font-semibold mb-1.5 block uppercase tracking-wide">Other
+              Details</label>
+            <p class="text-xs text-slate-300 leading-relaxed">{{ paymentType.other_details }}</p>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-2.5 mt-3">
+        <div class="flex items-start gap-2">
+          <i class="pi pi-info-circle text-blue-400 text-xs mt-0.5 shrink-0"></i>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Send exactly <strong class="text-white">₱{{ p2pOrder.amount | number:'1.2-2' }}</strong> to the payment
+            account above.
+          </p>
+        </div>
+      </div>
+      }
+      }
+    </div>
+    }
+
+    <!-- User BUY: Your receiving wallet address (green theme) -->
+    @if (p2pOrder.order_type === 'buy' && paramsViewType === 'my-orders' && p2pOrder.wallet_address) {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-wallet text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-green-300">Your Receiving Wallet Address</h3>
+      </div>
+
+      <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
+        <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Wallet Address</label>
+        <div class="flex items-start gap-2">
+          <p class="flex-1 text-xs font-mono text-white break-all leading-relaxed">{{ p2pOrder.wallet_address }}</p>
+          <button type="button" (click)="copyToClipboard(p2pOrder.wallet_address, 'Wallet address')"
+            class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+            <i class="pi pi-copy text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- User SELL: Merchant's wallet addresses (slate theme, list) -->
+    @if (p2pOrder.order_type === 'sell' && paramsViewType === 'my-orders' && adWalletAddresses.length > 0) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-file-edit text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-white">
+          Merchant {{ p2pOrder.p2p_ad?.token_symbol || 'Token' }} Wallets
+        </h3>
+      </div>
+
+      <div class="space-y-2.5">
+        @for (walletAddr of adWalletAddresses; track walletAddr.id) {
+        <div class="bg-slate-900/50 rounded-2xl p-3 border border-purple-500/20">
+          <div class="space-y-2.5">
+            @if (walletAddr.wallet_name) {
+            <div class="pb-2.5 border-b border-slate-700/50">
+              <label class="text-xs text-purple-400 font-semibold block uppercase tracking-wide mb-1">Wallet
+                Name</label>
+              <p class="text-sm font-semibold text-white">{{ walletAddr.wallet_name }}</p>
+            </div>
+            }
+
+            <div class="flex items-start gap-2">
+              <div class="flex-1 min-w-0">
+                <label class="text-xs text-purple-400 font-semibold mb-1.5 block uppercase tracking-wide">Wallet
+                  Address</label>
+                <p class="text-xs font-mono text-white break-all leading-relaxed">{{ walletAddr.wallet_address }}</p>
+              </div>
+              <button type="button" (click)="copyToClipboard(walletAddr.wallet_address, 'Wallet address')"
+                class="shrink-0 w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+                <i class="pi pi-copy text-sm"></i>
+              </button>
+            </div>
+
+            @if (walletAddr.other_details) {
+            <div class="pt-2 border-t border-slate-700/50">
+              <label class="text-xs text-purple-400 font-semibold mb-1.5 block uppercase tracking-wide">Other
+                Details</label>
+              <p class="text-xs text-slate-300 leading-relaxed">{{ walletAddr.other_details }}</p>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-2.5">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-info-circle text-blue-400 text-xs mt-0.5 shrink-0"></i>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Send exactly <strong class="text-white">{{ p2pOrder.quantity | number:'1.2-6' }} {{
+                p2pOrder.p2p_ad?.token_symbol }}</strong> to one of the wallet addresses above.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- User SELL: Your receiving payment details (green theme) -->
+    @if (p2pOrder.order_type === 'sell' && paramsViewType === 'my-orders' && (p2pOrder.account_name ||
+    p2pOrder.account_number)) {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <h3 class="text-sm font-bold text-green-300">Your Receiving Payment Details</h3>
+      </div>
+
+      <div class="space-y-2.5">
+        @if (p2pOrder.account_name) {
+        <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Account
+                Name</label>
+              <p class="text-sm font-semibold text-white">{{ p2pOrder.account_name }}</p>
+            </div>
+            <button type="button" (click)="copyToClipboard(p2pOrder.account_name, 'Account name')"
+              class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+              <i class="pi pi-copy text-sm"></i>
+            </button>
+          </div>
+        </div>
+        }
+
+        @if (p2pOrder.account_number) {
+        <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
+          <div class="flex items-start gap-2">
+            <div class="flex-1">
+              <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Account
+                Number</label>
+              <p class="text-sm font-mono text-white">{{ p2pOrder.account_number }}</p>
+            </div>
+            <button type="button" (click)="copyToClipboard(p2pOrder.account_number, 'Account number')"
+              class="shrink-0 w-9 h-9 rounded-full bg-green-500/20 border border-green-500/30 text-green-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
+              <i class="pi pi-copy text-sm"></i>
+            </button>
+          </div>
+        </div>
+        }
+
+        @if (p2pOrder.p2p_payment_type) {
+        <div class="bg-slate-900/50 rounded-2xl p-3 border border-green-500/20">
+          <label class="text-xs text-green-400 font-semibold mb-1.5 block uppercase tracking-wide">Payment
+            Method</label>
+          <div class="flex items-center gap-2">
+            @if (p2pOrder.p2p_payment_type.logo_url) {
+            <img [src]="p2pOrder.p2p_payment_type!.logo_url" [alt]="p2pOrder.p2p_payment_type!.name"
+              class="w-6 h-6 object-contain shrink-0" />
+            }
+            <p class="text-sm font-semibold text-white">{{ p2pOrder.p2p_payment_type.name }}</p>
           </div>
         </div>
         }
