@@ -55,15 +55,17 @@ export class Marketplace {
 
   activeTab: 'buy' | 'sell' = 'buy';
 
-  p2pAds: P2pAd[] = [];
-  p2pAdPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
-
-  selectedP2pAd: P2pAd | null = null;
-
-  paymentTypes: P2pPaymentType[] = [];
-  selectedPaymentType: P2pPaymentType | undefined;
+  p2pPaymentTypes: P2pPaymentType[] = [];
+  selectedP2pPaymentType: P2pPaymentType | undefined;
 
   searchTerm: string = '';
+
+  p2pAds: P2pAd[] = [];
+  p2pAdsPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+
+  selectedP2pAd: P2pAd | null = null;
+  p2pAdPaymentTypes: P2pAdPaymentType[] = [];
+  selectedP2pAdPaymentType: P2pAdPaymentType | undefined;
 
   showCreateOrderDialog: boolean = false;
   showConfirmOrderDialog: boolean = false;
@@ -78,6 +80,9 @@ export class Marketplace {
     amount: 0,
     p2p_payment_type_id: "",
     p2p_payment_type: undefined,
+    wallet_address: "",
+    account_name: "",
+    account_number: "",
     ordered_by_user_id: "",
     ordered_by_user: undefined,
     status: "",
@@ -96,11 +101,11 @@ export class Marketplace {
       ad.ordering_type === this.activeTab && ad.status === 'active'
     );
 
-    if (this.selectedPaymentType) {
+    if (this.selectedP2pPaymentType) {
       offers = offers.filter(ad => {
         const adPaymentTypes = this.getAdPaymentTypes(ad.id);
         return adPaymentTypes.some(pt =>
-          pt.p2p_payment_type?.name === this.selectedPaymentType!.name
+          pt.p2p_payment_type?.name === this.selectedP2pPaymentType!.name
         );
       });
     }
@@ -120,24 +125,41 @@ export class Marketplace {
     return offers;
   }
 
-  loadP2pAds(): void {
+  loadP2pPaymentTypes(): void {
     this.isLoading = true;
 
+    this.p2pPaymentTypesService.getP2pPaymentTypes().subscribe({
+      next: (p2pPaymentTypes) => {
+        this.p2pPaymentTypes = p2pPaymentTypes;
+        this.selectedP2pPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
+
+        this.loadP2pAds();
+      },
+      error: (error) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load payment types. Please try again.'
+        });
+      }
+    });
+  }
+
+  loadP2pAds(): void {
     this.p2pAdsService.getP2pAds().subscribe({
       next: (p2pAds) => {
         this.p2pAds = p2pAds;
+
         p2pAds.forEach(p2pAd => {
           this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAd.id).subscribe({
-            next: (paymentTypes) => {
-              this.p2pAdPaymentTypesMap.set(p2pAd.id, paymentTypes);
+            next: (p2pPaymentTypes) => {
+              this.p2pAdsPaymentTypesMap.set(p2pAd.id, p2pPaymentTypes);
             },
             error: (error) => {
               console.error('Error loading payment types for ad', p2pAd.id, error);
             }
           });
         });
-
-        this.loadP2pPaymentTypes();
 
         this.isLoading = false;
       },
@@ -152,24 +174,28 @@ export class Marketplace {
     });
   }
 
-  getAdPaymentTypes(p2pAdId: string): P2pAdPaymentType[] {
-    return this.p2pAdPaymentTypesMap.get(p2pAdId) || [];
-  }
+  loadP2pAdPaymentTypes(p2pAdId: string): void {
+    this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAdId).subscribe({
+      next: (p2pAdPaymentTypes) => {
+        this.p2pAdPaymentTypes = p2pAdPaymentTypes;
+        this.selectedP2pAdPaymentType = p2pAdPaymentTypes.length > 0 ? p2pAdPaymentTypes[0] : undefined;
 
-  loadP2pPaymentTypes(): void {
-    this.p2pPaymentTypesService.getP2pPaymentTypes().subscribe({
-      next: (p2pPaymentTypes) => {
-        this.paymentTypes = p2pPaymentTypes;
-        this.selectedPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
+        if (this.selectedP2pAdPaymentType) {
+          this.p2pOrderForm.p2p_payment_type_id = this.selectedP2pAdPaymentType?.p2p_payment_type_id;
+        }
       },
       error: (error) => {
         this.pMessageService.add({
           severity: 'error',
           summary: error.error.error || 'Error',
-          detail: error.error.message || 'Failed to load payment types. Please try again.'
+          detail: error.error.message || 'Failed to load payment types for the selected advertisement. Please try again.'
         });
       }
     });
+  }
+
+  getAdPaymentTypes(p2pAdId: string): P2pAdPaymentType[] {
+    return this.p2pAdsPaymentTypesMap.get(p2pAdId) || [];
   }
 
   getStatusBadgeClass(status: string): string {
@@ -199,6 +225,9 @@ export class Marketplace {
       amount: 0,
       p2p_payment_type_id: "",
       p2p_payment_type: undefined,
+      wallet_address: "",
+      account_name: "",
+      account_number: "",
       ordered_by_user_id: "",
       ordered_by_user: undefined,
       status: "",
@@ -207,21 +236,29 @@ export class Marketplace {
     };
 
     this.selectedP2pAd = null;
-    this.selectedPaymentType = this.paymentTypes.length > 0 ? this.paymentTypes[0] : undefined;
+
+    this.p2pAdPaymentTypes = [];
+    this.selectedP2pAdPaymentType = undefined;
   }
 
-  createOrder(ad: P2pAd): void {
+  createOrder(p2pAd: P2pAd): void {
+    // Store wallet address before reset
+    const savedWalletAddress = this.p2pOrderForm.wallet_address;
+
     this.resetP2pOrderForm();
 
-    this.selectedP2pAd = ad;
+    this.selectedP2pAd = p2pAd;
     this.orderInputMode = 'amount';
 
-    if (this.selectedPaymentType) {
-      this.p2pOrderForm.p2p_payment_type_id = this.selectedPaymentType?.id;
-    }
+    this.loadP2pAdPaymentTypes(p2pAd.id);
 
-    this.p2pOrderForm.amount = ad.min_limit;
+    this.p2pOrderForm.amount = p2pAd.min_limit;
     this.p2pOrderForm.quantity = 0;
+
+    // Restore wallet address for buy orders
+    if (this.activeTab === 'buy') {
+      this.p2pOrderForm.wallet_address = savedWalletAddress;
+    }
 
     this.calculateQuantity();
 
@@ -279,13 +316,52 @@ export class Marketplace {
       return;
     }
 
-    if (!this.selectedPaymentType) {
+    if (!this.selectedP2pAdPaymentType) {
       this.pMessageService.add({
         severity: 'error',
         summary: 'Payment Type Required',
         detail: 'Please select a payment type'
       });
       return;
+    }
+
+    // Validate wallet address for buy orders
+    if (this.activeTab === 'buy' && !this.p2pOrderForm.wallet_address?.trim()) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Wallet Address Required',
+        detail: 'Please enter your wallet address to receive the tokens'
+      });
+      return;
+    }
+
+    // Validate account details for sell orders
+    if (this.activeTab === 'sell') {
+      if (!this.p2pOrderForm.account_name?.trim()) {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Account Name Required',
+          detail: 'Please enter your account name for receiving payment'
+        });
+        return;
+      }
+      if (!this.p2pOrderForm.account_number?.trim()) {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Account Number Required',
+          detail: 'Please enter your account number for receiving payment'
+        });
+        return;
+      }
+    }
+
+    this.p2pOrderForm.p2p_ad_id = this.selectedP2pAd.id;
+    this.p2pOrderForm.order_type = this.activeTab;
+    this.p2pOrderForm.ordered_price = this.selectedP2pAd.price;
+    this.p2pOrderForm.ordered_by_user_id = this.currentUser?.id || '';
+
+    if (this.selectedP2pAdPaymentType) {
+      this.p2pOrderForm.p2p_payment_type_id = this.selectedP2pAdPaymentType?.p2p_payment_type_id;
     }
 
     this.showConfirmOrderDialog = true;
@@ -307,6 +383,9 @@ export class Marketplace {
       quantity: this.p2pOrderForm.quantity,
       amount: this.p2pOrderForm.amount,
       p2p_payment_type_id: this.p2pOrderForm.p2p_payment_type_id,
+      wallet_address: this.p2pOrderForm.wallet_address,
+      account_name: this.p2pOrderForm.account_name,
+      account_number: this.p2pOrderForm.account_number,
       ordered_by_user_id: this.currentUser?.id || ''
     };
 
@@ -361,10 +440,23 @@ export class Marketplace {
         localStorage.removeItem('auth_user');
       }
     }
+
+    const authWallet = localStorage.getItem('auth_wallet');
+    if (authWallet) {
+      try {
+        const walletData = JSON.parse(authWallet);
+        if (walletData.address) {
+          this.p2pOrderForm.wallet_address = walletData.address;
+        }
+      } catch (error) {
+        console.error('Failed to parse wallet data:', error);
+        localStorage.removeItem('auth_wallet');
+      }
+    }
   }
 
   ngOnInit(): void {
     this.checkAuthStatus();
-    this.loadP2pAds();
+    this.loadP2pPaymentTypes();
   }
 }

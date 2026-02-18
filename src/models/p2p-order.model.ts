@@ -13,6 +13,9 @@ export class P2pOrder {
   amount: number = 0;
   p2p_payment_type_id: string = "";
   p2p_payment_type: P2pPaymentType | undefined;
+  wallet_address: string = "";
+  account_name: string = "";
+  account_number: string = "";
   ordered_by_user_id: string = "";
   ordered_by_user: User | undefined;
   status: string = "";
@@ -27,6 +30,9 @@ export class CreateP2pOrderDto {
   quantity: number = 0;
   amount: number = 0;
   p2p_payment_type_id: string = "";
+  wallet_address: string = "";
+  account_name: string = "";
+  account_number: string = "";
   ordered_by_user_id: string = "";
 }
 
@@ -37,6 +43,9 @@ export class UpdateP2pOrderDto {
   ordered_price?: number = 0;
   amount?: number = 0;
   p2p_payment_type_id?: string = "";
-  ordered_by_user_id: string = "";
+  wallet_address?: string = "";
+  account_name?: string = "";
+  account_number?: string = "";
+  ordered_by_user_id?: string = "";
   status?: string;
 }

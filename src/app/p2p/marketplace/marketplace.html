@@ -29,7 +29,7 @@
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-3 mb-6">
       <div class="w-full md:w-56">
-        <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" placeholder="All Payment Types"
+        <p-select [options]="p2pPaymentTypes" [(ngModel)]="selectedP2pPaymentType" placeholder="All Payment Types"
           optionLabel="name" class="w-full" size="large">
           <ng-template #selectedItem let-selectedOption>
             @if (selectedOption) {
@@ -306,34 +306,6 @@
       </div>
     </div>
 
-    <!-- Payment Method -->
-    <div>
-      <label class="text-sm text-slate-400 mb-2 block">Payment Method <span class="text-red-400">*</span></label>
-      <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="paymentType"
-        placeholder="Select payment type" optionLabel="name" class="w-full" size="large">
-        <ng-template #selectedItem let-selectedOption>
-          @if (selectedOption) {
-          <div class="flex items-center gap-2">
-            @if (selectedOption.logo_url) {
-            <img [src]="selectedOption.logo_url" [alt]="selectedOption.name" class="w-5 h-5 object-contain" />
-            } @else {
-            <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
-              <i class="pi pi-wallet text-purple-400 text-xs"></i>
-            </div>
-            }
-            <span class="font-medium">{{ selectedOption.name }}</span>
-          </div>
-          }
-        </ng-template>
-        <ng-template let-paymentType #item>
-          <div class="flex items-center gap-3 py-2">
-            <img [src]="paymentType.logo_url" [alt]="paymentType.name" class="w-8 h-8 rounded-full object-cover" />
-            <span class="font-medium">{{ paymentType.name }}</span>
-          </div>
-        </ng-template>
-      </p-select>
-    </div>
-
     <!-- Order Amount/Crypto -->
     <div class="space-y-3">
       <div class="flex gap-2 border-b border-slate-700/50">
@@ -382,6 +354,115 @@
       </div>
       }
     </div>
+
+    <!-- Payment Method -->
+    <div>
+      <label class="text-sm text-slate-400 mb-2 block">
+        {{ activeTab === 'buy' ? 'How would you like to pay?' : 'How would you like to receive payment?' }}
+        <span class="text-red-400">*</span>
+      </label>
+      <p-select [options]="p2pAdPaymentTypes" [(ngModel)]="selectedP2pAdPaymentType" placeholder="Select payment type"
+        class="w-full" size="large">
+        <ng-template #selectedItem let-selectedOption>
+          @if (selectedOption) {
+          <div class="flex items-center gap-2">
+            @if (selectedOption.p2p_payment_type?.logo_url) {
+            <img [src]="selectedOption.p2p_payment_type.logo_url" [alt]="selectedOption.p2p_payment_type.name"
+              class="w-5 h-5 object-contain" />
+            } @else {
+            <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i class="pi pi-wallet text-purple-400 text-xs"></i>
+            </div>
+            }
+            <span class="font-medium">{{ selectedOption.p2p_payment_type?.name }}</span>
+          </div>
+          }
+        </ng-template>
+        <ng-template let-adPaymentType #item>
+          <div class="flex items-center gap-3 py-2">
+            <img [src]="adPaymentType.p2p_payment_type?.logo_url" [alt]="adPaymentType.p2p_payment_type?.name"
+              class="w-8 h-8 rounded-full object-cover" />
+            <span class="font-medium">{{ adPaymentType.p2p_payment_type?.name }}</span>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+
+    <!-- Wallet Address for Buy Orders -->
+    @if (activeTab === 'buy') {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-wallet text-white text-sm"></i>
+        </div>
+        <div class="flex-1">
+          <h4 class="text-sm font-semibold text-green-300 mb-1">Token Delivery Address</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Please provide your wallet address where you want to receive the {{ selectedP2pAd?.token_symbol || 'USDT' }}
+            tokens.
+            Make sure the address is correct as transactions cannot be reversed.
+          </p>
+        </div>
+      </div>
+      <div>
+        <label class="text-sm text-slate-400 mb-2 block">
+          Your Wallet Address <span class="text-red-400">*</span>
+        </label>
+        <input type="text" pInputText [(ngModel)]="p2pOrderForm.wallet_address" name="walletAddress"
+          placeholder="e.g., 0x1234...abcd or bc1q..."
+          class="w-full rounded-3xl border border-gray-100/30 px-4 py-3 font-mono text-sm"
+          style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        <div class="text-xs text-green-400 mt-1.5 flex items-center gap-1">
+          <i class="pi pi-info-circle"></i>
+          <span>Double-check your address before proceeding</span>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Account Details for Sell Orders -->
+    @if (activeTab === 'sell') {
+    <div class="bg-purple-500/10 border-2 border-purple-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <div class="flex-1">
+          <h4 class="text-sm font-semibold text-purple-300 mb-1">Payment Receiving Details</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Provide your {{ selectedP2pAdPaymentType?.p2p_payment_type?.name || 'payment' }} account details where you
+            want to receive the PHP payment.
+            Ensure the information is accurate to avoid payment delays.
+          </p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm text-slate-400 mb-2 block">
+            Account Name <span class="text-red-400">*</span>
+          </label>
+          <input type="text" pInputText [(ngModel)]="p2pOrderForm.account_name" name="accountName"
+            placeholder="e.g., Juan Dela Cruz" class="w-full rounded-3xl border border-gray-100/30 px-4 py-3"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-400 mb-2 block">
+            Account Number / Mobile Number <span class="text-red-400">*</span>
+          </label>
+          <input type="text" pInputText [(ngModel)]="p2pOrderForm.account_number" name="accountNumber"
+            placeholder="e.g., 09171234567 or 1234567890" class="w-full rounded-3xl border border-gray-100/30 px-4 py-3"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          <div class="text-xs text-purple-400 mt-1.5 flex items-center gap-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Enter the account number associated with your {{ selectedP2pAdPaymentType?.p2p_payment_type?.name ||
+              'payment method' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
 
     <!-- Trading Terms -->
     <div class="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-4">
@@ -459,7 +540,7 @@
         </div>
         <div class="flex justify-between">
           <span class="text-slate-400">Payment Method</span>
-          <span class="text-white font-semibold">{{ selectedPaymentType?.name }}</span>
+          <span class="text-white font-semibold">{{ selectedP2pPaymentType?.name }}</span>
         </div>
         <div class="flex justify-between pt-2 border-t border-slate-700/50">
           <span class="text-slate-400 font-semibold">Total Amount</span>

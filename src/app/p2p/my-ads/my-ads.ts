@@ -15,11 +15,13 @@ import { Token } from '../../../models/token.model';
 import { P2pAd, CreateP2pAdDto, UpdateP2pAdDto } from '../../../models/p2p-ad.model';
 import { P2pPaymentType } from '../../../models/p2p-payment-type.model'
 import { P2pAdPaymentType, CreateP2pAdPaymentTypeDto } from '../../../models/p2p-ad-payment-type.model';
+import { P2pAdWalletAddress, CreateP2pAdWalletAddressDto } from '../../../models/p2p-ad-wallet-address.model';
 
 import { TokensService } from '../../../services/tokens/tokens.service';
 import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
 import { P2pPaymentTypesService } from '../../../services/p2p-payment-types/p2p-payment-types.service';
 import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
+import { P2pAdWalletAddressesService } from '../../../services/p2p-ad-wallet-addresses/p2p-ad-wallet-addresses.service';
 
 @Component({
   selector: 'app-my-ads',
@@ -44,16 +46,17 @@ export class MyAds {
     private p2pAdsService: P2pAdsService,
     private p2pPaymentTypesService: P2pPaymentTypesService,
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
+    private p2pAdWalletAddressesService: P2pAdWalletAddressesService,
     private pMessageService: PMessageService
   ) { }
 
   currentUser: User | null = null;
 
   p2pAds: P2pAd[] = [];
-  p2pAdPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
+  p2pAdsPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
 
-  paymentTypes: P2pPaymentType[] = [];
-  selectedPaymentType: P2pPaymentType | undefined;
+  p2pPaymentTypes: P2pPaymentType[] = [];
+  selectedP2pPaymentType: P2pPaymentType | undefined;
 
   tokens: Token[] = [];
   selectedToken: Token | undefined;
@@ -97,6 +100,21 @@ export class MyAds {
   };
   p2pAdPaymentTypes: P2pAdPaymentType[] = [];
 
+  showP2pAdWalletAddressDetailsDialog: boolean = false;
+  p2pAdWalletAddressDetailsDialogMode: 'create' | 'edit' = 'create';
+  p2pAdWalletAddressForm: P2pAdWalletAddress = {
+    id: '',
+    p2p_ad_id: '',
+    p2p_ad: undefined,
+    wallet_name: '',
+    wallet_address: '',
+    attachments: [],
+    other_details: '',
+    created_at: new Date(),
+    updated_at: new Date()
+  };
+  p2pAdWalletAddresses: P2pAdWalletAddress[] = [];
+
   showDeleteP2pAdDialog: boolean = false;
   selectedP2pAdToDelete: P2pAd | null = null;
 
@@ -113,8 +131,8 @@ export class MyAds {
         this.p2pAds = p2pAds;
         p2pAds.forEach(p2pAd => {
           this.p2pAdPaymentTypesService.getP2pAdPaymentTypesByP2pAd(p2pAd.id).subscribe({
-            next: (paymentTypes) => {
-              this.p2pAdPaymentTypesMap.set(p2pAd.id, paymentTypes);
+            next: (p2pPaymentTypes) => {
+              this.p2pAdsPaymentTypesMap.set(p2pAd.id, p2pPaymentTypes);
             },
             error: (error) => {
               console.error('Error loading payment types for ad', p2pAd.id, error);
@@ -148,7 +166,7 @@ export class MyAds {
   }
 
   getAdPaymentTypes(p2pAdId: string): P2pAdPaymentType[] {
-    return this.p2pAdPaymentTypesMap.get(p2pAdId) || [];
+    return this.p2pAdsPaymentTypesMap.get(p2pAdId) || [];
   }
 
   loadTokens(): void {
@@ -172,8 +190,8 @@ export class MyAds {
   loadP2pPaymentTypes(): void {
     this.p2pPaymentTypesService.getP2pPaymentTypes().subscribe({
       next: (p2pPaymentTypes) => {
-        this.paymentTypes = p2pPaymentTypes;
-        this.selectedPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
+        this.p2pPaymentTypes = p2pPaymentTypes;
+        this.selectedP2pPaymentType = p2pPaymentTypes.length > 0 ? p2pPaymentTypes[0] : undefined;
       },
       error: (error) => {
         this.pMessageService.add({
@@ -226,6 +244,10 @@ export class MyAds {
     this.p2pAdPaymentTypes = [];
   }
 
+  resetP2pAdWalletAddresses(): void {
+    this.p2pAdWalletAddresses = [];
+  }
+
   resetP2pAdFormPaymentTypeForm(): void {
     this.p2pAdPaymentTypeForm = {
       id: '',
@@ -242,9 +264,24 @@ export class MyAds {
     }
   }
 
+  resetP2pAdWalletAddressForm(): void {
+    this.p2pAdWalletAddressForm = {
+      id: '',
+      p2p_ad_id: '',
+      p2p_ad: undefined,
+      wallet_name: '',
+      wallet_address: '',
+      attachments: [],
+      other_details: '',
+      created_at: new Date(),
+      updated_at: new Date()
+    }
+  }
+
   createP2pAd(): void {
     this.resetP2pAdForm();
     this.resetP2pAdPaymentTypes();
+    this.resetP2pAdWalletAddresses();
 
     this.showP2pAdDetailsDialog = true;
     this.p2pAdDetailsDialogMode = 'create';
@@ -280,8 +317,8 @@ export class MyAds {
     this.resetP2pAdFormPaymentTypeForm();
     this.p2pAdPaymentTypeForm = { ...p2pAdPaymentType };
 
-    if (this.selectedPaymentType?.id !== p2pAdPaymentType.p2p_payment_type_id) {
-      this.selectedPaymentType = this.paymentTypes.find(pt => pt.id === p2pAdPaymentType.p2p_payment_type_id);
+    if (this.selectedP2pPaymentType?.id !== p2pAdPaymentType.p2p_payment_type_id) {
+      this.selectedP2pPaymentType = this.p2pPaymentTypes.find(pt => pt.id === p2pAdPaymentType.p2p_payment_type_id);
     }
 
     this.showP2pAdPaymentTypeDetailsDialog = true;
@@ -289,7 +326,7 @@ export class MyAds {
   }
 
   saveP2pPaymentType(): void {
-    if (!this.selectedPaymentType?.id || !this.p2pAdPaymentTypeForm.account_name || !this.p2pAdPaymentTypeForm.account_number) {
+    if (!this.selectedP2pPaymentType?.id || !this.p2pAdPaymentTypeForm.account_name || !this.p2pAdPaymentTypeForm.account_number) {
       this.pMessageService.add({
         severity: 'warn',
         summary: 'Validation Error',
@@ -300,7 +337,7 @@ export class MyAds {
 
     if (this.p2pAdPaymentTypeDetailsDialogMode === 'create') {
       const isDuplicate = this.p2pAdPaymentTypes.some(
-        pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
+        pt => pt.p2p_payment_type_id === this.selectedP2pPaymentType?.id
       );
 
       if (isDuplicate) {
@@ -316,8 +353,8 @@ export class MyAds {
         id: `temp_${Date.now()}`,
         p2p_ad_id: this.p2pAdForm.id,
         p2p_ad: undefined,
-        p2p_payment_type_id: this.selectedPaymentType.id,
-        p2p_payment_type: this.selectedPaymentType,
+        p2p_payment_type_id: this.selectedP2pPaymentType.id,
+        p2p_payment_type: this.selectedP2pPaymentType,
         account_name: this.p2pAdPaymentTypeForm.account_name,
         account_number: this.p2pAdPaymentTypeForm.account_number,
         attachments: [],
@@ -342,7 +379,7 @@ export class MyAds {
 
       if (otherP2pAdPaymentTypes.length > 0) {
         const isDuplicate = otherP2pAdPaymentTypes.some(
-          pt => pt.p2p_payment_type_id === this.selectedPaymentType?.id
+          pt => pt.p2p_payment_type_id === this.selectedP2pPaymentType?.id
         );
 
         if (isDuplicate) {
@@ -355,8 +392,8 @@ export class MyAds {
         }
       }
 
-      this.p2pAdPaymentTypeForm.p2p_payment_type_id = this.selectedPaymentType.id;
-      this.p2pAdPaymentTypeForm.p2p_payment_type = this.selectedPaymentType;
+      this.p2pAdPaymentTypeForm.p2p_payment_type_id = this.selectedP2pPaymentType.id;
+      this.p2pAdPaymentTypeForm.p2p_payment_type = this.selectedP2pPaymentType;
       this.p2pAdPaymentTypeForm.updated_at = new Date();
 
       const index = this.p2pAdPaymentTypes.findIndex(pt => pt.id === id);
@@ -380,7 +417,7 @@ export class MyAds {
   }
 
   getPaymentTypeName(id: string): string {
-    return this.paymentTypes.find(pt => pt.id === id)?.name || 'Unknown';
+    return this.p2pPaymentTypes.find(pt => pt.id === id)?.name || 'Unknown';
   }
 
   deleteP2pPaymentType(id: string): void {
@@ -392,12 +429,93 @@ export class MyAds {
     });
   }
 
+  // Wallet Address CRUD Methods
+  createP2pWalletAddress(): void {
+    this.resetP2pAdWalletAddressForm();
+
+    this.showP2pAdWalletAddressDetailsDialog = true;
+    this.p2pAdWalletAddressDetailsDialogMode = 'create';
+  }
+
+  editP2pWalletAddress(p2pAdWalletAddress: P2pAdWalletAddress): void {
+    this.resetP2pAdWalletAddressForm();
+    this.p2pAdWalletAddressForm = { ...p2pAdWalletAddress };
+
+    this.showP2pAdWalletAddressDetailsDialog = true;
+    this.p2pAdWalletAddressDetailsDialogMode = 'edit';
+  }
+
+  saveP2pWalletAddress(): void {
+    if (!this.p2pAdWalletAddressForm.wallet_name || !this.p2pAdWalletAddressForm.wallet_address) {
+      this.pMessageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please fill in wallet name and wallet address.'
+      });
+      return;
+    }
+
+    if (this.p2pAdWalletAddressDetailsDialogMode === 'create') {
+      const newWalletAddress: P2pAdWalletAddress = {
+        id: `temp_${Date.now()}`,
+        p2p_ad_id: this.p2pAdForm.id,
+        p2p_ad: undefined,
+        wallet_name: this.p2pAdWalletAddressForm.wallet_name,
+        wallet_address: this.p2pAdWalletAddressForm.wallet_address,
+        attachments: [],
+        other_details: this.p2pAdWalletAddressForm.other_details,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      this.p2pAdWalletAddresses.push(newWalletAddress);
+
+      this.pMessageService.add({
+        severity: 'info',
+        summary: 'Draft',
+        detail: 'Wallet address added. Click Update to save changes.'
+      });
+    } else {
+      const id = this.p2pAdWalletAddressForm.id;
+      this.p2pAdWalletAddressForm.updated_at = new Date();
+
+      const index = this.p2pAdWalletAddresses.findIndex(wa => wa.id === id);
+      if (index !== -1) {
+        this.p2pAdWalletAddresses[index] = this.p2pAdWalletAddressForm;
+      }
+
+      this.pMessageService.add({
+        severity: 'info',
+        summary: 'Draft',
+        detail: 'Wallet address updated. Click Update to save changes.'
+      });
+    }
+
+    this.closeP2pWalletAddressDialog();
+  }
+
+  closeP2pWalletAddressDialog(): void {
+    this.resetP2pAdWalletAddressForm();
+    this.showP2pAdWalletAddressDetailsDialog = false;
+  }
+
+  deleteP2pWalletAddress(id: string): void {
+    this.p2pAdWalletAddresses = this.p2pAdWalletAddresses.filter(wa => wa.id !== id);
+    this.pMessageService.add({
+      severity: 'info',
+      summary: 'Draft',
+      detail: 'Wallet address marked for deletion. Click Update to save changes.'
+    });
+  }
+
   editP2pAd(p2pAd: P2pAd): void {
     this.resetP2pAdForm();
     this.resetP2pAdPaymentTypes();
+    this.resetP2pAdWalletAddresses();
 
     this.p2pAdForm = { ...p2pAd };
     this.loadAdPaymentTypes(p2pAd.id);
+    this.loadAdWalletAddresses(p2pAd.id);
 
     if (this.selectedToken?.symbol.toLocaleUpperCase() !== p2pAd.token_symbol.toLocaleUpperCase()) {
       this.selectedToken = this.tokens.find(t => t.symbol.toLocaleUpperCase() === p2pAd.token_symbol.toLocaleUpperCase());
@@ -417,6 +535,21 @@ export class MyAds {
           severity: 'error',
           summary: error.error.error || 'Error',
           detail: error.error.message || 'Failed to load advertisement payment types. Please try again.'
+        });
+      }
+    });
+  }
+
+  loadAdWalletAddresses(p2pAdId: string): void {
+    this.p2pAdWalletAddressesService.getP2pAdWalletAddressesByP2pAd(p2pAdId).subscribe({
+      next: (walletAddresses: P2pAdWalletAddress[]) => {
+        this.p2pAdWalletAddresses = JSON.parse(JSON.stringify(walletAddresses));
+      },
+      error: (error: any) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: error.error.error || 'Error',
+          detail: error.error.message || 'Failed to load advertisement wallet addresses. Please try again.'
         });
       }
     });
@@ -474,37 +607,20 @@ export class MyAds {
 
       this.p2pAdsService.createP2pAd(payload).subscribe({
         next: (createdP2pAd) => {
-          const paymentTypes: CreateP2pAdPaymentTypeDto[] = this.p2pAdPaymentTypes.map(pt => ({
-            p2p_ad_id: createdP2pAd.id,
-            p2p_payment_type_id: pt.p2p_payment_type_id,
-            account_name: pt.account_name,
-            account_number: pt.account_number,
-            attachments: pt.attachments,
-            other_details: pt.other_details
-          }));
+          this.saveChangesP2pAdPaymentTypes(createdP2pAd.id);
+          this.saveChangesP2pAdWalletAddresses(createdP2pAd.id);
 
-          this.p2pAdPaymentTypesService.createManyP2pAdPaymentTypes(paymentTypes).subscribe({
-            next: () => {
-              this.loadP2pAds();
-              this.closeConfirmCreateAdDialog();
-              this.closeP2pAdDetailsDialog();
+          this.loadP2pAds();
+          this.closeConfirmCreateAdDialog();
+          this.closeP2pAdDetailsDialog();
 
-              this.pMessageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Advertisement created successfully!'
-              });
-              this.isLoading = false;
-            },
-            error: (error) => {
-              this.pMessageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to create payment methods: ' + (error.error?.message || 'Unknown error')
-              });
-              this.isLoading = false;
-            }
+          this.pMessageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Advertisement created successfully!'
           });
+
+          this.isLoading = false;
         },
         error: (error) => {
           this.pMessageService.add({
@@ -531,33 +647,17 @@ export class MyAds {
         next: (updatedP2pAd) => {
           this.p2pAdPaymentTypesService.deleteP2pAdPaymentTypesByP2pAd(updatedP2pAd.id).subscribe({
             next: () => {
-              const paymentTypes: CreateP2pAdPaymentTypeDto[] = this.p2pAdPaymentTypes.map(pt => ({
-                p2p_ad_id: updatedP2pAd.id,
-                p2p_payment_type_id: pt.p2p_payment_type_id,
-                account_name: pt.account_name,
-                account_number: pt.account_number,
-                attachments: pt.attachments,
-                other_details: pt.other_details
-              }));
+              this.saveChangesP2pAdPaymentTypes(updatedP2pAd.id);
 
-              this.p2pAdPaymentTypesService.createManyP2pAdPaymentTypes(paymentTypes).subscribe({
+              this.p2pAdWalletAddressesService.deleteP2pAdWalletAddressesByP2pAd(updatedP2pAd.id).subscribe({
                 next: () => {
-                  this.loadP2pAds();
-                  this.closeConfirmUpdateAdDialog();
-                  this.closeP2pAdDetailsDialog();
-
-                  this.pMessageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Advertisement updated successfully!'
-                  });
-                  this.isLoading = false;
+                  this.saveChangesP2pAdWalletAddresses(updatedP2pAd.id);
                 },
                 error: (error) => {
                   this.pMessageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Failed to create payment methods: ' + (error.error?.message || 'Unknown error')
+                    detail: 'Failed to delete old payment methods: ' + (error.error?.message || 'Unknown error')
                   });
                   this.isLoading = false;
                 }
@@ -585,12 +685,72 @@ export class MyAds {
     }
   }
 
+  saveChangesP2pAdPaymentTypes(p2p_ad_id: string): void {
+    const p2pAdPaymentTypes: CreateP2pAdPaymentTypeDto[] = this.p2pAdPaymentTypes.map(pt => ({
+      p2p_ad_id: p2p_ad_id,
+      p2p_payment_type_id: pt.p2p_payment_type_id,
+      account_name: pt.account_name,
+      account_number: pt.account_number,
+      attachments: pt.attachments,
+      other_details: pt.other_details
+    }));
+
+    this.p2pAdPaymentTypesService.createManyP2pAdPaymentTypes(p2pAdPaymentTypes).subscribe({
+      next: () => {
+        // Payment types created successfully, no additional action needed here
+      },
+      error: (error) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to create payment methods: ' + (error.error?.message || 'Unknown error')
+        });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  saveChangesP2pAdWalletAddresses(p2p_ad_id: string): void {
+    const p2pAdWalletAddresses: CreateP2pAdWalletAddressDto[] = this.p2pAdWalletAddresses.map(wa => ({
+      p2p_ad_id: p2p_ad_id,
+      wallet_name: wa.wallet_name,
+      wallet_address: wa.wallet_address,
+      attachments: wa.attachments,
+      other_details: wa.other_details
+    }));
+
+    this.p2pAdWalletAddressesService.createManyP2pAdWalletAddresses(p2pAdWalletAddresses).subscribe({
+      next: () => {
+        this.loadP2pAds();
+        this.closeConfirmUpdateAdDialog();
+        this.closeP2pAdDetailsDialog();
+
+        this.pMessageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Advertisement updated successfully!'
+        });
+
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to create wallet addresses: ' + (error.error?.message || 'Unknown error')
+        });
+      }
+    });
+  }
+
   closeP2pAdDetailsDialog(): void {
     this.showP2pAdDetailsDialog = false;
 
     this.resetP2pAdForm();
     this.resetP2pAdPaymentTypes();
+    this.resetP2pAdWalletAddresses();
     this.resetP2pAdFormPaymentTypeForm();
+    this.resetP2pAdWalletAddressForm();
   }
 
   deleteP2pAd(p2pAd: P2pAd): void {

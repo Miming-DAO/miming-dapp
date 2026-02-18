@@ -490,6 +490,63 @@
             }
           </div>
 
+          <!-- Section 3.5: Wallet Addresses -->
+          <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+
+            <!-- Wallet Addresses Header -->
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center">
+                  <i class="pi pi-wallet text-white text-sm"></i>
+                </div>
+                <label class="text-sm font-semibold text-white">
+                  Wallet Addresses <span class="text-red-400">*</span>
+                </label>
+              </div>
+              <button type="button" (click)="createP2pWalletAddress()"
+                class="px-4 py-2 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5">
+                <i class="pi pi-plus"></i>
+                New
+              </button>
+            </div>
+
+            <!-- Wallet Addresses List -->
+            @if (p2pAdWalletAddresses.length > 0) {
+            <div class="space-y-2">
+              @for (walletAddress of p2pAdWalletAddresses; track walletAddress.id; let i = $index) {
+              <div class="flex items-center gap-3 p-3 rounded-3xl bg-slate-900/50 border border-slate-700/50">
+                <div
+                  class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+                  <i class="pi pi-wallet text-white text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm text-white font-semibold truncate">{{ walletAddress.wallet_name }}</div>
+                  <div class="text-xs text-slate-400 truncate font-mono">{{ walletAddress.wallet_address }}</div>
+                </div>
+                <div class="flex gap-1 shrink-0">
+                  <button type="button" (click)="editP2pWalletAddress(walletAddress)"
+                    class="w-8 h-8 rounded-full bg-green-500/20 hover:bg-green-500/30 text-green-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+                    <i class="pi pi-pencil text-xs"></i>
+                  </button>
+                  <button type="button" (click)="deleteP2pWalletAddress(walletAddress.id)"
+                    class="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all duration-200 flex items-center justify-center cursor-pointer">
+                    <i class="pi pi-trash text-xs"></i>
+                  </button>
+                </div>
+              </div>
+              }
+            </div>
+            } @else {
+            <div class="p-3 rounded-3xl bg-slate-700/30 border border-slate-600/30">
+              <div class="flex items-center gap-2 text-slate-400">
+                <i class="pi pi-info-circle text-sm"></i>
+                <span class="text-xs">No wallet addresses added yet</span>
+              </div>
+            </div>
+            }
+          </div>
+
           <!-- Section 4: Payment Instructions -->
           <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
             <div class="flex items-center gap-2 mb-3">
@@ -557,7 +614,7 @@
     <!-- Payment Type -->
     <div>
       <label class="text-xs text-slate-400 mb-2 block">Payment Type <span class="text-red-400">*</span></label>
-      <p-select [options]="paymentTypes" [(ngModel)]="selectedPaymentType" name="paymentType"
+      <p-select [options]="p2pPaymentTypes" [(ngModel)]="selectedP2pPaymentType" name="paymentType"
         placeholder="Select payment type" optionLabel="name" class="w-full" size="large">
         <ng-template #selectedItem let-selectedOption>
           @if (selectedOption) {
@@ -611,6 +668,69 @@
         {{ p2pAdPaymentTypeDetailsDialogMode === 'edit' ? 'Update' : 'Add' }}
       </button>
       <button type="button" (click)="closeP2pPaymentTypeDialog()"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        <i class="pi pi-times mr-2"></i>
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Wallet Address Dialog -->
+<p-dialog [(visible)]="showP2pAdWalletAddressDetailsDialog" [modal]="true"
+  [style]="{ 'width': '500px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center">
+        <i [class]="p2pAdWalletAddressDetailsDialogMode === 'edit' ? 'pi pi-pencil' : 'pi pi-plus'"
+          class="text-white text-lg"></i>
+      </div>
+      <div>
+        <span class="font-bold text-lg bg-linear-to-r from-green-400 to-green-200 bg-clip-text text-transparent">
+          {{ p2pAdWalletAddressDetailsDialogMode === 'edit' ? 'Edit Wallet Address' : 'Add Wallet Address' }}
+        </span>
+        <div class="text-xs text-slate-400">{{ p2pAdWalletAddressDetailsDialogMode === 'edit' ? 'Update wallet details'
+          :
+          'Add a new wallet address' }}</div>
+      </div>
+    </div>
+  </ng-template>
+  <div class="py-4 space-y-4">
+
+    <!-- Wallet Name -->
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Wallet Name <span class="text-red-400">*</span></label>
+      <input type="text" pInputText [(ngModel)]="p2pAdWalletAddressForm.wallet_name" name="walletName"
+        placeholder="e.g., MetaMask, Trust Wallet, Binance" class="w-full rounded-3xl border border-gray-100/30 px-4 py-3"
+        style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+    </div>
+
+    <!-- Wallet Address -->
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Wallet Address <span class="text-red-400">*</span></label>
+      <input type="text" pInputText [(ngModel)]="p2pAdWalletAddressForm.wallet_address" name="walletAddress"
+        placeholder="e.g., 0x1234...abcd or bc1q..."
+        class="w-full rounded-3xl border border-gray-100/30 px-4 py-3 font-mono text-sm"
+        style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+    </div>
+
+    <!-- Additional Details -->
+    <div>
+      <label class="text-xs text-slate-400 mb-2 block">Additional Details (Optional)</label>
+      <textarea pTextarea [(ngModel)]="p2pAdWalletAddressForm.other_details" name="walletOtherDetails"
+        placeholder="Network, chain, or any special instructions" class="w-full text-sm" [rows]="4"
+        style="border-radius: 1.5rem; border: 1px solid rgb(241 245 249 / 0.3); padding: 0.75rem 1rem; background-color: oklch(20.8% 0.042 265.755);"></textarea>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-2 pt-5">
+      <button type="button" (click)="saveP2pWalletAddress()"
+        class="px-6 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed">
+        <i class="pi pi-save mr-2"></i>
+        {{ p2pAdWalletAddressDetailsDialogMode === 'edit' ? 'Update' : 'Add' }}
+      </button>
+      <button type="button" (click)="closeP2pWalletAddressDialog()"
         class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
         <i class="pi pi-times mr-2"></i>
         Cancel
@@ -721,6 +841,14 @@
         <div class="flex justify-between">
           <span class="text-slate-400">Payment Methods</span>
           <span class="text-white font-semibold">{{ p2pAdPaymentTypes.length }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Wallet Addresses</span>
+          <span class="text-white font-semibold">{{ p2pAdWalletAddresses.length }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Wallet Addresses</span>
+          <span class="text-white font-semibold">{{ p2pAdWalletAddresses.length }}</span>
         </div>
       </div>
     </div>

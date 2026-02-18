@@ -65,27 +65,20 @@ export class OrderDetails implements OnInit {
     avatar?: string;
   }> = [];
 
-  get isUser(): boolean {
-    if (!this.currentUser || !this.p2pOrder) return false;
-    return this.currentUser.id === this.p2pOrder.ordered_by_user_id;
-  }
-
   get isMerchant(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
     return this.currentUser.id !== this.p2pOrder.ordered_by_user_id;
   }
 
-  // PENDING status buttons
+  get isUser(): boolean {
+    if (!this.currentUser || !this.p2pOrder) return false;
+    return this.currentUser.id === this.p2pOrder.ordered_by_user_id;
+  }
+
   get showUploadProofButton(): boolean {
     return this.isUser && this.p2pOrder?.status === 'pending';
   }
 
-  get showCancelButtonForPending(): boolean {
-    if (!this.p2pOrder || this.p2pOrder.status !== 'pending') return false;
-    return true; // Both user and merchant can cancel during pending
-  }
-
-  // PAID status buttons
   get showNotifyTokenSentButton(): boolean {
     return this.isMerchant && this.p2pOrder?.status === 'paid';
   }
@@ -94,12 +87,6 @@ export class OrderDetails implements OnInit {
     return this.isUser && this.p2pOrder?.status === 'paid';
   }
 
-  get showCancelButtonForPaid(): boolean {
-    if (!this.p2pOrder || this.p2pOrder.status !== 'paid') return false;
-    return this.isUser; // Only user can cancel when paid
-  }
-
-  // COMPLETED/CANCELLED - no cancel button
   get showCancelButton(): boolean {
     if (!this.p2pOrder) return false;
     if (this.p2pOrder.status === 'completed' || this.p2pOrder.status === 'cancelled') return false;
@@ -108,6 +95,99 @@ export class OrderDetails implements OnInit {
     if (this.p2pOrder.status === 'paid') return this.isUser;
 
     return false;
+  }
+
+  get statusIcon(): string {
+    if (!this.p2pOrder) return 'pi-clock';
+    switch (this.p2pOrder.status) {
+      case 'pending': return 'pi-clock';
+      case 'paid': return 'pi-check-circle';
+      case 'completed': return 'pi-check';
+      case 'cancelled': return 'pi-times-circle';
+      default: return 'pi-clock';
+    }
+  }
+
+  get statusTitle(): string {
+    if (!this.p2pOrder) return '';
+    switch (this.p2pOrder.status) {
+      case 'pending': return 'Waiting for Payment';
+      case 'paid': return 'Payment Submitted';
+      case 'completed': return 'Order Completed!';
+      case 'cancelled': return 'Order Cancelled';
+      default: return '';
+    }
+  }
+
+  get statusMessage(): string {
+    if (!this.p2pOrder) return '';
+
+    const { status, order_type } = this.p2pOrder;
+    const tokenSymbol = this.p2pOrder.p2p_ad?.token_symbol || '';
+    const amount = this.p2pOrder.amount || 0;
+    const quantity = this.p2pOrder.quantity || 0;
+    const price = this.p2pOrder.ordered_price || 0;
+
+    if (status === 'pending') {
+      if (this.paramsViewType === 'my-orders') {
+        if (order_type === 'buy') {
+          return `You are buying <span class="font-bold text-yellow-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span>. Please send <span class="font-bold text-yellow-400">₱${this.formatAmount(amount)} PHP</span> to the merchant and upload your proof of payment.`;
+        } else {
+          return `You are selling ${tokenSymbol} at a price of <span class="font-bold text-yellow-400">₱${this.formatAmount(price)} PHP</span> with a total amount of <span class="font-bold text-yellow-400">₱${this.formatAmount(amount)} PHP</span>. Please send <span class="font-bold text-yellow-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> to the merchant and upload your proof of payment.`;
+        }
+      } else {
+        if (order_type === 'buy') {
+          return `Waiting for the user to send <span class="font-bold text-yellow-400">₱${this.formatAmount(amount)} PHP</span> and upload their proof of payment.`;
+        } else {
+          return `Waiting for the user to send <span class="font-bold text-yellow-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> and upload their proof of payment.`;
+        }
+      }
+    }
+
+    if (status === 'paid') {
+      if (this.paramsViewType === 'my-orders') {
+        if (order_type === 'buy') {
+          return `Your payment proof has been uploaded. Waiting for the merchant to verify your <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> payment and send you <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span>.`;
+        } else {
+          return `Your payment proof has been uploaded. Waiting for the merchant to verify your <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> payment and send you <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span>.`;
+        }
+      } else {
+        if (order_type === 'buy') {
+          return `The user has uploaded their payment proof. Please verify you received <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> and send <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> to complete the order.`;
+        } else {
+          return `The user has uploaded their payment proof. Please verify you received <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> and send <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> to complete the order.`;
+        }
+      }
+    }
+
+    if (status === 'completed') {
+      return 'This order has been completed successfully. Thank you for using our P2P marketplace!';
+    }
+
+    if (status === 'cancelled') {
+      return 'This order has been cancelled. If you have questions, please contact support.';
+    }
+
+    return '';
+  }
+
+  get statusColorClass(): string {
+    if (!this.p2pOrder) return 'yellow';
+    switch (this.p2pOrder.status) {
+      case 'pending': return 'yellow';
+      case 'paid': return 'blue';
+      case 'completed': return 'green';
+      case 'cancelled': return 'red';
+      default: return 'yellow';
+    }
+  }
+
+  private formatQuantity(value: number): string {
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+  }
+
+  private formatAmount(value: number): string {
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   loadOrderDetails(): void {
@@ -323,6 +403,22 @@ export class OrderDetails implements OnInit {
     if (hours > 0) return `${hours}h ago`;
     if (minutes > 0) return `${minutes}m ago`;
     return 'Just now';
+  }
+
+  copyToClipboard(text: string, label: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.pMessageService.add({
+        severity: 'success',
+        summary: 'Copied',
+        detail: `${label} copied to clipboard`
+      });
+    }).catch(err => {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Copy Failed',
+        detail: 'Failed to copy to clipboard'
+      });
+    });
   }
 
   checkAuthStatus(): void {
