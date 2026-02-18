@@ -83,20 +83,19 @@ export class XteriumAccounts {
     }
 
     this.isProcessing = true;
+    this.showXteriumSignDialog = true;
+
+    const convertedAddress = this.polkadotJsService.encodePublicAddressByChainFormat(
+      this.selectedPolkadotWalletAccount.address,
+      42
+    );
 
     const nonceResponse = await firstValueFrom(this.authWalletService.generateNonce({
-      wallet_address: this.selectedPolkadotWalletAccount.address,
+      wallet_address: convertedAddress,
       wallet_type: 'polkadot'
     }));
 
     this.generatedNonce = nonceResponse.nonce;
-
-    const convertedAddress = this.polkadotJsService.encodePublicAddressByChainFormat(
-      this.selectedPolkadotWalletAccount!.address,
-      280
-    );
-
-    this.showXteriumSignDialog = true;
 
     const signingType = "signRaw";
     const payload = {
@@ -108,7 +107,7 @@ export class XteriumAccounts {
     this.xteriumSignUrl = 'https://deeplink.xterium.app/web3/sign-transaction?signingType=' + encodeURIComponent(signingType) + '&payload=' + encodeURIComponent(JSON.stringify(payload)) + '&callbackUrl=' + encodeURIComponent(callbackUrl);
     localStorage.setItem('requested_sign_raw', JSON.stringify({
       name: this.selectedPolkadotWalletAccount.meta.name,
-      address: this.selectedPolkadotWalletAccount.address,
+      address: convertedAddress,
       nonce: this.generatedNonce
     }));
 
