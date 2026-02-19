@@ -1,4 +1,4 @@
-<div class="backdrop-blur-md bg-slate-900/50 border-b border-purple-500/20">
+<div class="backdrop-blur-md bg-slate-900/50 border-b border-cyan-500/20">
   <div class="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between">
     <div class="flex items-center gap-2 md:gap-4">
       @if (isLoggedIn) {
@@ -10,14 +10,14 @@
 
       <!-- Page Title -->
       <div
-        class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-        <i class="pi pi-shopping-bag text-white text-lg md:text-xl"></i>
+        class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-linear-to-br from-cyan-600 to-blue-600 flex items-center justify-center">
+        <i class="pi pi-shield text-white text-lg md:text-xl"></i>
       </div>
       <div>
         <h1 class="text-lg md:text-2xl font-bold text-white bg-clip-text">
-          P2P Trading
+          Administration
         </h1>
-        <p class="text-xs text-slate-400 hidden sm:block">Peer-to-Peer Marketplace</p>
+        <p class="text-xs text-slate-400 hidden sm:block">Admin Control Panel</p>
       </div>
     </div>
 
@@ -89,109 +89,62 @@
     </div>
   </div>
 
-  <!-- P2P Navigation (shown only when logged in) -->
+  <!-- Admin Navigation (shown only when logged in) -->
   @if (isLoggedIn) {
-  <div class="border-t border-purple-500/20">
+  <div class="border-t border-cyan-500/20">
 
     <!-- Desktop Navigation -->
     <div class="px-4 md:px-6 lg:py-3 flex items-center justify-between">
 
       <!-- Left Section: Navigation Buttons -->
       <div class="hidden md:flex items-center space-x-1">
-        <button (click)="setActiveMenu('marketplace')"
-          [class]="activeMenu === 'marketplace' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
+        <button (click)="setActiveMenu('dashboard')"
+          [class]="activeMenu === 'dashboard' ? 'bg-linear-to-r from-cyan-600 to-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
           class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer">
-          <i class="pi pi-shopping-cart text-sm"></i>
-          <span class="font-medium">Marketplace</span>
+          <i class="pi pi-chart-bar text-sm"></i>
+          <span class="font-medium">Dashboard</span>
         </button>
-        <button (click)="setActiveMenu('orders')"
-          [class]="activeMenu === 'orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
+        <button (click)="setActiveMenu('users')"
+          [class]="activeMenu === 'users' ? 'bg-linear-to-r from-cyan-600 to-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
           class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer">
-          <i class="pi pi-list text-sm"></i>
-          <span class="font-medium">Orders</span>
-        </button>
-        <button (click)="setActiveMenu('my-ads')"
-          [class]="activeMenu === 'my-ads' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'"
-          class="flex items-center gap-2 px-4 py-2 rounded-3xl transition-all duration-200 cursor-pointer">
-          <i class="pi pi-megaphone text-sm"></i>
-          <span class="font-medium">My Ads</span>
+          <i class="pi pi-users text-sm"></i>
+          <span class="font-medium">Users</span>
         </button>
       </div>
 
-      <!-- Right Section: Stats + Admin -->
+      <!-- Right Section: Admin Badge -->
       <div class="hidden lg:flex items-center gap-2">
-
-        <!-- Quick Stats Button -->
-        <button (click)="showStatsDialog = true"
-          class="flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-          <i class="pi pi-chart-line text-sm"></i>
-          <span class="font-semibold text-sm">Stats</span>
-        </button>
+        <div class="flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 text-cyan-300 border border-cyan-500/30">
+          <i class="pi pi-shield text-sm"></i>
+          <span class="font-semibold text-sm">Admin</span>
+        </div>
       </div>
     </div>
 
     <!-- Mobile Menu -->
     @if (navMenuOpen) {
-    <div class="md:hidden border-t border-purple-500/20 p-3">
+    <div class="md:hidden border-t border-cyan-500/20 p-3">
       <div class="space-y-2">
 
         <!-- Mobile Navigation Links -->
-        <button (click)="setActiveMenu('marketplace')"
-          [class]="activeMenu === 'marketplace' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
+        <button (click)="setActiveMenu('dashboard')"
+          [class]="activeMenu === 'dashboard' ? 'bg-linear-to-r from-cyan-600 to-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
           class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
-          <i class="pi pi-shopping-cart"></i>
+          <i class="pi pi-chart-bar"></i>
           <div class="flex-1 text-left">
-            <div class="font-semibold">Marketplace</div>
-            <div class="text-xs opacity-70">Browse offers</div>
+            <div class="font-semibold">Dashboard</div>
+            <div class="text-xs opacity-70">Overview & statistics</div>
           </div>
         </button>
-        <button (click)="setActiveMenu('orders')"
-          [class]="activeMenu === 'orders' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
+        <button (click)="setActiveMenu('users')"
+          [class]="activeMenu === 'users' ? 'bg-linear-to-r from-cyan-600 to-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
           class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
-          <i class="pi pi-list"></i>
+          <i class="pi pi-users"></i>
           <div class="flex-1 text-left">
-            <div class="font-semibold">Orders</div>
-            <div class="text-xs opacity-70">Track transactions</div>
+            <div class="font-semibold">Users</div>
+            <div class="text-xs opacity-70">Manage user accounts</div>
           </div>
         </button>
-        <button (click)="setActiveMenu('my-ads')"
-          [class]="activeMenu === 'my-ads' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer">
-          <i class="pi pi-megaphone"></i>
-          <div class="flex-1 text-left">
-            <div class="font-semibold">My Ads</div>
-            <div class="text-xs opacity-70">Manage listings</div>
-          </div>
-        </button>
-        <button (click)="setActiveMenu('messages')"
-          [class]="activeMenu === 'messages' ? 'bg-linear-to-r from-purple-600 to-pink-600 text-white' : 'text-slate-300 hover:bg-slate-800/50'"
-          class="w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-all cursor-pointer relative">
-          <i class="pi pi-comments"></i>
-          <div class="flex-1 text-left">
-            <div class="font-semibold">Messages</div>
-            <div class="text-xs opacity-70">Chat history</div>
-          </div>
-          <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-        </button>
-
-        <!-- Mobile Stats -->
-        <div class="pt-3 mt-3 border-t border-purple-500/20">
-          <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Quick Stats</div>
-          <div class="grid grid-cols-3 gap-2">
-            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
-              <div class="text-xs text-slate-400 mb-1">Ads</div>
-              <div class="text-white font-bold">3</div>
-            </div>
-            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
-              <div class="text-xs text-slate-400 mb-1">Orders</div>
-              <div class="text-white font-bold">127</div>
-            </div>
-            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
-              <div class="text-xs text-slate-400 mb-1">Rate</div>
-              <div class="text-green-400 font-bold text-sm">98%</div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     }
@@ -206,15 +159,15 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <div
-        class="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
+        class="w-12 h-12 rounded-full bg-linear-to-r from-cyan-500 via-blue-500 to-indigo-600 flex items-center justify-center">
         <i class="pi pi-sign-in text-white text-xl"></i>
       </div>
       <div>
         <span
-          class="font-bold text-2xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-          Choose Login Method
+          class="font-bold text-2xl bg-linear-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+          Admin Login
         </span>
-        <div class="text-sm text-slate-400">Select how you want to sign in</div>
+        <div class="text-sm text-slate-400">Administrator access required</div>
       </div>
     </div>
   </ng-template>
@@ -222,16 +175,16 @@
 
     <!-- Web3 Wallet Login -->
     <button (click)="selectAuthMethod('wallet')"
-      class="w-full flex items-center gap-4 p-5 rounded-3xl bg-slate-800/50 hover:bg-linear-to-r hover:from-purple-500/20 hover:via-fuchsia-500/20 hover:to-pink-500/20 border border-slate-600/30 hover:border-purple-500/50 transition-all duration-200 cursor-pointer group">
+      class="w-full flex items-center gap-4 p-5 rounded-3xl bg-slate-800/50 hover:bg-linear-to-r hover:from-cyan-500/20 hover:via-blue-500/20 hover:to-indigo-500/20 border border-slate-600/30 hover:border-cyan-500/50 transition-all duration-200 cursor-pointer group">
       <div
-        class="w-14 h-14 rounded-full bg-linear-to-br from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200">
+        class="w-14 h-14 rounded-full bg-linear-to-br from-cyan-500 via-blue-500 to-indigo-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200">
         <i class="pi pi-wallet text-white text-2xl"></i>
       </div>
       <div class="flex-1 text-left">
-        <div class="font-bold text-lg text-white group-hover:text-purple-300 transition-colors">Web3 Wallet</div>
+        <div class="font-bold text-lg text-white group-hover:text-cyan-300 transition-colors">Web3 Wallet</div>
         <div class="text-sm text-slate-400">Connect with PolkadotJS, Talisman, or Xterium</div>
       </div>
-      <i class="pi pi-chevron-right text-slate-400 group-hover:text-purple-400 transition-colors"></i>
+      <i class="pi pi-chevron-right text-slate-400 group-hover:text-cyan-400 transition-colors"></i>
     </button>
 
     <!-- Google Login -->
@@ -416,58 +369,6 @@
       </button>
     </div>
   </ng-template>
-</p-dialog>
-
-<!-- Quick Stats Dialog -->
-<p-dialog [(visible)]="showStatsDialog" [modal]="true" [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }"
-  [dismissableMask]="true" styleClass="cosmic-dialog">
-  <ng-template #header>
-    <div class="flex items-center gap-3">
-      <div
-        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
-        <i class="pi pi-chart-line text-white text-lg"></i>
-      </div>
-      <span
-        class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-        Quick Stats
-      </span>
-    </div>
-  </ng-template>
-  <div class="space-y-4 py-2">
-    <div class="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 border border-purple-500/20">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-          <i class="pi pi-megaphone text-purple-400"></i>
-        </div>
-        <div>
-          <div class="text-sm text-slate-400">Active Ads</div>
-          <div class="text-2xl font-bold text-white">3</div>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 border border-blue-500/20">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-          <i class="pi pi-list text-blue-400"></i>
-        </div>
-        <div>
-          <div class="text-sm text-slate-400">Total Orders</div>
-          <div class="text-2xl font-bold text-white">127</div>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 border border-green-500/20">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-          <i class="pi pi-check-circle text-green-400"></i>
-        </div>
-        <div>
-          <div class="text-sm text-slate-400">Completion Rate</div>
-          <div class="text-2xl font-bold text-green-400">98.5%</div>
-        </div>
-      </div>
-    </div>
-  </div>
 </p-dialog>
 
 <!-- Toast -->

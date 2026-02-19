@@ -1,0 +1,322 @@
+<div class="max-w-7xl mx-auto space-y-6">
+
+  <!-- Loading State -->
+  @if (isLoading) {
+  <div class="flex justify-center items-center py-12">
+    <div class="flex flex-col items-center gap-4">
+      <i class="pi pi-spin pi-spinner text-4xl text-cyan-400"></i>
+      <p class="text-slate-400">Loading dashboard...</p>
+    </div>
+  </div>
+  }
+
+  @if (!isLoading) {
+
+  <!-- Welcome Section -->
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-cyan-500/20 p-6 md:p-8">
+    <div class="flex items-center gap-4">
+      <div
+        class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-linear-to-br from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+        <i class="pi pi-chart-line text-white text-2xl md:text-3xl"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white">Dashboard Overview</h1>
+        <p class="text-sm md:text-base text-slate-400">Monitor system performance and activity</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+
+    <!-- Total Users Card -->
+    <div
+      class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-cyan-900/20 to-slate-800/90 rounded-3xl border border-cyan-500/20 p-6 hover:border-cyan-500/40 transition-all duration-300 hover:scale-105">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center">
+          <i class="pi pi-users text-cyan-400 text-2xl"></i>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-bold">USERS</span>
+      </div>
+      <div class="text-3xl md:text-4xl font-bold text-white mb-2">{{ totalUsers || quickStats?.totalUsers || 0 }}</div>
+      <div class="text-sm text-slate-400">Total registered users</div>
+      <div class="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs">
+        <span class="text-slate-500">Admins: <span class="text-red-400 font-bold">{{ adminCount }}</span></span>
+        <span class="text-slate-500">Merchants: <span class="text-purple-400 font-bold">{{ merchantCount
+            }}</span></span>
+        <span class="text-slate-500">Users: <span class="text-blue-400 font-bold">{{ userCount }}</span></span>
+      </div>
+    </div>
+
+    <!-- Total P2P Ads Card -->
+    <div
+      class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/20 to-slate-800/90 rounded-3xl border border-purple-500/20 p-6 hover:border-purple-500/40 transition-all duration-300 hover:scale-105">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+          <i class="pi pi-megaphone text-purple-400 text-2xl"></i>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 text-xs font-bold">ADS</span>
+      </div>
+      <div class="text-3xl md:text-4xl font-bold text-white mb-2">{{ quickStats?.totalP2PAds || 0 }}</div>
+      <div class="text-sm text-slate-400">Active P2P advertisements</div>
+      <div class="mt-4 pt-4 border-t border-slate-700/50">
+        <div class="flex items-center gap-2 text-xs text-green-400">
+          <i class="pi pi-arrow-up"></i>
+          <span>{{ recentAds.length }} new this week</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Orders Card -->
+    <div
+      class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-blue-900/20 to-slate-800/90 rounded-3xl border border-blue-500/20 p-6 hover:border-blue-500/40 transition-all duration-300 hover:scale-105">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+          <i class="pi pi-shopping-cart text-blue-400 text-2xl"></i>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 text-xs font-bold">ORDERS</span>
+      </div>
+      <div class="text-3xl md:text-4xl font-bold text-white mb-2">{{ totalOrders }}</div>
+      <div class="text-sm text-slate-400">Total P2P orders</div>
+      <div class="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs">
+        <span class="text-slate-500">Pending: <span class="text-yellow-400 font-bold">{{ pendingOrders }}</span></span>
+        <span class="text-slate-500">Completed: <span class="text-green-400 font-bold">{{ completedOrders
+            }}</span></span>
+      </div>
+    </div>
+
+    <!-- Total Chains Card -->
+    <div
+      class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-indigo-900/20 to-slate-800/90 rounded-3xl border border-indigo-500/20 p-6 hover:border-indigo-500/40 transition-all duration-300 hover:scale-105">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
+          <i class="pi pi-link text-indigo-400 text-2xl"></i>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-xs font-bold">CHAINS</span>
+      </div>
+      <div class="text-3xl md:text-4xl font-bold text-white mb-2">{{ quickStats?.totalChains || 0 }}</div>
+      <div class="text-sm text-slate-400">Supported blockchains</div>
+      <div class="mt-4 pt-4 border-t border-slate-700/50">
+        <div class="flex items-center gap-2 text-xs text-indigo-400">
+          <i class="pi pi-check-circle"></i>
+          <span>Cross-chain enabled</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Two Column Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Recent Users -->
+    <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-cyan-500/20 p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+            <i class="pi pi-users text-cyan-400 text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Recent Users</h3>
+            <p class="text-xs text-slate-400">Latest registrations</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        @if (recentUsers.length === 0) {
+        <div class="text-center py-8">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-slate-700/50 flex items-center justify-center">
+            <i class="pi pi-inbox text-2xl text-slate-400"></i>
+          </div>
+          <p class="text-slate-400 text-sm">No recent users</p>
+        </div>
+        }
+        @for (user of recentUsers; track user.id) {
+        <div
+          class="flex items-center gap-3 p-3 rounded-2xl bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/30 hover:border-cyan-500/30 transition-all">
+          @if (user.photo_url) {
+          <img [src]="user.photo_url" [alt]="user.full_name"
+            class="w-10 h-10 rounded-full object-cover border-2 border-cyan-500/30" />
+          } @else {
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+            {{ getInitials(user.full_name || user.username) }}
+          </div>
+          }
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-white text-sm truncate">{{ user.full_name || user.username }}</div>
+            <div class="text-xs text-slate-400 truncate">{{ user.email }}</div>
+          </div>
+          <div>
+            <span
+              [class]="user.type === 'admin' ? 'bg-red-500/20 text-red-300 border-red-500/30' : user.type === 'merchant' ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border-blue-500/30'"
+              class="px-2 py-1 rounded-lg text-xs font-bold border uppercase">
+              {{ user.type }}
+            </span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent P2P Ads -->
+    <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+            <i class="pi pi-megaphone text-purple-400 text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Recent Advertisements</h3>
+            <p class="text-xs text-slate-400">Latest P2P ads</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        @if (recentAds.length === 0) {
+        <div class="text-center py-8">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-slate-700/50 flex items-center justify-center">
+            <i class="pi pi-inbox text-2xl text-slate-400"></i>
+          </div>
+          <p class="text-slate-400 text-sm">No recent ads</p>
+        </div>
+        }
+        @for (ad of recentAds; track ad.id) {
+        <div
+          class="flex items-center gap-3 p-3 rounded-2xl bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/30 hover:border-purple-500/30 transition-all">
+          @if (ad.logo_url) {
+          <img [src]="ad.logo_url" [alt]="ad.name" class="w-10 h-10 rounded-full object-cover" />
+          } @else {
+          <div
+            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
+            {{ getInitials(ad.name) }}
+          </div>
+          }
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-white text-sm truncate">{{ ad.name }}</div>
+            <div class="text-xs text-slate-400">{{ ad.p2p_number }}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-yellow-400 text-sm">₱{{ ad.price }}</div>
+            <span [class]="getStatusBadgeClass(ad.status)"
+              class="px-2 py-0.5 rounded text-xs font-semibold border uppercase inline-block mt-1">
+              {{ ad.status }}
+            </span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-blue-500/20 p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+          <i class="pi pi-shopping-cart text-blue-400 text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Recent Orders</h3>
+          <p class="text-xs text-slate-400">Latest P2P transactions</p>
+        </div>
+      </div>
+    </div>
+
+    @if (recentOrders.length === 0) {
+    <div class="text-center py-8">
+      <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-slate-700/50 flex items-center justify-center">
+        <i class="pi pi-inbox text-2xl text-slate-400"></i>
+      </div>
+      <p class="text-slate-400 text-sm">No recent orders</p>
+    </div>
+    } @else {
+
+    <!-- Desktop Table -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-slate-700">
+            <th class="text-left py-3 px-2 text-xs font-semibold text-slate-400 uppercase">Order #</th>
+            <th class="text-left py-3 px-2 text-xs font-semibold text-slate-400 uppercase">Type</th>
+            <th class="text-right py-3 px-2 text-xs font-semibold text-slate-400 uppercase">Amount</th>
+            <th class="text-right py-3 px-2 text-xs font-semibold text-slate-400 uppercase">Total</th>
+            <th class="text-center py-3 px-2 text-xs font-semibold text-slate-400 uppercase">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of recentOrders; track order.id) {
+          <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+            <td class="py-3 px-2">
+              <div class="font-semibold text-white text-sm">{{ order.order_number }}</div>
+              <div class="text-xs text-slate-400">{{ order.created_at | date:'short' }}</div>
+            </td>
+            <td class="py-3 px-2">
+              <span
+                [class]="order.order_type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+                class="px-2 py-1 rounded-lg text-xs font-bold border uppercase">
+                {{ order.order_type }}
+              </span>
+            </td>
+            <td class="py-3 px-2 text-right">
+              <div class="text-sm text-white font-semibold">{{ order.amount }}</div>
+              <div class="text-xs text-slate-400">{{ order.p2p_ad?.token_symbol || 'USDT' }}</div>
+            </td>
+            <td class="py-3 px-2 text-right">
+              <div class="text-sm font-bold text-yellow-400">₱{{ order.ordered_price }}</div>
+            </td>
+            <td class="py-3 px-2 text-center">
+              <span [class]="getStatusBadgeClass(order.status)"
+                class="px-2 py-1 rounded-lg text-xs font-semibold border uppercase">
+                {{ order.status }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="md:hidden space-y-3">
+      @for (order of recentOrders; track order.id) {
+      <div class="p-4 rounded-2xl bg-slate-700/30 border border-slate-600/30">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="font-bold text-white text-sm">{{ order.order_number }}</div>
+            <div class="text-xs text-slate-400">{{ order.created_at | date:'short' }}</div>
+          </div>
+          <span
+            [class]="order.order_type === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="px-2 py-1 rounded-lg text-xs font-bold border uppercase">
+            {{ order.order_type }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-400 mb-1">Amount</div>
+            <div class="text-sm text-white font-semibold">{{ order.amount }} {{ order.p2p_ad?.token_symbol || 'USDT' }}
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-400 mb-1">Total</div>
+            <div class="text-sm font-bold text-yellow-400">₱{{ order.ordered_price }}</div>
+          </div>
+          <div>
+            <span [class]="getStatusBadgeClass(order.status)"
+              class="px-2 py-1 rounded-lg text-xs font-semibold border uppercase">
+              {{ order.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  }
+</div>

@@ -46,7 +46,7 @@ import { PolkadotIdenticonUtil } from '../../shared/polkadot-identicon-util/polk
 })
 export class SubHeader {
   @Input() mobileMenuOpen: boolean = false;
-  @Input() activeMenu: string = 'marketplace';
+  @Input() activeMenu: string = 'dashboard';
 
   @Output() mobileMenuOpenOnClick = new EventEmitter<boolean>();
   @Output() loginP2PUserOnClick = new EventEmitter<void>();
@@ -70,7 +70,6 @@ export class SubHeader {
   isXteriumMode: boolean = false;
 
   navMenuOpen: boolean = false;
-  showStatsDialog: boolean = false;
 
   isLoggedIn: boolean = false;
   currentUser: User | null = null;
@@ -90,33 +89,22 @@ export class SubHeader {
     this.navMenuOpen = false;
 
     switch (menu) {
-      case 'marketplace':
-        this.router.navigate(['/p2p/marketplace']);
+      case 'dashboard':
+        this.router.navigate(['/admin/dashboard']);
         break;
-      case 'orders':
-        this.router.navigate(['/p2p/orders']);
-        break;
-      case 'my-ads':
-        this.router.navigate(['/p2p/my-ads']);
+      case 'users':
+        this.router.navigate(['/admin/users']);
         break;
     }
   }
 
   updateActiveMenuFromRoute(): void {
     const currentUrl = this.router.url;
-    if (currentUrl.includes('/p2p/marketplace')) {
-      this.activeMenu = 'marketplace';
-    } else if (currentUrl.includes('/p2p/orders')) {
-      this.activeMenu = 'orders';
-    } else if (currentUrl.includes('/p2p/my-ads')) {
-      this.activeMenu = 'my-ads';
-    } else if (currentUrl.includes('/p2p/admin')) {
-      this.activeMenu = 'admin';
+    if (currentUrl.includes('/admin/dashboard')) {
+      this.activeMenu = 'dashboard';
+    } else if (currentUrl.includes('/admin/users')) {
+      this.activeMenu = 'users';
     }
-  }
-
-  navigateToAdminConsole(): void {
-    this.router.navigate(['/p2p/admin']);
   }
 
   login(): void {

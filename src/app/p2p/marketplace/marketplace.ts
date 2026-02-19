@@ -440,6 +440,8 @@ export class Marketplace {
           is_disabled: false,
           photo_url: userData.user.photo_url,
           google_account_id: userData.user.google_account_id,
+          created_at: new Date(),
+          updated_at: new Date(),
         };
       } catch (error) {
         console.error('Failed to parse auth data:', error);

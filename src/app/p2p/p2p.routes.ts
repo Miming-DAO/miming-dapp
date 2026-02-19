@@ -23,10 +23,6 @@ export const routes: Routes = [
         path: "my-ads",
         loadComponent: () => import('./my-ads/my-ads').then(m => m.MyAds)
       },
-      {
-        path: 'admin',
-        loadChildren: () => import('./admin/admin.routes').then((m) => m.routes),
-      },
     ]
   },
 ];

@@ -1,0 +1,402 @@
+<div class="max-w-7xl mx-auto">
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-cyan-500/20 p-4 md:p-8">
+
+    <!-- Panel Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">User Management</h2>
+        <p class="text-sm md:text-base text-slate-400">View and manage all registered users</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row gap-3 mb-6">
+      <div class="w-full md:w-56">
+        <p-select [(ngModel)]="selectedRole" [options]="roleOptions" optionLabel="label" optionValue="value"
+          placeholder="All Roles" (onChange)="applyFilters()" class="w-full" size="large">
+          <ng-template #selectedItem let-selectedOption>
+            @if (selectedOption) {
+            <div class="flex items-center gap-2">
+              <i [class]="getRoleIcon(selectedOption.value)" class="text-sm"></i>
+              <span class="font-medium">{{ selectedOption.label }}</span>
+            </div>
+            }
+          </ng-template>
+          <ng-template #item let-option>
+            <div class="flex items-center gap-2 py-1">
+              <i [class]="getRoleIcon(option.value)" class="text-sm"></i>
+              <span class="font-medium">{{ option.label }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+
+      <div class="flex-1">
+        <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()"
+          placeholder="Search by name, email, or username..."
+          class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-gray-100/30 text-white placeholder:text-slate-500 outline-none focus:border-cyan-500/50 transition-all" />
+      </div>
+    </div>
+
+
+
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="flex justify-center items-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <i class="pi pi-spin pi-spinner text-4xl text-cyan-400"></i>
+        <p class="text-slate-400">Loading users...</p>
+      </div>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && filteredUsers.length === 0 && !searchQuery && !selectedRole) {
+    <div class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-cyan-500/10 flex items-center justify-center">
+        <i class="pi pi-users text-4xl text-cyan-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No Users Found</h3>
+      <p class="text-slate-400">No registered users in the system yet</p>
+    </div>
+    }
+
+    <!-- No Results State -->
+    @if (!isLoading && filteredUsers.length === 0 && (searchQuery || selectedRole)) {
+    <div class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-cyan-500/10 flex items-center justify-center">
+        <i class="pi pi-inbox text-4xl text-cyan-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No Matching Users</h3>
+      <p class="text-slate-400">Try adjusting your search or filters</p>
+    </div>
+    }
+
+    <!-- Users Table -->
+    @if (!isLoading && filteredUsers.length > 0) {
+
+    <!-- Desktop Table View -->
+    <div class="hidden md:block backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-cyan-500/20 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-max">
+          <thead>
+            <tr class="border-b border-slate-700 bg-slate-900/50">
+              <th class="text-left py-4 px-4 text-sm font-bold text-cyan-400 uppercase tracking-wider">User</th>
+              <th
+                class="text-left py-4 px-4 text-sm font-bold text-cyan-400 uppercase tracking-wider hidden lg:table-cell">
+                Email</th>
+              <th class="text-left py-4 px-4 text-sm font-bold text-cyan-400 uppercase tracking-wider">Role</th>
+              <th
+                class="text-left py-4 px-4 text-sm font-bold text-cyan-400 uppercase tracking-wider hidden xl:table-cell">
+                Auth Type</th>
+              <th
+                class="text-left py-4 px-4 text-sm font-bold text-cyan-400 uppercase tracking-wider hidden xl:table-cell">
+                Status</th>
+              <th class="text-center py-4 px-4 text-sm font-bold text-cyan-400 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers; track user.id) {
+            <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+
+              <!-- User Info -->
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-3">
+                  @if (user.auth_type === 'wallet') {
+                  <app-polkadot-identicon-util [address]="user.username || user.email" [size]="40"></app-polkadot-identicon-util>
+                  } @else if (user.photo_url) {
+                  <img [src]="user.photo_url" [alt]="user.full_name"
+                    class="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-cyan-500/30" />
+                  } @else {
+                  <div
+                    class="w-10 h-10 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    {{ getInitials(user.full_name || user.username) }}
+                  </div>
+                  }
+                  <div class="min-w-0">
+                    <div class="font-semibold text-white truncate">{{ user.full_name || user.username }}</div>
+                    @if (user.auth_type === 'wallet') {
+                    <div class="text-xs text-slate-400 font-mono truncate lg:hidden">{{ user.email.slice(0, 8) }}...{{
+                      user.email.slice(-6) }}</div>
+                    } @else {
+                    <div class="text-xs text-slate-400 truncate lg:hidden">{{ user.email }}</div>
+                    }
+                    @if (user.username && user.username !== user.email && user.auth_type !== 'wallet') {
+                    <div class="text-xs text-slate-500 truncate">{{ user.username }}</div>
+                    }
+                  </div>
+                </div>
+              </td>
+
+              <!-- Email -->
+              <td class="py-4 px-4 hidden lg:table-cell">
+                @if (user.auth_type === 'wallet') {
+                <div class="text-sm text-slate-300 font-mono truncate max-w-xs">{{ user.email.slice(0, 8) }}...{{
+                  user.email.slice(-6) }}</div>
+                } @else {
+                <div class="text-sm text-slate-300 truncate max-w-xs">{{ user.email }}</div>
+                }
+              </td>
+
+              <!-- Role -->
+              <td class="py-4 px-4">
+                <span [class]="getRoleBadgeClass(user.type)"
+                  class="px-3 py-1.5 rounded-3xl text-xs font-bold border uppercase inline-flex items-center gap-1.5">
+                  <i [class]="getRoleIcon(user.type)" class="text-xs"></i>
+                  {{ user.type }}
+                </span>
+              </td>
+
+              <!-- Auth Type -->
+              <td class="py-4 px-4 hidden xl:table-cell">
+                <div class="flex items-center gap-2">
+                  @if (user.auth_type === 'wallet') {
+                  <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <i class="pi pi-wallet text-purple-400 text-xs"></i>
+                  </div>
+                  <span class="text-sm text-slate-300">Wallet</span>
+                  } @else if (user.auth_type === 'google') {
+                  <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                      <path fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                  </div>
+                  <span class="text-sm text-slate-300">Google</span>
+                  }
+                </div>
+              </td>
+
+              <!-- Status -->
+              <td class="py-4 px-4 hidden xl:table-cell">
+                <span
+                  [class]="user.is_disabled ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-green-500/20 text-green-300 border-green-500/30'"
+                  class="px-2 py-1 rounded-3xl text-xs font-semibold border uppercase inline-block">
+                  {{ user.is_disabled ? 'Disabled' : 'Active' }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="py-4 px-4">
+                <div class="flex items-center justify-center gap-2">
+                  <button (click)="openChangeRoleDialog(user)" title="Change Role"
+                    class="px-3 py-1.5 flex items-center gap-1.5 rounded-3xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-all cursor-pointer text-xs font-semibold">
+                    <i class="pi pi-user-edit"></i>
+                    <span class="hidden lg:inline">Change Role</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="md:hidden space-y-3">
+      @for (user of filteredUsers; track user.id) {
+      <div
+        class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-cyan-900/20 to-slate-800/90 rounded-3xl border border-cyan-500/20 p-4 hover:border-cyan-500/40 transition-all duration-200">
+
+        <!-- Header: User Info -->
+        <div class="flex items-center gap-3 mb-3">
+          @if (user.auth_type === 'wallet') {
+          <app-polkadot-identicon-util [address]="user.username || user.email" [size]="48"></app-polkadot-identicon-util>
+          } @else if (user.photo_url) {
+          <img [src]="user.photo_url" [alt]="user.full_name"
+            class="w-12 h-12 rounded-full object-cover shrink-0 border-2 border-cyan-500/30" />
+          } @else {
+          <div
+            class="w-12 h-12 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold shrink-0">
+            {{ getInitials(user.full_name || user.username) }}
+          </div>
+          }
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-white truncate">{{ user.full_name || user.username }}</h3>
+            @if (user.auth_type === 'wallet') {
+            <p class="text-xs text-slate-400 font-mono truncate">{{ user.email.slice(0, 8) }}...{{ user.email.slice(-6)
+              }}</p>
+            } @else {
+            <p class="text-xs text-slate-400 truncate">{{ user.email }}</p>
+            }
+            @if (user.username && user.username !== user.email && user.auth_type !== 'wallet') {
+            <p class="text-xs text-slate-500 truncate">{{ user.username }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="grid grid-cols-2 gap-2 mb-3 pb-3 border-b border-slate-700/50">
+          <div>
+            <span class="text-xs text-slate-400 block mb-1">Role</span>
+            <span [class]="getRoleBadgeClass(user.type)"
+              class="px-2 py-1 rounded-3xl text-xs font-bold border uppercase inline-flex items-center gap-1">
+              <i [class]="getRoleIcon(user.type)" class="text-xs"></i>
+              {{ user.type }}
+            </span>
+          </div>
+          <div>
+            <span class="text-xs text-slate-400 block mb-1">Status</span>
+            <span
+              [class]="user.is_disabled ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-green-500/20 text-green-300 border-green-500/30'"
+              class="px-2 py-1 rounded-3xl text-xs font-semibold border uppercase inline-block">
+              {{ user.is_disabled ? 'Disabled' : 'Active' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Auth Type -->
+        <div class="mb-3 pb-3 border-b border-slate-700/50">
+          <span class="text-xs text-slate-400 block mb-2">Authentication</span>
+          <div class="flex items-center gap-2">
+            @if (user.auth_type === 'wallet') {
+            <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i class="pi pi-wallet text-purple-400 text-xs"></i>
+            </div>
+            <span class="text-sm text-slate-300 font-medium">Web3 Wallet</span>
+            } @else if (user.auth_type === 'google') {
+            <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+              <svg class="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+            </div>
+            <span class="text-sm text-slate-300 font-medium">Google Account</span>
+            }
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end">
+          <button (click)="openChangeRoleDialog(user)"
+            class="px-4 py-2 flex items-center gap-2 rounded-3xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-all cursor-pointer text-sm font-semibold">
+            <i class="pi pi-user-edit"></i>
+            <span>Change Role</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Change Role Dialog -->
+<p-dialog [(visible)]="showChangeRoleDialog" [modal]="true"
+  [style]="{ 'width': '500px', 'max-width': '90vw', 'border-radius': '1.5rem' }" [dismissableMask]="true"
+  styleClass="cosmic-dialog">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-full bg-linear-to-r from-cyan-500 via-blue-500 to-indigo-600 flex items-center justify-center">
+        <i class="pi pi-user-edit text-white text-lg"></i>
+      </div>
+      <span
+        class="font-bold text-xl bg-linear-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+        Change User Role
+      </span>
+    </div>
+  </ng-template>
+  <div class="py-4">
+    @if (selectedUser) {
+    <!-- User Info -->
+    <div class="mb-6 p-4 rounded-3xl bg-slate-700/30 border border-slate-600/50">
+      <div class="flex items-center gap-3">
+        @if (selectedUser.auth_type === 'wallet') {
+        <app-polkadot-identicon-util [address]="selectedUser.username || selectedUser.email" [size]="48"></app-polkadot-identicon-util>
+        } @else if (selectedUser.photo_url) {
+        <img [src]="selectedUser.photo_url" [alt]="selectedUser.full_name"
+          class="w-12 h-12 rounded-full object-cover border-2 border-cyan-500/30" />
+        } @else {
+        <div
+          class="w-12 h-12 rounded-full bg-linear-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold">
+          {{ getInitials(selectedUser.full_name || selectedUser.username) }}
+        </div>
+        }
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-white truncate">{{ selectedUser.full_name || selectedUser.username }}</div>
+          @if (selectedUser.auth_type === 'wallet') {
+          <div class="text-sm text-slate-400 font-mono truncate">{{ selectedUser.email.slice(0, 8) }}...{{
+            selectedUser.email.slice(-6) }}</div>
+          } @else {
+          <div class="text-sm text-slate-400 truncate">{{ selectedUser.email }}</div>
+          }
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-xs text-slate-500">Current Role:</span>
+            <span [class]="getRoleBadgeClass(selectedUser.type)"
+              class="px-2 py-0.5 rounded-3xl text-xs font-bold border uppercase">
+              {{ selectedUser.type }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Selection -->
+    <div class="mb-4">
+      <label class="block text-sm font-semibold text-slate-300 mb-3">Select New Role</label>
+      <div class="space-y-2">
+        @for (roleOption of roleChangeOptions; track roleOption.value) {
+        <button (click)="selectedNewRole = roleOption.value"
+          [class]="selectedNewRole === roleOption.value ? 'bg-linear-to-r from-cyan-500/30 to-blue-500/30 border-cyan-500/50' : 'bg-slate-700/30 border-slate-600/50 hover:bg-slate-700/50'"
+          [disabled]="selectedUser.type === roleOption.value"
+          class="w-full flex items-center gap-3 p-4 rounded-3xl border transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+          <div
+            [class]="selectedNewRole === roleOption.value ? 'bg-cyan-500/30 border-cyan-500/50' : 'bg-slate-600/30 border-slate-600/50'"
+            class="w-12 h-12 rounded-full flex items-center justify-center border-2">
+            <i [class]="getRoleIcon(roleOption.value)" class="text-xl"
+              [class.text-cyan-400]="selectedNewRole === roleOption.value"
+              [class.text-slate-400]="selectedNewRole !== roleOption.value"></i>
+          </div>
+          <div class="flex-1 text-left">
+            <div class="font-bold text-white">{{ roleOption.label }}</div>
+            <div class="text-xs text-slate-400">{{ roleOption.description }}</div>
+          </div>
+          @if (selectedUser.type === roleOption.value) {
+          <span
+            class="px-2 py-1 rounded-3xl bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/30">
+            Current
+          </span>
+          }
+        </button>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-2 pt-5">
+      <button [disabled]="!selectedNewRole || selectedNewRole === selectedUser?.type || isProcessing"
+        (click)="changeUserRole()"
+        class="px-4 py-3 rounded-full bg-linear-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-700 disabled:from-slate-600 disabled:via-slate-600 disabled:to-slate-600 text-white font-semibold transition-all duration-200 border-0 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        @if (isProcessing) {
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Updating...</span>
+        } @else {
+        <i class="pi pi-check"></i>
+        <span>Update Role</span>
+        }
+      </button>
+      <button (click)="showChangeRoleDialog = false"
+        class="px-4 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 hover:text-white font-medium transition-all duration-200 border border-slate-600/30 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Toast -->
+<p-toast />
