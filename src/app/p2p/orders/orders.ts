@@ -14,6 +14,7 @@ import { ToastModule as PToastModule } from 'primeng/toast';
 
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { P2pOrder } from '../../../models/p2p-order.model';
+import { User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-orders',
@@ -40,6 +41,10 @@ export class Orders {
     private p2pOrdersService: P2pOrdersService,
     private pMessageService: PMessageService
   ) { }
+
+  currentUser: User | null = null;
+  isMerchant: boolean = false;
+  isAdmin: boolean = false;
 
   activeViewTab: 'my-orders' | 'ad-orders' = 'my-orders';
   activeStatusTab: 'in-progress' | 'completed' | 'cancelled' = 'in-progress';
@@ -138,7 +143,43 @@ export class Orders {
     return classes[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
   }
 
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+          created_at: new Date(),
+          updated_at: new Date()
+        };
+
+        if (this.currentUser.type === 'merchant') {
+          this.isMerchant = true;
+        }
+
+        if (this.currentUser.type === 'admin') {
+          this.isAdmin = true;
+        }
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
+    }
+  }
+
   ngOnInit(): void {
+    this.checkAuthStatus();
+
     this.route.queryParams.subscribe(params => {
       const viewType = params['viewType'];
       if (viewType === 'my-orders') {

@@ -27,6 +27,17 @@
     <span class="font-medium">{{ item.label }}</span>
   </a>
   }
+
+  <!-- Admin Panel (Only for Admins) -->
+  @if (isAdmin) {
+  <a routerLink="/admin"
+    routerLinkActive="bg-linear-to-r from-cyan-500/30 to-blue-500/30 border-cyan-500/50"
+    class="flex items-center gap-3 px-4 py-3 rounded-full text-white/90 hover:bg-white/15 hover:text-white transition-all duration-200 group cursor-pointer border border-transparent">
+    <i class="pi pi-shield text-lg group-hover:scale-110 transition-transform duration-200"></i>
+    <span class="font-medium">Admin Panel</span>
+    <span class="ml-auto px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold">ADMIN</span>
+  </a>
+  }
 </nav>
 
 <!-- Support Card -->

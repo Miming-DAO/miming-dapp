@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { MenuItem as PMenuItem } from 'primeng/api';
@@ -6,9 +7,12 @@ import { MenuModule as PMenuModule } from 'primeng/menu';
 import { ButtonModule as PButtonModule } from 'primeng/button';
 import { ImageModule as PImageModule } from 'primeng/image';
 
+import { User } from '../../../models/user.model';
+
 @Component({
   selector: 'app-sidebar',
   imports: [
+    CommonModule,
     RouterModule,
     PMenuModule,
     PButtonModule,
@@ -17,9 +21,12 @@ import { ImageModule as PImageModule } from 'primeng/image';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar {
+export class Sidebar implements OnInit {
   @Output() onClickGenerate = new EventEmitter<void>();
   @Output() onClose = new EventEmitter<void>();
+
+  currentUser: User | null = null;
+  isAdmin: boolean = false;
 
   menuItems: PMenuItem[] = [
     {
@@ -38,6 +45,18 @@ export class Sidebar {
       routerLink: ['/chart'],
     },
   ];
+
+  ngOnInit(): void {
+    this.loadCurrentUser();
+  }
+
+  loadCurrentUser(): void {
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
+      this.currentUser = JSON.parse(storedUser);
+      this.isAdmin = this.currentUser?.type === 'admin';
+    }
+  }
 
   closeSidebar() {
     this.onClose.emit();

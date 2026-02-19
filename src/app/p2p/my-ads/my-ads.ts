@@ -51,6 +51,8 @@ export class MyAds {
   ) { }
 
   currentUser: User | null = null;
+  isMerchant: boolean = false;
+  isAdmin: boolean = false;
 
   p2pAds: P2pAd[] = [];
   p2pAdsPaymentTypesMap: Map<string, P2pAdPaymentType[]> = new Map();
@@ -823,6 +825,14 @@ export class MyAds {
           created_at: new Date(),
           updated_at: new Date()
         };
+
+        if (this.currentUser.type === 'merchant') {
+          this.isMerchant = true;
+        }
+
+        if (this.currentUser.type === 'admin') {
+          this.isAdmin = true;
+        }
       } catch (error) {
         console.error('Failed to parse auth data:', error);
         localStorage.removeItem('auth_user');
