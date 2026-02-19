@@ -46,19 +46,41 @@ export class Sidebar implements OnInit {
     },
   ];
 
-  ngOnInit(): void {
-    this.loadCurrentUser();
-  }
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
 
-  loadCurrentUser(): void {
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
-      this.currentUser = JSON.parse(storedUser);
-      this.isAdmin = this.currentUser?.type === 'admin';
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+          created_at: new Date(),
+          updated_at: new Date()
+        };
+
+        if (this.currentUser.type === 'admin') {
+          this.isAdmin = true;
+        }
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
     }
   }
 
   closeSidebar() {
     this.onClose.emit();
+  }
+
+  ngOnInit(): void {
+    this.checkAuthStatus();
   }
 }
