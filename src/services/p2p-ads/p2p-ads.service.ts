@@ -16,11 +16,13 @@ export class P2pAdsService {
     private http: HttpClient
   ) { }
 
-  private getHeaders(): HttpHeaders {
+  private getHeaders(includeContentType = true): HttpHeaders {
     const googleUser = localStorage.getItem('auth_user');
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
+    let headers = new HttpHeaders();
+
+    if (includeContentType) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
@@ -60,6 +62,17 @@ export class P2pAdsService {
     return this.http.patch<P2pAd>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
       headers: this.getHeaders()
     });
+  }
+
+  uploadLogo(file: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string }>(
+      `${this.apiUrl}/${this.apiPrefix}/upload-logo`,
+      formData,
+      { headers: this.getHeaders(false) }
+    );
   }
 
   deleteP2pAd(id: string): Observable<void> {

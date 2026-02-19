@@ -18,6 +18,9 @@ export class P2pOrder {
   account_number: string = "";
   ordered_by_user_id: string = "";
   ordered_by_user: User | undefined;
+  proof_attachment_url_1: string = "";
+  proof_attachment_url_2: string = "";
+  proof_attachment_url_3: string = "";
   status: string = "";
   created_at: Date = new Date();
   updated_at: Date = new Date();
@@ -47,5 +50,8 @@ export class UpdateP2pOrderDto {
   account_name?: string = "";
   account_number?: string = "";
   ordered_by_user_id?: string = "";
+  proof_attachment_url_1: string = "";
+  proof_attachment_url_2: string = "";
+  proof_attachment_url_3: string = "";
   status?: string;
 }

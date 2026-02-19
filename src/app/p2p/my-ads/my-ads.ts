@@ -291,14 +291,27 @@ export class MyAds {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      const reader = new FileReader();
 
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const imageUrl = e.target?.result as string;
-        this.p2pAdForm.logo_url = imageUrl;
-      };
-
-      reader.readAsDataURL(file);
+      this.isLoading = true;
+      this.p2pAdsService.uploadLogo(file).subscribe({
+        next: (results) => {
+          this.p2pAdForm.logo_url = results.url;
+          this.isLoading = false;
+          this.pMessageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Logo uploaded successfully!'
+          });
+        },
+        error: (error) => {
+          this.pMessageService.add({
+            severity: 'error',
+            summary: error.error.error || 'Error',
+            detail: error.error.message || 'Failed to upload logo. Please try again.'
+          });
+          this.isLoading = false;
+        }
+      });
     }
   }
 

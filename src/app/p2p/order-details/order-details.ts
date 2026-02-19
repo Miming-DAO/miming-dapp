@@ -9,6 +9,7 @@ import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
 import { ButtonModule as PButtonModule } from 'primeng/button';
 import { ToastModule as PToastModule } from 'primeng/toast';
 
+import { environment } from '../../../environments/environment';
 import { User } from '../../../models/user.model';
 import { P2pOrder } from '../../../models/p2p-order.model';
 import { P2pAdPaymentType } from '../../../models/p2p-ad-payment-type.model';
@@ -61,6 +62,8 @@ export class OrderDetails implements OnInit {
   showConfirmReceivedDialog: boolean = false;
   showCancelOrderDialog: boolean = false;
   showNotifyTokenDialog: boolean = false;
+  showImagePreviewDialog: boolean = false;
+  previewImageUrl: string = '';
 
   isLoading: boolean = false;
 
@@ -88,6 +91,30 @@ export class OrderDetails implements OnInit {
       return null;
     }
     return this.adPaymentTypes.find(pt => pt.p2p_payment_type_id === this.p2pOrder!.p2p_payment_type_id) || null;
+  }
+
+  get proofAttachments(): Array<{ url: string, type: 'image' | 'pdf', filename: string }> {
+    if (!this.p2pOrder) return [];
+    const attachments: Array<{ url: string, type: 'image' | 'pdf', filename: string }> = [];
+
+    const addAttachment = (attachmentUrl: string) => {
+      if (attachmentUrl) {
+        const fullUrl = `${attachmentUrl}`;
+        const isPdf = attachmentUrl.toLowerCase().endsWith('.pdf');
+        const filename = attachmentUrl.split('/').pop() || 'attachment';
+        attachments.push({
+          url: fullUrl,
+          type: isPdf ? 'pdf' : 'image',
+          filename
+        });
+      }
+    };
+
+    addAttachment(this.p2pOrder.proof_attachment_url_1);
+    addAttachment(this.p2pOrder.proof_attachment_url_2);
+    addAttachment(this.p2pOrder.proof_attachment_url_3);
+
+    return attachments;
   }
 
   get showUploadProofButton(): boolean {
@@ -355,14 +382,30 @@ export class OrderDetails implements OnInit {
   uploadPaymentProof(): void {
     if (this.selectedFiles.length === 0 || !this.p2pOrder) return;
 
-    this.pMessageService.add({
-      severity: 'success',
-      summary: 'Proof Uploaded',
-      detail: `${this.selectedFiles.length} file(s) submitted successfully.`
-    });
+    this.isLoading = true;
 
-    this.closePaymentProofDialog();
-    this.loadOrderDetails();
+    this.p2pOrdersService.uploadProofAttachment(this.p2pOrder.id, this.selectedFiles).subscribe({
+      next: (updatedOrder: P2pOrder) => {
+        this.pMessageService.add({
+          severity: 'success',
+          summary: 'Proof Uploaded',
+          detail: `${this.selectedFiles.length} file(s) submitted successfully.`
+        });
+
+        this.closePaymentProofDialog();
+        this.loadOrderDetails();
+
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Upload Failed',
+          detail: error.error?.message || 'Failed to upload proof of payment. Please try again.'
+        });
+        this.isLoading = false;
+      }
+    });
   }
 
   openConfirmReceivedDialog(): void {
@@ -376,13 +419,30 @@ export class OrderDetails implements OnInit {
   confirmPaymentReceived(): void {
     if (!this.p2pOrder) return;
 
-    this.pMessageService.add({
-      severity: 'success',
-      summary: 'Payment Confirmed',
-      detail: 'Payment has been confirmed. The order is now complete.'
+    this.isLoading = true;
+
+    this.p2pOrdersService.confirmP2pOrder(this.p2pOrder.id).subscribe({
+      next: (updatedOrder: P2pOrder) => {
+        this.pMessageService.add({
+          severity: 'success',
+          summary: 'Payment Confirmed',
+          detail: 'Payment has been confirmed. The order is now complete.'
+        });
+
+        this.closeConfirmReceivedDialog();
+        this.loadOrderDetails();
+
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Confirmation Failed',
+          detail: error.error?.message || 'Failed to confirm payment. Please try again.'
+        });
+        this.isLoading = false;
+      }
     });
-    this.closeConfirmReceivedDialog();
-    this.loadOrderDetails();
   }
 
   openNotifyTokenDialog(): void {
@@ -396,14 +456,30 @@ export class OrderDetails implements OnInit {
   notifyTokenSent(): void {
     if (!this.p2pOrder) return;
 
-    this.pMessageService.add({
-      severity: 'success',
-      summary: 'Notification Sent',
-      detail: 'User has been notified that Token was sent.'
+    this.isLoading = true;
+
+    this.p2pOrdersService.confirmP2pOrder(this.p2pOrder.id).subscribe({
+      next: (updatedOrder: P2pOrder) => {
+        this.pMessageService.add({
+          severity: 'success',
+          summary: 'Token Sent Confirmed',
+          detail: 'Order has been marked as complete. User will be notified.'
+        });
+
+        this.closeNotifyTokenDialog();
+        this.loadOrderDetails();
+
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Confirmation Failed',
+          detail: error.error?.message || 'Failed to confirm token sent. Please try again.'
+        });
+        this.isLoading = false;
+      }
     });
-    this.closeNotifyTokenDialog();
-    // TODO: Implement backend call to update order status and notify user
-    this.loadOrderDetails();
   }
 
   openCancelOrderDialog(): void {
@@ -417,13 +493,30 @@ export class OrderDetails implements OnInit {
   cancelOrder(): void {
     if (!this.p2pOrder) return;
 
-    this.pMessageService.add({
-      severity: 'warn',
-      summary: 'Order Cancelled',
-      detail: 'The order has been cancelled successfully.'
+    this.isLoading = true;
+
+    this.p2pOrdersService.cancelP2pOrder(this.p2pOrder.id).subscribe({
+      next: (updatedOrder: P2pOrder) => {
+        this.pMessageService.add({
+          severity: 'warn',
+          summary: 'Order Cancelled',
+          detail: 'The order has been cancelled successfully.'
+        });
+
+        this.closeCancelOrderDialog();
+        this.loadOrderDetails();
+
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        this.pMessageService.add({
+          severity: 'error',
+          summary: 'Cancellation Failed',
+          detail: error.error?.message || 'Failed to cancel order. Please try again.'
+        });
+        this.isLoading = false;
+      }
     });
-    this.closeCancelOrderDialog();
-    this.loadOrderDetails();
   }
 
   goBack(): void {
@@ -461,6 +554,16 @@ export class OrderDetails implements OnInit {
         detail: 'Failed to copy to clipboard'
       });
     });
+  }
+
+  openImagePreview(imageUrl: string): void {
+    this.previewImageUrl = imageUrl;
+    this.showImagePreviewDialog = true;
+  }
+
+  closeImagePreview(): void {
+    this.showImagePreviewDialog = false;
+    this.previewImageUrl = '';
   }
 
   checkAuthStatus(): void {
