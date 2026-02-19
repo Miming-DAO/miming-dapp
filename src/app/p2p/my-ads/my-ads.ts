@@ -68,6 +68,7 @@ export class MyAds {
   p2pAdForm: P2pAd = {
     id: '',
     user_id: '',
+    user: undefined,
     type: 'sell',
     ordering_type: 'buy',
     p2p_number: '',
@@ -224,6 +225,7 @@ export class MyAds {
     this.p2pAdForm = {
       id: '',
       user_id: '',
+      user: undefined,
       type: 'sell',
       ordering_type: 'buy',
       p2p_number: '',

@@ -69,17 +69,28 @@
       <!-- Chat Header with Merchant Info -->
       <div class="p-4 border-b border-slate-700/50 bg-slate-900/50">
         <div class="flex items-center gap-3">
-          @if (p2pOrder.p2p_ad?.logo_url) {
-          <img [src]="p2pOrder.p2p_ad?.logo_url" [alt]="p2pOrder.p2p_ad?.name"
-            class="w-10 h-10 rounded-full object-cover shrink-0" />
-          } @else {
-          <div
-            class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
-            <i class="pi pi-user text-white"></i>
+          <div class="relative">
+            @if (p2pOrder.p2p_ad?.logo_url) {
+            <img [src]="p2pOrder.p2p_ad?.logo_url" [alt]="p2pOrder.p2p_ad?.name"
+              class="w-10 h-10 rounded-full object-cover shrink-0" />
+            } @else {
+            <div
+              class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
+              <i class="pi pi-user text-white"></i>
+            </div>
+            }
+            <!-- Online/Offline Indicator -->
+            <div
+              [class]="'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-900 ' + (isOtherUserOnline ? 'bg-green-500' : 'bg-slate-500')">
+            </div>
           </div>
-          }
           <div class="flex-1 min-w-0">
-            <h3 class="text-base font-bold text-white truncate">{{ p2pOrder.p2p_ad?.name }}</h3>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-bold text-white truncate">{{ p2pOrder.p2p_ad?.name }}</h3>
+              @if (isOtherUserOnline) {
+              <span class="text-xs text-green-400">Online</span>
+              }
+            </div>
             <div class="flex items-center gap-2">
               <img [src]="'/images/tokens/' + (p2pOrder.p2p_ad?.token_symbol || 'usdt').toLowerCase() + '.png'"
                 [alt]="p2pOrder.p2p_ad?.token_symbol || 'USDT'" class="w-3.5 h-3.5 object-contain" />
@@ -92,7 +103,7 @@
       <!-- Chat Messages -->
       <div class="chat-messages p-4 space-y-3 bg-slate-900/30"
         style="height: calc(100vh - 340px); max-height: calc(100vh - 340px);">
-        @for (msg of chatMessages; track msg.timestamp) {
+        @for (msg of chatMessages; track msg.timestamp.getTime()) {
         @if (msg.sender === 'me') {
 
         <!-- My Message -->
@@ -101,7 +112,14 @@
             <div class="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl rounded-tr-sm p-3">
               <p class="text-sm text-white">{{ msg.message }}</p>
             </div>
-            <p class="text-xs text-slate-500 mt-1 text-right">{{ formatMessageTime(msg.timestamp) }}</p>
+            <div class="flex items-center justify-end gap-1 mt-1">
+              <p class="text-xs text-slate-500">{{ formatMessageTime(msg.timestamp) }}</p>
+              @if (msg.isRead) {
+              <i class="pi pi-check-circle text-xs text-blue-400" title="Seen"></i>
+              } @else {
+              <i class="pi pi-check text-xs text-slate-500" title="Sent"></i>
+              }
+            </div>
           </div>
         </div>
         } @else {
@@ -131,13 +149,27 @@
           <p class="text-xs text-slate-600 mt-1">Start a conversation</p>
         </div>
         }
+
+        <!-- Typing Indicator -->
+        @if (isOtherUserTyping) {
+        <div class="flex justify-start">
+          <div class="bg-slate-700/50 rounded-3xl rounded-tl-sm px-4 py-2">
+            <div class="flex items-center gap-1">
+              <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+              <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+              <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+            </div>
+          </div>
+        </div>
+        }
       </div>
 
       <!-- Chat Input -->
       @if (p2pOrder.status !== 'completed' && p2pOrder.status !== 'cancelled') {
       <div class="p-4 border-t border-slate-700/50 bg-slate-900/50">
         <div class="flex gap-2">
-          <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
+          <input type="text" [(ngModel)]="chatMessage" (input)="onChatInputChange()" (keyup.enter)="sendMessage()"
+            placeholder="Type a message..."
             class="flex-1 px-4 py-2.5 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 text-sm" />
           <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
             [class.opacity-50]="!chatMessage || !chatMessage.trim()"
@@ -924,17 +956,28 @@
         <!-- Chat Header with Merchant Info -->
         <div class="p-4 border-b border-slate-700/50 bg-slate-900/50">
           <div class="flex items-center gap-3">
-            @if (p2pOrder.p2p_ad?.logo_url) {
-            <img [src]="p2pOrder.p2p_ad?.logo_url" [alt]="p2pOrder.p2p_ad?.name"
-              class="w-10 h-10 rounded-full object-cover shrink-0" />
-            } @else {
-            <div
-              class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
-              <i class="pi pi-user text-white"></i>
+            <div class="relative">
+              @if (p2pOrder.p2p_ad?.logo_url) {
+              <img [src]="p2pOrder.p2p_ad?.logo_url" [alt]="p2pOrder.p2p_ad?.name"
+                class="w-10 h-10 rounded-full object-cover shrink-0" />
+              } @else {
+              <div
+                class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
+                <i class="pi pi-user text-white"></i>
+              </div>
+              }
+              <!-- Online/Offline Indicator -->
+              <div
+                [class]="'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-900 ' + (isOtherUserOnline ? 'bg-green-500' : 'bg-slate-500')">
+              </div>
             </div>
-            }
             <div class="flex-1 min-w-0">
-              <h3 class="text-base font-bold text-white truncate">{{ p2pOrder.p2p_ad?.name }}</h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-white truncate">{{ p2pOrder.p2p_ad?.name }}</h3>
+                @if (isOtherUserOnline) {
+                <span class="text-xs text-green-400">Online</span>
+                }
+              </div>
               <div class="flex items-center gap-2">
                 <img [src]="'/images/tokens/' + (p2pOrder.p2p_ad?.token_symbol || 'usdt').toLowerCase() + '.png'"
                   [alt]="p2pOrder.p2p_ad?.token_symbol || 'USDT'" class="w-3.5 h-3.5 object-contain" />
@@ -955,7 +998,14 @@
               <div class="bg-linear-to-r from-purple-600 to-pink-600 rounded-3xl rounded-tr-sm p-3">
                 <p class="text-sm text-white">{{ msg.message }}</p>
               </div>
-              <p class="text-xs text-slate-500 mt-1 text-right">{{ formatMessageTime(msg.timestamp) }}</p>
+              <div class="flex items-center justify-end gap-1 mt-1">
+                <p class="text-xs text-slate-500">{{ formatMessageTime(msg.timestamp) }}</p>
+                @if (msg.isRead) {
+                <i class="pi pi-check-circle text-xs text-blue-400" title="Seen"></i>
+                } @else {
+                <i class="pi pi-check text-xs text-slate-500" title="Sent"></i>
+                }
+              </div>
             </div>
           </div>
           } @else {
@@ -986,13 +1036,27 @@
             <p class="text-xs text-slate-600 mt-1">Start a conversation</p>
           </div>
           }
+
+          <!-- Typing Indicator -->
+          @if (isOtherUserTyping) {
+          <div class="flex justify-start">
+            <div class="bg-slate-700/50 rounded-3xl rounded-tl-sm px-4 py-2">
+              <div class="flex items-center gap-1">
+                <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+                <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+                <div class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+              </div>
+            </div>
+          </div>
+          }
         </div>
 
         <!-- Chat Input -->
         @if (p2pOrder.status !== 'completed' && p2pOrder.status !== 'cancelled') {
         <div class="p-4 border-t border-slate-700/50 bg-slate-900/50">
           <div class="flex gap-2">
-            <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendMessage()" placeholder="Type a message..."
+            <input type="text" [(ngModel)]="chatMessage" (input)="onChatInputChange()" (keyup.enter)="sendMessage()"
+              placeholder="Type a message..."
               class="flex-1 px-4 py-2.5 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 text-sm" />
             <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
               [class.opacity-50]="!chatMessage || !chatMessage.trim()"

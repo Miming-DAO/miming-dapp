@@ -1,9 +1,11 @@
 import { P2pAdPaymentType } from "./p2p-ad-payment-type.model";
 import { P2pAdWalletAddress } from "./p2p-ad-wallet-address.model";
+import { User } from "./user.model";
 
 export class P2pAd {
   id: string = "";
   user_id: string = "";
+  user: User | undefined;
   type: 'buy' | 'sell' = 'buy';
   ordering_type: 'buy' | 'sell' = 'buy';
   p2p_number: string = "";

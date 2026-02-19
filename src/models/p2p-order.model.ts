@@ -21,6 +21,7 @@ export class P2pOrder {
   proof_attachment_url_1: string = "";
   proof_attachment_url_2: string = "";
   proof_attachment_url_3: string = "";
+  p2p_conversation_id: string = "";
   status: string = "";
   created_at: Date = new Date();
   updated_at: Date = new Date();
@@ -37,6 +38,7 @@ export class CreateP2pOrderDto {
   account_name: string = "";
   account_number: string = "";
   ordered_by_user_id: string = "";
+  p2p_conversation_id: string = "";
 }
 
 export class UpdateP2pOrderDto {

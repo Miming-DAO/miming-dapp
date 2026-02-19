@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { MessageService as PMessageService } from 'primeng/api';
 import { DialogModule as PDialogModule } from 'primeng/dialog';
@@ -18,6 +20,7 @@ import { P2pAdWalletAddress } from '../../../models/p2p-ad-wallet-address.model'
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
 import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
 import { P2pAdWalletAddressesService } from '../../../services/p2p-ad-wallet-addresses/p2p-ad-wallet-addresses.service';
+import { P2pChatService, ConversationHistory } from '../../../services/p2p-chat/p2p-chat.service';
 
 @Component({
   selector: 'app-order-details',
@@ -33,7 +36,7 @@ import { P2pAdWalletAddressesService } from '../../../services/p2p-ad-wallet-add
   styleUrl: './order-details.css',
   providers: [PMessageService],
 })
-export class OrderDetails implements OnInit {
+export class OrderDetails implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
@@ -41,8 +44,11 @@ export class OrderDetails implements OnInit {
     private p2pOrdersService: P2pOrdersService,
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
     private p2pAdWalletAddressesService: P2pAdWalletAddressesService,
+    private p2pChatService: P2pChatService,
     private pMessageService: PMessageService
   ) { }
+
+  private destroy$ = new Subject<void>();
 
   currentUser: User | null = null;
 
@@ -69,12 +75,18 @@ export class OrderDetails implements OnInit {
 
   chatMessage: string = '';
   chatMessages: Array<{
+    id: string;
     sender: 'me' | 'other';
     senderName: string;
     message: string;
     timestamp: Date;
     avatar?: string;
+    isRead: boolean;
   }> = [];
+
+  isOtherUserTyping: boolean = false;
+  typingTimeout: any = null;
+  activeUsers: string[] = [];
 
   get isMerchant(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
@@ -84,6 +96,23 @@ export class OrderDetails implements OnInit {
   get isUser(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
     return this.currentUser.id === this.p2pOrder.ordered_by_user_id;
+  }
+
+  get isMerchantOnline(): boolean {
+    if (!this.p2pOrder || !this.p2pOrder.p2p_ad?.user_id) return false;
+    return this.activeUsers.includes(this.p2pOrder.p2p_ad.user_id);
+  }
+
+  get isOtherUserOnline(): boolean {
+    if (!this.currentUser || !this.p2pOrder) return false;
+
+    // Determine the other user's ID
+    const otherUserId = this.isMerchant
+      ? this.p2pOrder.ordered_by_user_id
+      : this.p2pOrder.p2p_ad?.user_id;
+
+    if (!otherUserId) return false;
+    return this.activeUsers.includes(otherUserId);
   }
 
   get selectedAdPaymentType(): P2pAdPaymentType | null {
@@ -244,6 +273,8 @@ export class OrderDetails implements OnInit {
           this.loadAdPaymentTypes(this.p2pOrder.p2p_ad_id);
           this.loadAdWalletAddresses(this.p2pOrder.p2p_ad_id);
         }
+
+        this.loadChatMessages();
       },
       error: (error: any) => {
         this.pMessageService.add({
@@ -279,66 +310,179 @@ export class OrderDetails implements OnInit {
   }
 
   loadChatMessages(): void {
-    // TODO: Load actual chat messages from backend
-    // Mock data for now - adjust based on viewType
-    if (this.paramsViewType === 'my-orders') {
-      // User is the user
-      this.chatMessages = [
-        {
-          sender: 'other',
-          senderName: 'Merchant',
-          message: 'Hello! Thanks for your order. Please proceed with the payment.',
-          timestamp: new Date(Date.now() - 3600000),
-          avatar: ''
-        },
-        {
-          sender: 'me',
-          senderName: 'You',
-          message: 'Payment sent! Reference: TXN123456',
-          timestamp: new Date(Date.now() - 1800000)
-        }
-      ];
-    } else {
-      // User is the merchant (viewing order on their ad)
-      this.chatMessages = [
-        {
-          sender: 'me',
-          senderName: 'You',
-          message: 'Hello! Thanks for your order. Please proceed with the payment.',
-          timestamp: new Date(Date.now() - 3600000),
-          avatar: ''
-        },
-        {
-          sender: 'other',
-          senderName: 'User',
-          message: 'Payment sent! Reference: TXN123456',
-          timestamp: new Date(Date.now() - 1800000)
-        }
-      ];
+    if (!this.p2pOrder) return;
+    this.p2pChatService.initializeSocket();
+
+    if (this.currentUser) {
+      const conversationId = this.p2pOrder.p2p_conversation_id;
+      this.p2pChatService.joinConversation(conversationId, this.currentUser.id);
+
+      this.p2pChatService.messages$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((conversationHistory: ConversationHistory | null) => {
+          if (conversationHistory) {
+            const unreadMessageIds: string[] = [];
+
+            this.chatMessages = conversationHistory.messages.map(msg => {
+              const isMine = this.isMerchant ? msg.role === 'merchant' : msg.role === 'user';
+              const isRead = msg.read_by && this.currentUser ? msg.read_by.includes(this.currentUser.id) : false;
+
+              // Track unread messages from others
+              if (!isMine && !isRead && this.currentUser) {
+                unreadMessageIds.push(msg._id);
+              }
+
+              // For my messages, check if OTHER user has read them
+              let isReadByOther = false;
+              if (isMine && msg.read_by && this.p2pOrder) {
+                const otherUserId = this.isMerchant
+                  ? this.p2pOrder.ordered_by_user_id
+                  : this.p2pOrder.p2p_ad?.user_id;
+                isReadByOther = otherUserId ? msg.read_by.includes(otherUserId) : false;
+              }
+
+              return {
+                id: msg._id,
+                sender: isMine ? 'me' : 'other',
+                senderName: isMine ? 'You' : (this.isMerchant ? 'User' : 'Merchant'),
+                message: msg.content,
+                timestamp: new Date(msg.created_at),
+                avatar: msg.role === 'merchant' ? this.p2pOrder?.p2p_ad?.logo_url : '',
+                isRead: isReadByOther
+              };
+            });
+
+            // Auto-mark unread messages as read
+            if (unreadMessageIds.length > 0 && this.currentUser && this.p2pOrder) {
+              setTimeout(() => {
+                this.p2pChatService.markMessagesAsRead(
+                  this.p2pOrder!.p2p_conversation_id,
+                  this.currentUser!.id,
+                  unreadMessageIds
+                );
+              }, 500);
+            }
+
+            setTimeout(() => {
+              this.scrollChatToBottom();
+            }, 100);
+          }
+        });
+
+      this.p2pChatService.userTyping$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((typing) => {
+          if (typing && typing.user_id !== this.currentUser?.id) {
+            this.isOtherUserTyping = typing.isTyping;
+            // Scroll to bottom when typing indicator appears/disappears
+            setTimeout(() => {
+              this.scrollChatToBottom();
+            }, 50);
+          }
+        });
+
+      this.p2pChatService.activeUsers$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((activeUsers) => {
+          this.activeUsers = activeUsers;
+        });
+
+      this.p2pChatService.messagesRead$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((readData) => {
+          if (readData && readData.user_id !== this.currentUser?.id) {
+            // Update read status for messages
+            this.chatMessages = this.chatMessages.map(msg => {
+              if (readData.messageIds.includes(msg.id) && msg.sender === 'me') {
+                return { ...msg, isRead: true };
+              }
+              return msg;
+            });
+            // Scroll to bottom when read status changes
+            setTimeout(() => {
+              this.scrollChatToBottom();
+            }, 50);
+          }
+        });
+
+      this.p2pChatService.connectionStatus$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((isConnected) => {
+          if (!isConnected) {
+            this.pMessageService.add({
+              severity: 'warn',
+              summary: 'Connection Lost',
+              detail: 'Reconnecting to chat...'
+            });
+          } else {
+            this.pMessageService.clear();
+            this.pMessageService.add({
+              severity: 'success',
+              summary: 'Connected',
+              detail: 'Reconnected to chat successfully.'
+            });
+          }
+        });
+
+      this.p2pChatService.error$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((error) => {
+          if (error) {
+            // Optionally handle chat errors, e.g. show a notification
+          }
+        });
     }
   }
 
+  onChatInputChange(): void {
+    if (!this.p2pOrder || !this.currentUser) return;
+
+    const conversationId = this.p2pOrder.p2p_conversation_id;
+
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    this.p2pChatService.emitTyping(conversationId, this.currentUser.id, true);
+    this.typingTimeout = setTimeout(() => {
+      if (this.p2pOrder && this.currentUser) {
+        this.p2pChatService.emitTyping(conversationId, this.currentUser.id, false);
+      }
+    }, 5000);
+  }
+
   sendMessage(): void {
-    if (!this.chatMessage || !this.chatMessage.trim()) return;
+    if (!this.chatMessage || !this.chatMessage.trim() || !this.p2pOrder || !this.currentUser) return;
 
-    const newMessage = {
-      sender: 'me' as const,
-      senderName: 'You',
-      message: this.chatMessage.trim(),
-      timestamp: new Date()
-    };
+    const conversationId = this.p2pOrder.p2p_conversation_id;
+    const content = this.chatMessage.trim();
 
-    this.chatMessages.push(newMessage);
     this.chatMessage = '';
 
-    // TODO: Send message to backend
-    // Scroll to bottom
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    this.p2pChatService.emitTyping(conversationId, this.currentUser.id, false);
+
+    this.p2pChatService.sendMessage(
+      conversationId,
+      this.currentUser.id,
+      this.isMerchant ? 'merchant' : 'user',
+      content
+    );
+
     setTimeout(() => {
-      const chatContainer = document.querySelector('.chat-messages');
-      if (chatContainer) {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
+      this.scrollChatToBottom();
     }, 100);
+  }
+
+  private scrollChatToBottom(): void {
+    // Query all chat containers (mobile and desktop)
+    const chatContainers = document.querySelectorAll('.chat-messages');
+    chatContainers.forEach(container => {
+      container.scrollTop = container.scrollHeight;
+    });
   }
 
   openPaymentProofDialog(): void {
@@ -573,7 +717,7 @@ export class OrderDetails implements OnInit {
         const userData = JSON.parse(authUser);
 
         this.currentUser = {
-          id: userData.user._id,
+          id: userData.user.id,
           email: userData.user.email,
           full_name: userData.user.full_name,
           username: userData.user.username,
@@ -608,8 +752,17 @@ export class OrderDetails implements OnInit {
       this.paramsOrderId = params['id'];
       if (this.paramsOrderId) {
         this.loadOrderDetails();
-        this.loadChatMessages();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.p2pChatService.leaveConversation();
+    this.p2pChatService.disconnect();
   }
 }

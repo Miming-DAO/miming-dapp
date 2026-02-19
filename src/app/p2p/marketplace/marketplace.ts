@@ -88,6 +88,7 @@ export class Marketplace {
     proof_attachment_url_1: "",
     proof_attachment_url_2: "",
     proof_attachment_url_3: "",
+    p2p_conversation_id: "",
     status: "",
     created_at: new Date(),
     updated_at: new Date(),
@@ -236,6 +237,7 @@ export class Marketplace {
       proof_attachment_url_1: "",
       proof_attachment_url_2: "",
       proof_attachment_url_3: "",
+      p2p_conversation_id: "",
       status: "",
       created_at: new Date(),
       updated_at: new Date(),
@@ -392,7 +394,8 @@ export class Marketplace {
       wallet_address: this.p2pOrderForm.wallet_address,
       account_name: this.p2pOrderForm.account_name,
       account_number: this.p2pOrderForm.account_number,
-      ordered_by_user_id: this.currentUser?.id || ''
+      ordered_by_user_id: this.currentUser?.id || '',
+      p2p_conversation_id: this.p2pOrderForm.p2p_conversation_id
     };
 
     this.p2pOrdersService.createP2pOrder(createOrderDto).subscribe({
