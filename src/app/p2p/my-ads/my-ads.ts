@@ -573,11 +573,22 @@ export class MyAds {
   }
 
   openConfirmCreateAdDialog(): void {
+    // Payment types are always required
     if (this.p2pAdPaymentTypes.length === 0) {
       this.pMessageService.add({
         severity: 'warn',
         summary: 'Validation Error',
         detail: 'Please add at least one payment method.'
+      });
+      return;
+    }
+
+    // Wallet addresses are required for buy ads
+    if (this.p2pAdForm.type === 'buy' && this.p2pAdWalletAddresses.length === 0) {
+      this.pMessageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please add at least one wallet address for buy orders.'
       });
       return;
     }
@@ -590,11 +601,22 @@ export class MyAds {
   }
 
   openConfirmUpdateAdDialog(): void {
+    // Payment types are always required
     if (this.p2pAdPaymentTypes.length === 0) {
       this.pMessageService.add({
         severity: 'warn',
         summary: 'Validation Error',
         detail: 'Please add at least one payment method.'
+      });
+      return;
+    }
+
+    // Wallet addresses are required for buy ads
+    if (this.p2pAdForm.type === 'buy' && this.p2pAdWalletAddresses.length === 0) {
+      this.pMessageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please add at least one wallet address for buy orders.'
       });
       return;
     }
