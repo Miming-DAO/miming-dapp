@@ -16,11 +16,13 @@ import { P2pAd } from '../../../models/p2p-ad.model';
 import { P2pAdPaymentType } from '../../../models/p2p-ad-payment-type.model';
 import { P2pPaymentType } from '../../../models/p2p-payment-type.model';
 import { P2pOrder, CreateP2pOrderDto } from '../../../models/p2p-order.model';
+import { Chain } from '../../../models/chain.model';
 
 import { P2pAdsService } from '../../../services/p2p-ads/p2p-ads.service';
 import { P2pAdPaymentTypesService } from '../../../services/p2p-ad-payment-types/p2p-ad-payment-types.service';
 import { P2pPaymentTypesService } from '../../../services/p2p-payment-types/p2p-payment-types.service';
 import { P2pOrdersService } from '../../../services/p2p-orders/p2p-orders.service';
+import { ChainsService } from '../../../services/chains/chains.service';
 import { User } from '../../../models/user.model';
 
 @Component({
@@ -48,6 +50,7 @@ export class Marketplace {
     private p2pAdPaymentTypesService: P2pAdPaymentTypesService,
     private p2pPaymentTypesService: P2pPaymentTypesService,
     private p2pOrdersService: P2pOrdersService,
+    private chainsService: ChainsService,
     private pMessageService: PMessageService
   ) { }
 
@@ -67,6 +70,9 @@ export class Marketplace {
   p2pAdPaymentTypes: P2pAdPaymentType[] = [];
   selectedP2pAdPaymentType: P2pAdPaymentType | undefined;
 
+  chains: Chain[] = [];
+  selectedChain: Chain | undefined;
+
   showCreateOrderDialog: boolean = false;
   showConfirmOrderDialog: boolean = false;
   p2pOrderForm: P2pOrder = {
@@ -80,6 +86,7 @@ export class Marketplace {
     amount: 0,
     p2p_payment_type_id: "",
     p2p_payment_type: undefined,
+    wallet_chain: "",
     wallet_address: "",
     account_name: "",
     account_number: "",
@@ -229,6 +236,7 @@ export class Marketplace {
       amount: 0,
       p2p_payment_type_id: "",
       p2p_payment_type: undefined,
+      wallet_chain: "",
       wallet_address: "",
       account_name: "",
       account_number: "",
@@ -247,6 +255,27 @@ export class Marketplace {
 
     this.p2pAdPaymentTypes = [];
     this.selectedP2pAdPaymentType = undefined;
+  }
+
+  loadChains(): void {
+    this.chainsService.getChainsByNetworkId(1).subscribe({
+      next: (chains: Chain[]) => {
+        this.chains = chains;
+        this.selectedChain = chains[0] || undefined;
+        if (this.selectedChain) {
+          this.p2pOrderForm.wallet_chain = this.selectedChain.name;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading chains:', error);
+      }
+    });
+  }
+
+  onChainSelected(): void {
+    if (this.selectedChain) {
+      this.p2pOrderForm.wallet_chain = this.selectedChain.name;
+    }
   }
 
   createOrder(p2pAd: P2pAd): void {
@@ -343,6 +372,16 @@ export class Marketplace {
       return;
     }
 
+    // Validate wallet chain for buy orders
+    if (this.activeTab === 'buy' && !this.p2pOrderForm.wallet_chain?.trim()) {
+      this.pMessageService.add({
+        severity: 'error',
+        summary: 'Chain Required',
+        detail: 'Please select a chain for token delivery'
+      });
+      return;
+    }
+
     // Validate account details for sell orders
     if (this.activeTab === 'sell') {
       if (!this.p2pOrderForm.account_name?.trim()) {
@@ -391,6 +430,7 @@ export class Marketplace {
       quantity: this.p2pOrderForm.quantity,
       amount: this.p2pOrderForm.amount,
       p2p_payment_type_id: this.p2pOrderForm.p2p_payment_type_id,
+      wallet_chain: this.p2pOrderForm.wallet_chain,
       wallet_address: this.p2pOrderForm.wallet_address,
       account_name: this.p2pOrderForm.account_name,
       account_number: this.p2pOrderForm.account_number,
@@ -468,6 +508,8 @@ export class Marketplace {
 
   ngOnInit(): void {
     this.checkAuthStatus();
+
+    this.loadChains();
     this.loadP2pPaymentTypes();
   }
 }
