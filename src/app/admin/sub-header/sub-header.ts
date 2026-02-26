@@ -242,8 +242,12 @@ export class SubHeader {
       this.messageService.add({
         severity: 'success',
         summary: 'Connected',
-        detail: 'Wallet authenticated successfully'
+        detail: 'Wallet authenticated successfully. Reloading...'
       });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Wallet authentication failed:', error);
       this.messageService.add({
@@ -292,7 +296,9 @@ export class SubHeader {
       });
 
       this.isProcessing = false;
-      this.router.navigate(['/p2p/marketplace']);
+      this.router.navigate(['/p2p/marketplace']).then(() => {
+        window.location.reload();
+      });
     }, 500);
   }
 

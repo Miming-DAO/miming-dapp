@@ -88,6 +88,11 @@ export class OrderDetails implements OnInit, OnDestroy {
   typingTimeout: any = null;
   activeUsers: string[] = [];
 
+  lastMessageTime: number = 0;
+  messagesCooldown: number = 0;
+  messageCooldownInterval: any = null;
+  readonly MESSAGE_COOLDOWN = 5000; // 5 seconds in milliseconds
+
   get isMerchant(): boolean {
     if (!this.currentUser || !this.p2pOrder) return false;
     return this.currentUser.id !== this.p2pOrder.ordered_by_user_id;
@@ -155,7 +160,7 @@ export class OrderDetails implements OnInit, OnDestroy {
   }
 
   get showConfirmTokenReceivedButton(): boolean {
-    return this.isUser && this.p2pOrder?.status === 'paid';
+    return this.isUser && this.p2pOrder?.status === 'notified';
   }
 
   get showCancelButton(): boolean {
@@ -173,6 +178,7 @@ export class OrderDetails implements OnInit, OnDestroy {
     switch (this.p2pOrder.status) {
       case 'pending': return 'pi-clock';
       case 'paid': return 'pi-check-circle';
+      case 'notified': return 'pi-bell';
       case 'completed': return 'pi-check';
       case 'cancelled': return 'pi-times-circle';
       default: return 'pi-clock';
@@ -181,9 +187,14 @@ export class OrderDetails implements OnInit, OnDestroy {
 
   get statusTitle(): string {
     if (!this.p2pOrder) return '';
-    switch (this.p2pOrder.status) {
-      case 'pending': return 'Waiting for Payment';
-      case 'paid': return 'Payment Submitted';
+    const { status, order_type } = this.p2pOrder;
+    switch (status) {
+      case 'pending':
+        return order_type === 'buy' ? 'Waiting for Payment' : 'Waiting for Token Transfer';
+      case 'paid':
+        return order_type === 'buy' ? 'Payment Submitted' : 'Token Transfer Submitted';
+      case 'notified':
+        return order_type === 'buy' ? 'Tokens Sent — Confirm Receipt' : 'Payment Sent — Confirm Receipt';
       case 'completed': return 'Order Completed!';
       case 'cancelled': return 'Order Cancelled';
       default: return '';
@@ -218,15 +229,31 @@ export class OrderDetails implements OnInit, OnDestroy {
     if (status === 'paid') {
       if (this.paramsViewType === 'my-orders') {
         if (order_type === 'buy') {
-          return `Your payment proof has been uploaded. Waiting for the merchant to verify your <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> payment and send you <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span>.`;
+          return `Your proof of payment has been submitted. Waiting for the merchant to verify your <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> payment and send you <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span>.`;
         } else {
-          return `Your payment proof has been uploaded. Waiting for the merchant to verify your <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> payment and send you <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span>.`;
+          return `Your proof of token transfer has been submitted. Waiting for the merchant to verify your <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> transfer and send you <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span>.`;
         }
       } else {
         if (order_type === 'buy') {
-          return `The user has uploaded their payment proof. Please verify you received <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> and send <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> to complete the order.`;
+          return `The user has submitted their proof of payment. Please verify you received <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span>, then send <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> to the user's wallet and notify them.`;
         } else {
-          return `The user has uploaded their payment proof. Please verify you received <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> and send <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> to complete the order.`;
+          return `The user has submitted their proof of token transfer. Please verify you received <span class="font-bold text-blue-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span>, then send <span class="font-bold text-blue-400">₱${this.formatAmount(amount)} PHP</span> to the user's account and notify them.`;
+        }
+      }
+    }
+
+    if (status === 'notified') {
+      if (this.paramsViewType === 'my-orders') {
+        if (order_type === 'buy') {
+          return `The merchant has sent <span class="font-bold text-orange-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> to your wallet. Please check your wallet and confirm receipt once the tokens arrive.`;
+        } else {
+          return `The merchant has sent your payment of <span class="font-bold text-orange-400">₱${this.formatAmount(amount)} PHP</span> to your account. Please check your account and confirm receipt once the payment arrives.`;
+        }
+      } else {
+        if (order_type === 'buy') {
+          return `You have notified the user that <span class="font-bold text-orange-400">${this.formatQuantity(quantity)} ${tokenSymbol}</span> has been sent. Waiting for the user to confirm receipt to complete this order.`;
+        } else {
+          return `You have notified the user that the payment of <span class="font-bold text-orange-400">₱${this.formatAmount(amount)} PHP</span> has been sent. Waiting for the user to confirm receipt to complete this order.`;
         }
       }
     }
@@ -247,10 +274,28 @@ export class OrderDetails implements OnInit, OnDestroy {
     switch (this.p2pOrder.status) {
       case 'pending': return 'yellow';
       case 'paid': return 'blue';
+      case 'notified': return 'orange';
       case 'completed': return 'green';
       case 'cancelled': return 'red';
       default: return 'yellow';
     }
+  }
+
+  get uploadProofButtonLabel(): string {
+    if (!this.p2pOrder) return 'Upload Proof';
+    return this.p2pOrder.order_type === 'buy' ? 'Pay & Upload Proof' : 'Transfer & Upload Proof';
+  }
+
+  get notifyButtonLabel(): string {
+    if (!this.p2pOrder) return 'Notify Sent';
+    const symbol = this.p2pOrder.p2p_ad?.token_symbol || 'Token';
+    return this.p2pOrder.order_type === 'buy' ? `Notify ${symbol} Sent` : 'Notify Payment Sent';
+  }
+
+  get confirmButtonLabel(): string {
+    if (!this.p2pOrder) return 'Confirm Received';
+    const symbol = this.p2pOrder.p2p_ad?.token_symbol || 'Token';
+    return this.p2pOrder.order_type === 'buy' ? `Confirm ${symbol} Received` : 'Confirm Payment Received';
   }
 
   private formatQuantity(value: number): string {
@@ -454,6 +499,19 @@ export class OrderDetails implements OnInit, OnDestroy {
   sendMessage(): void {
     if (!this.chatMessage || !this.chatMessage.trim() || !this.p2pOrder || !this.currentUser) return;
 
+    // Check if cooldown is active
+    const now = Date.now();
+    const timeSinceLastMessage = now - this.lastMessageTime;
+
+    if (timeSinceLastMessage < this.MESSAGE_COOLDOWN) {
+      this.pMessageService.add({
+        severity: 'warn',
+        summary: 'Please wait',
+        detail: `You can send the next message in ${Math.ceil((this.MESSAGE_COOLDOWN - timeSinceLastMessage) / 1000)} second(s).`
+      });
+      return;
+    }
+
     const conversationId = this.p2pOrder.p2p_conversation_id;
     const content = this.chatMessage.trim();
 
@@ -472,9 +530,42 @@ export class OrderDetails implements OnInit, OnDestroy {
       content
     );
 
+    // Update last message time and start cooldown
+    this.lastMessageTime = now;
+    this.startMessageCooldown();
+
     setTimeout(() => {
       this.scrollChatToBottom();
     }, 100);
+  }
+
+  private startMessageCooldown(): void {
+    this.messagesCooldown = this.MESSAGE_COOLDOWN / 1000; // Convert to seconds
+
+    // Clear any existing interval
+    if (this.messageCooldownInterval) {
+      clearInterval(this.messageCooldownInterval);
+    }
+
+    // Update cooldown every 100ms for smooth countdown
+    this.messageCooldownInterval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - this.lastMessageTime;
+      const remaining = Math.max(0, this.MESSAGE_COOLDOWN - elapsed);
+      this.messagesCooldown = remaining / 1000;
+
+      if (remaining <= 0) {
+        clearInterval(this.messageCooldownInterval);
+        this.messageCooldownInterval = null;
+        this.messagesCooldown = 0;
+      }
+    }, 100);
+  }
+
+  get canSendMessage(): boolean {
+    if (!this.chatMessage || !this.chatMessage.trim()) return false;
+    const now = Date.now();
+    return (now - this.lastMessageTime) >= this.MESSAGE_COOLDOWN;
   }
 
   private scrollChatToBottom(): void {
@@ -563,14 +654,19 @@ export class OrderDetails implements OnInit, OnDestroy {
   confirmPaymentReceived(): void {
     if (!this.p2pOrder) return;
 
+    const isBuy = this.p2pOrder.order_type === 'buy';
+    const symbol = this.p2pOrder.p2p_ad?.token_symbol || 'Token';
+
     this.isLoading = true;
 
     this.p2pOrdersService.confirmP2pOrder(this.p2pOrder.id).subscribe({
       next: (updatedOrder: P2pOrder) => {
         this.pMessageService.add({
           severity: 'success',
-          summary: 'Payment Confirmed',
-          detail: 'Payment has been confirmed. The order is now complete.'
+          summary: 'Receipt Confirmed',
+          detail: isBuy
+            ? `${symbol} receipt confirmed. The order is now complete.`
+            : 'Payment receipt confirmed. The order is now complete.'
         });
 
         this.closeConfirmReceivedDialog();
@@ -582,7 +678,7 @@ export class OrderDetails implements OnInit, OnDestroy {
         this.pMessageService.add({
           severity: 'error',
           summary: 'Confirmation Failed',
-          detail: error.error?.message || 'Failed to confirm payment. Please try again.'
+          detail: error.error?.message || 'Failed to confirm receipt. Please try again.'
         });
         this.isLoading = false;
       }
@@ -597,17 +693,22 @@ export class OrderDetails implements OnInit, OnDestroy {
     this.showNotifyTokenDialog = false;
   }
 
-  notifyTokenSent(): void {
+  notifyUser(): void {
     if (!this.p2pOrder) return;
+
+    const isBuy = this.p2pOrder.order_type === 'buy';
+    const symbol = this.p2pOrder.p2p_ad?.token_symbol || 'Token';
 
     this.isLoading = true;
 
-    this.p2pOrdersService.confirmP2pOrder(this.p2pOrder.id).subscribe({
+    this.p2pOrdersService.notifyP2pOrder(this.p2pOrder.id).subscribe({
       next: (updatedOrder: P2pOrder) => {
         this.pMessageService.add({
           severity: 'success',
-          summary: 'Token Sent Confirmed',
-          detail: 'Order has been marked as complete. User will be notified.'
+          summary: 'User Notified',
+          detail: isBuy
+            ? `The user has been notified that ${symbol} has been sent. Waiting for them to confirm receipt.`
+            : 'The user has been notified that payment has been sent. Waiting for them to confirm receipt.'
         });
 
         this.closeNotifyTokenDialog();
@@ -618,8 +719,8 @@ export class OrderDetails implements OnInit, OnDestroy {
       error: (error: any) => {
         this.pMessageService.add({
           severity: 'error',
-          summary: 'Confirmation Failed',
-          detail: error.error?.message || 'Failed to confirm token sent. Please try again.'
+          summary: 'Notification Failed',
+          detail: error.error?.message || 'Failed to notify user. Please try again.'
         });
         this.isLoading = false;
       }
@@ -759,6 +860,9 @@ export class OrderDetails implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
+    }
+    if (this.messageCooldownInterval) {
+      clearInterval(this.messageCooldownInterval);
     }
     this.destroy$.next();
     this.destroy$.complete();

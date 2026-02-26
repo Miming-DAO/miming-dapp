@@ -35,7 +35,7 @@
           <div class="flex-1 min-w-0">
             <h1 class="text-base font-bold text-white truncate">{{ p2pOrder.order_number }}</h1>
             <span
-              [class]="p2pOrder.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : p2pOrder.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : p2pOrder.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
+              [class]="p2pOrder.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : p2pOrder.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : p2pOrder.status === 'notified' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : p2pOrder.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
               class="inline-block px-2 py-1 rounded-full text-xs font-bold border uppercase">
               {{ p2pOrder.status }}
             </span>
@@ -171,11 +171,17 @@
           <input type="text" [(ngModel)]="chatMessage" (input)="onChatInputChange()" (keyup.enter)="sendMessage()"
             placeholder="Type a message..."
             class="flex-1 px-4 py-2.5 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 text-sm" />
-          <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
-            [class.opacity-50]="!chatMessage || !chatMessage.trim()"
-            [class.cursor-not-allowed]="!chatMessage || !chatMessage.trim()"
-            class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200 cursor-pointer">
-            <i class="pi pi-send"></i>
+          <button (click)="sendMessage()" [disabled]="!canSendMessage" [class.opacity-50]="!canSendMessage"
+            [class.cursor-not-allowed]="!canSendMessage"
+            class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200 cursor-pointer relative group"
+            [title]="messagesCooldown > 0 ? 'Wait ' + (messagesCooldown | number: '1.1-1') + 's before sending' : 'Send message'">
+            <span class="flex items-center justify-center">
+              @if (messagesCooldown > 0) {
+              <span class="text-xs font-semibold">{{ messagesCooldown | number: '1.1-1' }}s</span>
+              } @else {
+              <i class="pi pi-send"></i>
+              }
+            </span>
           </button>
         </div>
       </div>
@@ -215,7 +221,7 @@
 
           <div>
             <span
-              [class]="p2pOrder.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : p2pOrder.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : p2pOrder.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
+              [class]="p2pOrder.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : p2pOrder.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' : p2pOrder.status === 'notified' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : p2pOrder.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'"
               class="px-4 py-2 rounded-full text-sm font-bold border uppercase">
               {{ p2pOrder.status }}
             </span>
@@ -238,7 +244,7 @@
             [class]="'w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-linear-to-r from-' + statusColorClass + '-500 to-' + statusColorClass + '-600'">
             <i [class]="'text-white text-xl pi ' + statusIcon"></i>
           </div>
-          <div class="flex-1 space-y-2">
+          <div class="flex-1 space-y-1">
             <h3 class="text-lg font-bold text-white">{{ statusTitle }}</h3>
             <p class="text-sm text-slate-300 leading-relaxed" [innerHTML]="statusMessage"></p>
           </div>
@@ -934,7 +940,8 @@
       }
 
       <!-- Action Buttons -->
-      @if (p2pOrder.status === 'pending' || p2pOrder.status === 'paid') {
+      @if (p2pOrder.status === 'pending' || p2pOrder.status === 'paid' || (!isMerchant && p2pOrder.status ===
+      'notified')) {
       <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-6">
         <div class="flex flex-wrap gap-3">
 
@@ -943,25 +950,25 @@
           <button type="button" (click)="openPaymentProofDialog()"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-upload"></i>
-            <span>Pay & Upload Proof</span>
+            <span>{{ uploadProofButtonLabel }}</span>
           </button>
           }
 
-          <!-- PAID: Merchant Notify Token Sent Button -->
+          <!-- PAID: Merchant Notify Sent Button -->
           @if (showNotifyTokenSentButton) {
           <button type="button" (click)="openNotifyTokenDialog()"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-send"></i>
-            <span>Notify {{ p2pOrder.p2p_ad?.token_symbol }} Sent</span>
+            <span>{{ notifyButtonLabel }}</span>
           </button>
           }
 
-          <!-- PAID: User Confirm Token Received Button -->
+          <!-- NOTIFIED: User Confirm Received Button -->
           @if (showConfirmTokenReceivedButton) {
           <button type="button" (click)="openConfirmReceivedDialog()"
             class="flex-1 min-w-50 px-4 py-2.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer">
             <i class="pi pi-check-circle"></i>
-            <span>Confirm {{ p2pOrder.p2p_ad?.token_symbol }} Received</span>
+            <span>{{ confirmButtonLabel }}</span>
           </button>
           }
 
@@ -1088,11 +1095,17 @@
             <input type="text" [(ngModel)]="chatMessage" (input)="onChatInputChange()" (keyup.enter)="sendMessage()"
               placeholder="Type a message..."
               class="flex-1 px-4 py-2.5 rounded-3xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500/50 text-sm" />
-            <button (click)="sendMessage()" [disabled]="!chatMessage || !chatMessage.trim()"
-              [class.opacity-50]="!chatMessage || !chatMessage.trim()"
-              [class.cursor-not-allowed]="!chatMessage || !chatMessage.trim()"
-              class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200 cursor-pointer">
-              <i class="pi pi-send"></i>
+            <button (click)="sendMessage()" [disabled]="!canSendMessage" [class.opacity-50]="!canSendMessage"
+              [class.cursor-not-allowed]="!canSendMessage"
+              class="px-4 py-2.5 rounded-3xl bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200 cursor-pointer relative group"
+              [title]="messagesCooldown > 0 ? 'Wait ' + (messagesCooldown | number: '1.1-1') + 's before sending' : 'Send message'">
+              <span class="flex items-center justify-center">
+                @if (messagesCooldown > 0) {
+                <span class="text-xs font-semibold">{{ messagesCooldown | number: '1.1-1' }}s</span>
+                } @else {
+                <i class="pi pi-send"></i>
+                }
+              </span>
             </button>
           </div>
         </div>
@@ -1829,25 +1842,25 @@
       <button type="button" (click)="openPaymentProofDialog(); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-upload"></i>
-        <span>Pay & Upload Proof</span>
+        <span>{{ uploadProofButtonLabel }}</span>
       </button>
       }
 
-      <!-- PAID: Merchant Notify Token Sent Button -->
+      <!-- PAID: Merchant Notify Sent Button -->
       @if (showNotifyTokenSentButton) {
       <button type="button" (click)="openNotifyTokenDialog(); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-send"></i>
-        <span>Notify {{ p2pOrder.p2p_ad?.token_symbol }} Sent</span>
+        <span>{{ notifyButtonLabel }}</span>
       </button>
       }
 
-      <!-- PAID: User Confirm Token Received Button -->
+      <!-- NOTIFIED: User Confirm Received Button -->
       @if (showConfirmTokenReceivedButton) {
       <button type="button" (click)="openConfirmReceivedDialog(); showMobileOrderDetailsDialog = false"
         class="w-full px-4 py-3 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
         <i class="pi pi-check-circle"></i>
-        <span>Confirm {{ p2pOrder.p2p_ad?.token_symbol }} Received</span>
+        <span>{{ confirmButtonLabel }}</span>
       </button>
       }
 
@@ -1864,7 +1877,7 @@
   }
 </p-dialog>
 
-<!-- Confirm Token Received Dialog -->
+<!-- Confirm Received Dialog -->
 <p-dialog [(visible)]="showConfirmReceivedDialog" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
   <ng-template #header>
@@ -1872,7 +1885,7 @@
       <div class="w-10 h-10 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center">
         <i class="pi pi-check-circle text-white text-lg"></i>
       </div>
-      <span class="text-lg font-bold text-white">Confirm Token Received</span>
+      <span class="text-lg font-bold text-white">{{ confirmButtonLabel }}</span>
     </div>
   </ng-template>
   <div class="space-y-4 py-4">
@@ -1881,22 +1894,38 @@
         <i class="pi pi-exclamation-triangle text-yellow-400 text-xl mt-0.5"></i>
         <div class="space-y-2">
           <p class="text-white font-semibold text-sm">Please verify before confirming:</p>
+          @if (p2pOrder?.order_type === 'buy') {
           <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-            <li>You have received the Token in your wallet</li>
-            <li>The amount matches the order quantity</li>
+            <li>You have received the <strong class="text-white">{{ p2pOrder?.p2p_ad?.token_symbol }}</strong> tokens in
+              your wallet</li>
+            <li>The quantity matches the order amount</li>
             <li>This action cannot be undone</li>
           </ul>
+          } @else {
+          <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+            <li>You have received the payment in your account</li>
+            <li>The amount matches the order total</li>
+            <li>This action cannot be undone</li>
+          </ul>
+          }
         </div>
       </div>
     </div>
     @if (p2pOrder) {
     <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
       <div class="space-y-2 text-sm">
+        @if (p2pOrder.order_type === 'buy') {
         <div class="flex justify-between">
-          <span class="text-slate-400">Expected Amount</span>
+          <span class="text-slate-400">Expected Tokens</span>
           <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} {{
             p2pOrder.p2p_ad?.token_symbol }}</span>
         </div>
+        } @else {
+        <div class="flex justify-between">
+          <span class="text-slate-400">Expected Payment</span>
+          <span class="text-white font-bold text-base">₱{{ p2pOrder.amount | number:'1.2-2' }} PHP</span>
+        </div>
+        }
       </div>
     </div>
     }
@@ -1906,7 +1935,8 @@
       <button type="button" (click)="confirmPaymentReceived()"
         class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
         <i class="pi pi-check"></i>
-        <span>Yes, I Received {{ p2pOrder?.p2p_ad?.token_symbol }}</span>
+        <span>{{ p2pOrder?.order_type === 'buy' ? 'Yes, I Received ' + (p2pOrder?.p2p_ad?.token_symbol || 'Token') :
+          'Yes, I Received Payment' }}</span>
       </button>
       <button type="button" (click)="closeConfirmReceivedDialog()"
         class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
@@ -1916,7 +1946,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- Notify Token Sent Dialog -->
+<!-- Notify Sent Dialog -->
 <p-dialog [(visible)]="showNotifyTokenDialog" [modal]="true" [closable]="true" [draggable]="false"
   [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
   <ng-template #header>
@@ -1924,7 +1954,7 @@
       <div class="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-blue-600 flex items-center justify-center">
         <i class="pi pi-send text-white text-lg"></i>
       </div>
-      <span class="text-lg font-bold text-white">Notify Token Sent</span>
+      <span class="text-lg font-bold text-white">{{ notifyButtonLabel }}</span>
     </div>
   </ng-template>
   <div class="space-y-4 py-4">
@@ -1932,12 +1962,22 @@
       <div class="flex items-start gap-3">
         <i class="pi pi-info-circle text-blue-400 text-xl mt-0.5"></i>
         <div class="space-y-2">
-          <p class="text-white font-semibold text-sm">Confirm Token notification:</p>
+          @if (p2pOrder?.order_type === 'buy') {
+          <p class="text-white font-semibold text-sm">Confirm token dispatch:</p>
           <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-            <li>This will notify the user that Token has been sent</li>
-            <li>Make sure you have actually sent the Token</li>
-            <li>The user will be able to confirm receipt</li>
+            <li>You have sent the <strong class="text-white">{{ p2pOrder?.p2p_ad?.token_symbol }}</strong> tokens to the
+              user's wallet</li>
+            <li>This will notify the user to confirm receipt</li>
+            <li>The order will complete once the user confirms</li>
           </ul>
+          } @else {
+          <p class="text-white font-semibold text-sm">Confirm payment dispatch:</p>
+          <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+            <li>You have sent the payment to the user's account</li>
+            <li>This will notify the user to confirm receipt</li>
+            <li>The order will complete once the user confirms</li>
+          </ul>
+          }
         </div>
       </div>
     </div>
@@ -1945,10 +1985,18 @@
     @if (p2pOrder) {
     <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
       <div class="space-y-2 text-sm">
+        @if (p2pOrder.order_type === 'buy') {
         <div class="flex justify-between">
-          <span class="text-slate-400">Token Amount</span>
-          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} Token</span>
+          <span class="text-slate-400">Tokens to Send</span>
+          <span class="text-white font-bold text-base">{{ p2pOrder.quantity | number:'1.2-6' }} {{
+            p2pOrder.p2p_ad?.token_symbol }}</span>
         </div>
+        } @else {
+        <div class="flex justify-between">
+          <span class="text-slate-400">Payment to Send</span>
+          <span class="text-white font-bold text-base">₱{{ p2pOrder.amount | number:'1.2-2' }} PHP</span>
+        </div>
+        }
         <div class="flex justify-between">
           <span class="text-slate-400">User</span>
           <span class="text-white font-semibold">{{ p2pOrder.ordered_by_user?.full_name || 'Unknown' }}</span>
@@ -1959,9 +2007,9 @@
   </div>
   <ng-template #footer>
     <div class="flex gap-3 pt-2">
-      <button type="button" (click)="notifyTokenSent()"
+      <button type="button" (click)="notifyUser()"
         class="px-6 py-3.5 rounded-3xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg cursor-pointer">
-        <i class="pi pi-check"></i>
+        <i class="pi pi-bell"></i>
         <span>Yes, Notify User</span>
       </button>
       <button type="button" (click)="closeNotifyTokenDialog()"

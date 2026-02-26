@@ -40,7 +40,9 @@ export class GoogleCallback implements OnInit {
 
       this.loginStatus = 'Login successful! Redirecting...';
       setTimeout(() => {
-        this.router.navigate(['/p2p']);
+        this.router.navigate(['/p2p']).then(() => {
+          window.location.reload();
+        });
       }, 1500);
     } catch (error) {
       this.errorMessage = 'Failed to process authentication data';

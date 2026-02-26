@@ -89,6 +89,14 @@ export class P2pOrdersService {
     );
   }
 
+  notifyP2pOrder(id: string): Observable<P2pOrder> {
+    return this.http.patch<P2pOrder>(
+      `${this.apiUrl}/${this.apiPrefix}/notify/${id}`,
+      {},
+      { headers: this.getHeaders() }
+    );
+  }
+
   cancelP2pOrder(id: string): Observable<P2pOrder> {
     return this.http.patch<P2pOrder>(
       `${this.apiUrl}/${this.apiPrefix}/cancel/${id}`,

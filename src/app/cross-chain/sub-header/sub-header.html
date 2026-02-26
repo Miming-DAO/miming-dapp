@@ -134,7 +134,9 @@
       [class.to-pink-500/20]="selectedPolkadotWalletAccount?.address === account.address"
       [class.border-purple-500/50]="selectedPolkadotWalletAccount?.address === account.address"
       (click)="selectedPolkadotWalletAccount = account">
+      @if (currentUser?.auth_type === 'wallet') {
       <app-polkadot-identicon-util [address]="account.address" [size]="40"></app-polkadot-identicon-util>
+      }
       <div class="flex flex-col">
         <span class="font-bold text-lg text-white">{{ account.meta.name }}</span>
         <span class="text-sm text-slate-400">
@@ -181,8 +183,10 @@
   </ng-template>
   <div class="flex flex-col gap-3 py-4">
     <div class="p-4 rounded-3xl flex items-center gap-3 bg-slate-800/50 border border-slate-600/30">
+      @if (currentUser?.auth_type === 'wallet') {
       <app-polkadot-identicon-util [address]="currentUser?.username || ''" [size]="48">
       </app-polkadot-identicon-util>
+      }
       <div class="flex flex-col flex-1">
         <span class="font-bold text-lg text-white">
           {{ currentUser?.full_name || currentUser?.username || 'User' }}

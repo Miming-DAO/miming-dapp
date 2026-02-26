@@ -193,8 +193,12 @@ export class SubHeader {
       this.messageService.add({
         severity: 'success',
         summary: 'Connected',
-        detail: 'Wallet authenticated successfully'
+        detail: 'Wallet authenticated successfully. Reloading...'
       });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Wallet authentication failed:', error);
       this.messageService.add({
@@ -228,8 +232,10 @@ export class SubHeader {
       });
 
       this.isProcessing = false;
-      this.router.navigate(['/cross-chain']);
-    }, 500);
+      this.router.navigate(['/cross-chain']).then(() => {
+        window.location.reload();
+      });
+    }, 1000);
   }
 
   getPolkadotWalletAccount(): void {

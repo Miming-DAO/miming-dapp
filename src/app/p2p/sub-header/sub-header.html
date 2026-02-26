@@ -118,15 +118,9 @@
         </button>
       </div>
 
-      <!-- Right Section: Stats + Admin -->
+      <!-- Right Section -->
       <div class="hidden lg:flex items-center gap-2">
 
-        <!-- Quick Stats Button -->
-        <button (click)="showStatsDialog = true"
-          class="flex items-center gap-2 px-4 py-2 rounded-3xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-          <i class="pi pi-chart-line text-sm"></i>
-          <span class="font-semibold text-sm">Stats</span>
-        </button>
       </div>
     </div>
 
@@ -173,25 +167,6 @@
           </div>
           <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
         </button>
-
-        <!-- Mobile Stats -->
-        <div class="pt-3 mt-3 border-t border-purple-500/20">
-          <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Quick Stats</div>
-          <div class="grid grid-cols-3 gap-2">
-            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
-              <div class="text-xs text-slate-400 mb-1">Ads</div>
-              <div class="text-white font-bold">3</div>
-            </div>
-            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
-              <div class="text-xs text-slate-400 mb-1">Orders</div>
-              <div class="text-white font-bold">127</div>
-            </div>
-            <div class="bg-slate-800/50 rounded-3xl p-2.5 text-center">
-              <div class="text-xs text-slate-400 mb-1">Rate</div>
-              <div class="text-green-400 font-bold text-sm">98%</div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     }
@@ -336,7 +311,9 @@
       [class.to-pink-500/20]="selectedPolkadotWalletAccount?.address === account.address"
       [class.border-purple-500/50]="selectedPolkadotWalletAccount?.address === account.address"
       (click)="selectedPolkadotWalletAccount = account">
+      @if (currentUser?.auth_type === 'wallet') {
       <app-polkadot-identicon-util [address]="account.address" [size]="40"></app-polkadot-identicon-util>
+      }
       <div class="flex flex-col">
         <span class="font-bold text-lg text-white">{{ account.meta.name }}</span>
         <span class="text-sm text-slate-400">
@@ -383,8 +360,10 @@
   </ng-template>
   <div class="flex flex-col gap-3 py-4">
     <div class="p-4 rounded-3xl flex items-center gap-3 bg-slate-800/50 border border-slate-600/30">
+      @if (currentUser?.auth_type === 'wallet') {
       <app-polkadot-identicon-util [address]="currentUser?.username || ''" [size]="48">
       </app-polkadot-identicon-util>
+      }
       <div class="flex flex-col flex-1">
         <span class="font-bold text-lg text-white">
           {{ currentUser?.full_name || currentUser?.username || 'User' }}
@@ -416,58 +395,6 @@
       </button>
     </div>
   </ng-template>
-</p-dialog>
-
-<!-- Quick Stats Dialog -->
-<p-dialog [(visible)]="showStatsDialog" [modal]="true" [style]="{ 'width': '25rem', 'border-radius': '1.5rem' }"
-  [dismissableMask]="true" styleClass="cosmic-dialog">
-  <ng-template #header>
-    <div class="flex items-center gap-3">
-      <div
-        class="w-10 h-10 rounded-full bg-linear-to-r from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center">
-        <i class="pi pi-chart-line text-white text-lg"></i>
-      </div>
-      <span
-        class="font-bold text-xl bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-        Quick Stats
-      </span>
-    </div>
-  </ng-template>
-  <div class="space-y-4 py-2">
-    <div class="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 border border-purple-500/20">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-          <i class="pi pi-megaphone text-purple-400"></i>
-        </div>
-        <div>
-          <div class="text-sm text-slate-400">Active Ads</div>
-          <div class="text-2xl font-bold text-white">3</div>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 border border-blue-500/20">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-          <i class="pi pi-list text-blue-400"></i>
-        </div>
-        <div>
-          <div class="text-sm text-slate-400">Total Orders</div>
-          <div class="text-2xl font-bold text-white">127</div>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between p-4 rounded-3xl bg-slate-800/50 border border-green-500/20">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-          <i class="pi pi-check-circle text-green-400"></i>
-        </div>
-        <div>
-          <div class="text-sm text-slate-400">Completion Rate</div>
-          <div class="text-2xl font-bold text-green-400">98.5%</div>
-        </div>
-      </div>
-    </div>
-  </div>
 </p-dialog>
 
 <!-- Toast -->

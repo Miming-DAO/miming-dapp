@@ -288,6 +288,7 @@ export class Marketplace {
     this.orderInputMode = 'amount';
 
     this.loadP2pAdPaymentTypes(p2pAd.id);
+    this.loadChains();
 
     this.p2pOrderForm.amount = p2pAd.min_limit;
     this.p2pOrderForm.quantity = 0;
@@ -508,8 +509,6 @@ export class Marketplace {
 
   ngOnInit(): void {
     this.checkAuthStatus();
-
-    this.loadChains();
     this.loadP2pPaymentTypes();
   }
 }
