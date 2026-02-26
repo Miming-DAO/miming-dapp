@@ -1,0 +1,290 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { firstValueFrom } from 'rxjs';
+
+import { InjectedAccountWithMeta as PolkadotWalletAccount } from '@polkadot/extension-inject/types';
+import { web3FromSource } from '@polkadot/extension-dapp';
+
+import { MessageService } from 'primeng/api';
+import { ToastModule as PToastModule } from 'primeng/toast';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
+import { TooltipModule as PTooltipModule } from 'primeng/tooltip';
+import { SelectModule as PSelectModule } from 'primeng/select';
+
+import { PolkadotIdenticonUtil } from '../../shared/polkadot-identicon-util/polkadot-identicon-util';
+import { DeviceDetectorService } from '../../../services/device-detector/device-detector.service';
+import { PolkadotJsService } from '../../../services/polkadot-js/polkadot-js.service';
+import { AuthWalletService } from '../../../services/auth-wallet/auth-wallet.service';
+
+import { User } from '../../../models/user.model';
+
+@Component({
+  selector: 'app-sub-header',
+  imports: [
+    CommonModule,
+    PToastModule,
+    PDialogModule,
+    PTooltipModule,
+    PSelectModule,
+    PolkadotIdenticonUtil
+  ],
+  templateUrl: './sub-header.html',
+  styleUrl: './sub-header.css',
+  providers: [MessageService],
+})
+export class SubHeader {
+  @Input() mobileMenuOpen: boolean = false;
+
+  @Output() mobileMenuOpenOnClick = new EventEmitter<boolean>();
+  @Output() loginCrossChainUserOnClick = new EventEmitter<void>();
+  @Output() logoutCrossChainUserOnClick = new EventEmitter<void>();
+
+  isMobileDevice: boolean = false;
+
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private authWalletService: AuthWalletService,
+    private deviceDetectorService: DeviceDetectorService,
+    private polkadotJsService: PolkadotJsService,
+    private messageService: MessageService
+  ) {
+    this.isMobileDevice = this.deviceDetectorService.isMobile();
+  }
+
+  isXteriumMode: boolean = false;
+
+  isLoggedIn: boolean = false;
+  currentUser: User | null = null;
+
+  showAvailableWalletsDialog: boolean = false;
+  showPolkadotWalletAccountsDialog: boolean = false;
+  polkadotWalletAccounts: PolkadotWalletAccount[] = [];
+  selectedPolkadotWalletAccount: PolkadotWalletAccount | undefined;
+  showPolkadotWalletAccountDialog: boolean = false;
+
+  isProcessing: boolean = false;
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    this.mobileMenuOpenOnClick.emit(this.mobileMenuOpen);
+  }
+
+  login(): void {
+    this.showAvailableWalletsDialog = true;
+  }
+
+  async connectPolkadotJsWallet() {
+    try {
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('polkadot-js');
+      this.polkadotWalletAccounts = results;
+      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+      this.showPolkadotWalletAccountsDialog = true;
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
+  async connectTalismanWallet() {
+    try {
+      const results: PolkadotWalletAccount[] = await this.polkadotJsService.connectToWallet('talisman');
+      this.polkadotWalletAccounts = results;
+      this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+      this.showPolkadotWalletAccountsDialog = true;
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
+  async connectXteriumWallet() {
+    try {
+      if (this.isMobileDevice) {
+        const callbackUrl = window.location.origin + '/auth/xterium-accounts';
+        window.location.href = 'https://deeplink.xterium.app/web3/connect-accounts?origin=' + encodeURIComponent(window.location.origin) + '&callbackUrl=' + encodeURIComponent(callbackUrl);
+      } else {
+        const results = await this.polkadotJsService.connectToWallet('xterium');
+
+        this.polkadotWalletAccounts = results;
+        this.selectedPolkadotWalletAccount = this.polkadotWalletAccounts[0];
+
+        this.showPolkadotWalletAccountsDialog = true;
+      }
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to connect: ' + (error as Error).message
+      });
+    }
+  }
+
+  async connectPolkadotWalletAccount(): Promise<void> {
+    if (!this.selectedPolkadotWalletAccount) return;
+
+    this.isProcessing = true;
+
+    try {
+      const nonceResponse = await firstValueFrom(this.authWalletService.generateNonce({
+        wallet_address: this.selectedPolkadotWalletAccount.address,
+        wallet_type: 'polkadot'
+      }));
+
+      if (!nonceResponse) {
+        throw new Error('Failed to generate nonce');
+      }
+
+      const injector = await web3FromSource(this.selectedPolkadotWalletAccount.meta.source);
+      if (!injector?.signer?.signRaw) {
+        throw new Error('Wallet does not support message signing');
+      }
+
+      const signResult = await injector.signer.signRaw({
+        address: this.selectedPolkadotWalletAccount.address,
+        data: nonceResponse.nonce,
+        type: 'bytes'
+      });
+
+      const verifyResponse = await firstValueFrom(this.authWalletService.verifySignature({
+        wallet_name: this.selectedPolkadotWalletAccount.meta.name || 'Unknown Polkadot Wallet',
+        wallet_address: this.selectedPolkadotWalletAccount.address,
+        nonce: nonceResponse.nonce,
+        signature: signResult.signature
+      }));
+
+      if (!verifyResponse) {
+        throw new Error('Failed to verify signature');
+      }
+
+      localStorage.setItem('auth_user', JSON.stringify(verifyResponse));
+      localStorage.setItem('auth_wallet', JSON.stringify(this.selectedPolkadotWalletAccount));
+
+      this.isLoggedIn = true;
+      this.currentUser = {
+        id: verifyResponse.user._id,
+        email: verifyResponse.user.email,
+        full_name: verifyResponse.user.full_name,
+        username: verifyResponse.user.username,
+        type: verifyResponse.user.type,
+        auth_type: verifyResponse.user.auth_type,
+        is_disabled: false,
+        photo_url: verifyResponse.user.photo_url,
+        google_account_id: verifyResponse.user.google_account_id,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      this.showPolkadotWalletAccountsDialog = false;
+      this.showAvailableWalletsDialog = false;
+
+      this.loginCrossChainUserOnClick.emit();
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Connected',
+        detail: 'Wallet authenticated successfully. Reloading...'
+      });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Wallet authentication failed:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Authentication Failed',
+        detail: (error as Error).message || 'Failed to authenticate wallet'
+      });
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  logout(): void {
+    this.isProcessing = true;
+
+    setTimeout(() => {
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_wallet');
+
+      this.showPolkadotWalletAccountDialog = false;
+
+      this.isLoggedIn = false;
+      this.currentUser = null;
+
+      this.logoutCrossChainUserOnClick.emit();
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Disconnected',
+        detail: 'Wallet disconnected successfully'
+      });
+
+      this.isProcessing = false;
+      this.router.navigate(['/cross-chain']).then(() => {
+        window.location.reload();
+      });
+    }, 1000);
+  }
+
+  getPolkadotWalletAccount(): void {
+    this.showPolkadotWalletAccountDialog = true;
+  }
+
+  copyAddressToClipboard(address?: string): void {
+    if (!address) return;
+    navigator.clipboard.writeText(address).then(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Copied',
+        detail: 'Address copied to clipboard'
+      });
+    });
+  }
+
+  checkAuthStatus(): void {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+
+        this.isLoggedIn = true;
+        this.currentUser = {
+          id: userData.user._id,
+          email: userData.user.email,
+          full_name: userData.user.full_name,
+          username: userData.user.username,
+          type: userData.user.type,
+          auth_type: userData.user.auth_type,
+          is_disabled: false,
+          photo_url: userData.user.photo_url,
+          google_account_id: userData.user.google_account_id,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+      } catch (error) {
+        console.error('Failed to parse auth data:', error);
+        localStorage.removeItem('auth_user');
+      }
+    }
+  }
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.isXteriumMode = params['xterium'] === 'true';
+    });
+
+    this.checkAuthStatus();
+  }
+}

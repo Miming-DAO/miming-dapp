@@ -1,43 +1,48 @@
-export interface P2pAd {
-  id: string
-  user_id: string;
-  type: 'buy' | 'sell';
-  p2p_number: string;
-  logo_url: string;
-  name: string;
-  token_symbol: string;
-  price: number;
-  available_amount: number;
-  min_limit: number;
-  max_limit: number;
-  payment_instructions: string;
-  total_orders: number;
-  completed_orders: number;
-  status: string;
-  created_at: Date;
-  updated_at: Date;
+import { P2pAdPaymentType } from "./p2p-ad-payment-type.model";
+import { P2pAdWalletAddress } from "./p2p-ad-wallet-address.model";
+import { User } from "./user.model";
+
+export class P2pAd {
+  id: string = "";
+  user_id: string = "";
+  user: User | undefined;
+  type: 'buy' | 'sell' = 'buy';
+  ordering_type: 'buy' | 'sell' = 'buy';
+  p2p_number: string = "";
+  logo_url: string = "";
+  name: string = "";
+  token_symbol: string = "";
+  price: number = 0;
+  min_limit: number = 0;
+  max_limit: number = 0;
+  payment_instructions: string = "";
+  total_orders: number = 0;
+  completed_orders: number = 0;
+  status: string = "";
+  created_at: Date = new Date();
+  updated_at: Date = new Date();
 }
 
-export interface CreateP2pAdDto {
-  type: 'buy' | 'sell';
-  logo_url: string;
-  name: string;
-  token_symbol: string;
-  price: number;
-  available_amount: number;
-  min_limit: number;
-  max_limit: number;
-  payment_instructions: string;
+export class CreateP2pAdDto {
+  user_id: string = "";
+  type: 'buy' | 'sell' = 'buy';
+  logo_url: string = "";
+  name: string = "";
+  token_symbol: string = "";
+  price: number = 0;
+  min_limit: number = 0;
+  max_limit: number = 0;
+  payment_instructions: string = "";
 }
 
-export interface UpdateP2pAdDto {
-  type?: 'buy' | 'sell';
-  logo_url?: string;
-  name?: string;
-  token_symbol?: string;
-  price?: number;
-  available_amount?: number;
-  min_limit?: number;
-  max_limit?: number;
-  payment_instructions?: string;
+export class UpdateP2pAdDto {
+  user_id?: string = "";
+  type?: 'buy' | 'sell' = 'buy';
+  logo_url?: string = "";
+  name?: string = "";
+  token_symbol?: string = "";
+  price?: number = 0;
+  min_limit?: number = 0;
+  max_limit?: number = 0;
+  payment_instructions?: string = "";
 }

@@ -12,63 +12,96 @@ export class P2pOrdersService {
   private apiUrl = environment.apiUrl;
   private apiPrefix = 'api/p2p-orders';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
-  private getHeaders(): HttpHeaders {
-    const googleUser = localStorage.getItem('google_user');
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
+  private getHeaders(includeContentType = true): HttpHeaders {
+    const googleUser = localStorage.getItem('auth_user');
+    let headers = new HttpHeaders();
+
+    if (includeContentType) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
 
     if (googleUser) {
       const userData = JSON.parse(googleUser);
-      if (userData.token) {
-        headers = headers.set('Authorization', `Bearer ${userData.token}`);
+      if (userData.access_token) {
+        headers = headers.set('Authorization', `Bearer ${userData.access_token}`);
       }
     }
 
     return headers;
   }
 
-  getOrders(): Observable<P2pOrder[]> {
+  getP2pOrders(): Observable<P2pOrder[]> {
     return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}`, {
       headers: this.getHeaders()
     });
   }
 
-  getOrdersByAuthUser(): Observable<P2pOrder[]> {
-    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/auth-user`, {
+  getP2pMyOrdersByAuthUser(): Observable<P2pOrder[]> {
+    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/my-orders/auth-user`, {
       headers: this.getHeaders()
     });
   }
 
-  getOrdersByP2pAd(p2p_ad_id: string): Observable<P2pOrder[]> {
+  getP2pAdOrdersByAuthUser(): Observable<P2pOrder[]> {
+    return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/ad-orders/auth-user`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getP2pOrdersByP2pAd(p2p_ad_id: string): Observable<P2pOrder[]> {
     return this.http.get<P2pOrder[]>(`${this.apiUrl}/${this.apiPrefix}/by/p2p-ad/${p2p_ad_id}`, {
       headers: this.getHeaders()
     });
   }
 
-  createOrder(createDto: CreateP2pOrderDto): Observable<P2pOrder> {
+  createP2pOrder(createDto: CreateP2pOrderDto): Observable<P2pOrder> {
     return this.http.post<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}`, createDto, {
       headers: this.getHeaders()
     });
   }
 
-  getOrderById(id: string): Observable<P2pOrder> {
+  getP2pOrderById(id: string): Observable<P2pOrder> {
     return this.http.get<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
       headers: this.getHeaders()
     });
   }
 
-  updateOrder(id: string, updateDto: UpdateP2pOrderDto): Observable<P2pOrder> {
-    return this.http.patch<P2pOrder>(`${this.apiUrl}/${this.apiPrefix}/${id}`, updateDto, {
-      headers: this.getHeaders()
-    });
+  uploadProofAttachment(id: string, files: File[]): Observable<P2pOrder> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+
+    return this.http.post<P2pOrder>(
+      `${this.apiUrl}/${this.apiPrefix}/upload-proof-attachment/${id}`,
+      formData,
+      { headers: this.getHeaders(false) }
+    );
   }
 
-  deleteOrder(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${this.apiPrefix}/${id}`, {
-      headers: this.getHeaders()
-    });
+  confirmP2pOrder(id: string): Observable<P2pOrder> {
+    return this.http.patch<P2pOrder>(
+      `${this.apiUrl}/${this.apiPrefix}/confirm/${id}`,
+      {},
+      { headers: this.getHeaders() }
+    );
+  }
+
+  notifyP2pOrder(id: string): Observable<P2pOrder> {
+    return this.http.patch<P2pOrder>(
+      `${this.apiUrl}/${this.apiPrefix}/notify/${id}`,
+      {},
+      { headers: this.getHeaders() }
+    );
+  }
+
+  cancelP2pOrder(id: string): Observable<P2pOrder> {
+    return this.http.patch<P2pOrder>(
+      `${this.apiUrl}/${this.apiPrefix}/cancel/${id}`,
+      {},
+      { headers: this.getHeaders() }
+    );
   }
 }

@@ -1,0 +1,89 @@
+:host {
+  display: block;
+  height: 100vh;
+
+  --sidebar-bg-image: url('/images/backgrounds/miming-bg.png');
+}
+
+/* primeng - drawer */
+::ng-deep .p-drawer-header {
+  display: none !important;
+  padding: 0 !important;
+}
+
+::ng-deep .p-drawer-content {
+  padding: 0 !important;
+}
+
+/* primeng - select */
+::ng-deep .p-select-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 27, 75, 0.98) 0%,
+    rgba(88, 28, 135, 0.98) 100%
+  ) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25) !important;
+}
+
+::ng-deep .p-select {
+  border-radius: 9999px !important;
+  background-color: oklch(20.8% 0.042 265.755) !important;
+}
+
+::ng-deep .p-select .p-select-label {
+  border-radius: 9999px !important;
+}
+
+::ng-deep .p-select-list {
+  padding: 0.5rem !important;
+}
+
+::ng-deep .p-select-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2) !important;
+  padding: 0.75rem 1rem !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep .p-select-option {
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+  color: rgb(203, 213, 225) !important;
+  transition: all 0.2s !important;
+}
+
+::ng-deep .p-select-option:hover {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: white !important;
+}
+
+::ng-deep .p-select-option.p-select-option-selected {
+  background: linear-gradient(
+    to right,
+    rgba(168, 85, 247, 0.2),
+    rgba(236, 72, 153, 0.2)
+  ) !important;
+  color: white !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+::ng-deep .p-select-option.p-select-option-selected:hover {
+  background: linear-gradient(
+    to right,
+    rgba(168, 85, 247, 0.3),
+    rgba(236, 72, 153, 0.3)
+  ) !important;
+}
+
+/* primeng - input number */
+::ng-deep .p-inputnumber-input {
+  background-color: oklch(20.8% 0.042 265.755) !important;
+  color: white !important;
+  border-radius: 9999px !important;
+  font-size: 20px !important;
+}

@@ -1,0 +1,612 @@
+<div class="max-w-7xl mx-auto">
+  <div class="backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 p-4 md:p-8">
+
+    <!-- Panel Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">P2P Marketplace</h2>
+        <p class="text-sm md:text-base text-slate-400">Browse and create orders</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex gap-2">
+        <button (click)="activeTab = 'buy'"
+          [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="flex-1 px-4 md:px-6 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer">
+          <span class="hidden sm:inline">Buy</span>
+          <span class="sm:hidden">Buy</span>
+        </button>
+
+        <button (click)="activeTab = 'sell'"
+          [class]="activeTab === 'sell' ? 'bg-linear-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white shadow-sm' : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'"
+          class="flex-1 px-4 md:px-6 py-2.5 md:py-3 rounded-3xl font-bold text-sm md:text-base transition-all duration-200 cursor-pointer">
+          <span class="hidden sm:inline">Sell</span>
+          <span class="sm:hidden">Sell</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row gap-3 mb-6">
+      <div class="w-full md:w-56">
+        <p-select [options]="p2pPaymentTypes" [(ngModel)]="selectedP2pPaymentType" placeholder="All Payment Types"
+          optionLabel="name" class="w-full" size="large">
+          <ng-template #selectedItem let-selectedOption>
+            @if (selectedOption) {
+            <div class="flex items-center gap-2">
+              @if (selectedOption.logo_url) {
+              <img [src]="selectedOption.logo_url" [alt]="selectedOption.name" class="w-5 h-5 object-contain" />
+              } @else {
+              <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="pi pi-wallet text-purple-400 text-xs"></i>
+              </div>
+              }
+              <span class="font-medium">{{ selectedOption.name }}</span>
+            </div>
+            }
+          </ng-template>
+          <ng-template let-paymentType #item>
+            <div class="flex items-center gap-2 py-1">
+              @if (paymentType.logo_url) {
+              <img [src]="paymentType.logo_url" [alt]="paymentType.name" class="w-5 h-5 object-contain" />
+              } @else {
+              <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <i class="pi pi-wallet text-purple-400 text-xs"></i>
+              </div>
+              }
+              <span class="font-medium">{{ paymentType.name }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+
+      <div class="flex-1">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search merchants or offers..."
+          class="w-full px-4 py-3 rounded-3xl bg-slate-800/50 border border-gray-100/30 text-white placeholder:text-slate-500 outline-none focus:border-purple-500/50 transition-all" />
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="flex justify-center items-center py-12">
+      <div class="flex flex-col items-center gap-4">
+        <i class="pi pi-spin pi-spinner text-4xl text-purple-400"></i>
+        <p class="text-slate-400">Loading marketplace...</p>
+      </div>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && filteredOffers.length === 0) {
+    <div class="text-center py-12">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-purple-500/10 flex items-center justify-center">
+        <i class="pi pi-inbox text-4xl text-purple-400"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-white mb-2">No Offers Available</h3>
+      <p class="text-slate-400">There are no {{ activeTab }} offers at the moment</p>
+    </div>
+    }
+
+    <!-- Ads List -->
+    @if (!isLoading && filteredOffers.length > 0) {
+
+    <!-- Desktop Table View -->
+    <div
+      class="hidden md:block backdrop-blur-xl bg-slate-800/50 rounded-3xl border border-purple-500/20 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-max">
+          <thead>
+            <tr class="border-b border-slate-700">
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400">Merchant</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400">Price</th>
+              <th class="text-right py-3 px-4 text-sm font-semibold text-slate-400 hidden lg:table-cell">Limits</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-slate-400 hidden xl:table-cell">Payment</th>
+              <th class="text-center py-3 px-4 text-sm font-semibold text-slate-400">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (offer of filteredOffers; track offer.id) {
+            <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+
+              <!-- Merchant Column -->
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-3">
+
+                  @if (offer.logo_url) {
+                  <img [src]="offer.logo_url" [alt]="offer.name" class="w-12 h-12 rounded-full object-cover shrink-0" />
+                  } @else {
+                  <div
+                    [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+                    class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    {{ offer.name.substring(0, 2).toUpperCase() }}
+                  </div>
+                  }
+
+                  <div class="min-w-0">
+                    <div class="font-semibold text-white truncate">{{ offer.name }}</div>
+                    <div class="text-xs text-slate-400 mt-0.5">{{ offer.total_orders }} orders | {{
+                      offer.completed_orders > 0 ? ((offer.completed_orders / offer.total_orders) * 100 |
+                      number:'1.0-0') : 0 }}%
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Price Column -->
+              <td class="py-4 px-4 text-right">
+                <div
+                  class="font-bold text-lg bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap">
+                  ₱{{ offer.price | number:'1.2-2' }}
+                </div>
+                <div class="flex items-end justify-end gap-1 mt-0.5">
+                  <img [src]="'/images/tokens/' + (offer.token_symbol || 'usdt').toLowerCase() + '.png'"
+                    [alt]="offer.token_symbol || 'USDT'" class="w-4 h-4 object-contain" />
+                  <span class="text-xs text-slate-300 font-semibold">{{ offer.token_symbol || 'USDT' }}</span>
+                </div>
+              </td>
+
+              <!-- Limits Column -->
+              <td class="py-4 px-4 text-right hidden lg:table-cell">
+                <div class="font-semibold text-white whitespace-nowrap">
+                  ₱{{ offer.min_limit | number:'1.2-2' }} ~ ₱{{ offer.max_limit | number:'1.2-2' }}
+                </div>
+              </td>
+
+              <!-- Payment Methods -->
+              <td class="py-4 px-4 hidden xl:table-cell">
+                <div class="flex flex-wrap gap-1 max-w-xs">
+                  @for (paymentType of getAdPaymentTypes(offer.id).slice(0, 2); track paymentType.id) {
+                  <span
+                    class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    {{ paymentType.p2p_payment_type?.name }}
+                  </span>
+                  }
+                  @if (getAdPaymentTypes(offer.id).length > 2) {
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-300">
+                    +{{ getAdPaymentTypes(offer.id).length - 2 }}
+                  </span>
+                  }
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="py-4 px-4">
+                <div class="flex items-center justify-center">
+                  <button (click)="createOrder(offer)"
+                    [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'"
+                    class="px-5 py-2 rounded-3xl text-white font-semibold text-sm hover:scale-105 transition-all duration-200 cursor-pointer whitespace-nowrap">
+                    Create Order
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="md:hidden space-y-3">
+      @for (offer of filteredOffers; track offer.id) {
+      <div
+        class="backdrop-blur-xl bg-linear-to-br from-slate-800/80 via-purple-900/30 to-slate-800/90 rounded-3xl border border-purple-500/20 p-4 hover:border-purple-500/40 transition-all duration-200">
+
+        <!-- Merchant Info Header -->
+        <div class="flex items-center gap-3 mb-3">
+
+          @if (offer.logo_url) {
+          <img [src]="offer.logo_url" [alt]="offer.name" class="w-12 h-12 rounded-full object-cover shrink-0" />
+          } @else {
+          <div
+            [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0">
+            {{ offer.name.substring(0, 2).toUpperCase() }}
+          </div>
+          }
+
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-white truncate">{{ offer.name }}</h3>
+            <p class="text-xs text-slate-400">{{ offer.total_orders }} orders | {{ offer.completed_orders > 0 ?
+              ((offer.completed_orders / offer.total_orders) * 100 | number:'1.0-0') : 0 }}%</p>
+          </div>
+          <span
+            [class]="activeTab === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="px-3 py-1 rounded-full text-xs font-bold border uppercase shrink-0">
+            <i [class]="activeTab === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="mr-1"></i>
+            {{ activeTab }}
+          </span>
+        </div>
+
+        <!-- Price + Token -->
+        <div class="border-b border-slate-700/50 mb-3 pb-3">
+          <div class="flex items-center justify-between px-2">
+            <span class="text-xs text-slate-400">Price</span>
+            <div class="flex items-center gap-2">
+              <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+                ₱{{ offer.price | number:'1.2-2' }}
+              </div>
+              <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-700/50">
+                <img [src]="'/images/tokens/' + (offer.token_symbol || 'usdt').toLowerCase() + '.png'"
+                  [alt]="offer.token_symbol || 'USDT'" class="w-4 h-4 object-contain">
+                <span class="text-xs text-white font-semibold">{{ offer.token_symbol || 'USDT' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="space-y-2 mb-3">
+          <div class="flex justify-between px-2">
+            <span class="text-xs text-slate-400">Limits</span>
+            <div class="text-white font-bold text-sm text-right">₱{{ offer.min_limit | number:'1.2-2' }} - ₱{{
+              offer.max_limit | number:'1.2-2' }}</div>
+          </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="border-b border-slate-700/50 mb-3 pb-3">
+          <div class="px-2">
+            <span class="text-xs text-slate-400 block mb-2">Payment Methods</span>
+            <div class="flex flex-wrap gap-1">
+              @for (paymentType of getAdPaymentTypes(offer.id); track paymentType.id) {
+              <span
+                class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                {{ paymentType.p2p_payment_type?.name }}
+              </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button (click)="createOrder(offer)"
+          [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'"
+          class="w-full px-4 py-3 rounded-3xl text-white font-bold hover:scale-[1.02] transition-all duration-200 cursor-pointer">
+          Create Order
+        </button>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Create Order Dialog -->
+<p-dialog [(visible)]="showCreateOrderDialog" [modal]="true"
+  [style]="{ 'width': '650px', 'max-width': '95vw', 'border-radius': '1.5rem' }" [dismissableMask]="true">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+        class="w-10 h-10 rounded-3xl flex items-center justify-center">
+        <i [class]="activeTab === 'buy' ? 'pi pi-arrow-down' : 'pi pi-arrow-up'" class="text-white text-lg"></i>
+      </div>
+      <div>
+        <span
+          class="font-bold text-lg bg-linear-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+          Create {{ activeTab === 'buy' ? 'Buy' : 'Sell' }} Order
+        </span>
+        <div class="text-xs text-slate-400">
+          {{ activeTab === 'buy' ? 'Purchase' : 'Sell' }} {{ selectedP2pAd?.token_symbol || 'USDT' }} from {{
+          selectedP2pAd?.name }}
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <div class="py-4 space-y-5">
+
+    <!-- Offer Information -->
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Price</span>
+          <div class="text-right">
+            <div class="font-bold text-xl bg-linear-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              ₱{{ selectedP2pAd?.price | number:'1.2-2' }}
+            </div>
+            <div class="text-xs text-slate-400">per {{ selectedP2pAd?.token_symbol || 'USDT' }}</div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-slate-400">Order Limits</span>
+          <div class="text-white font-semibold text-right">
+            ₱{{ selectedP2pAd?.min_limit | number:'1.2-2' }} - ₱{{ selectedP2pAd?.max_limit | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Amount/Crypto -->
+    <div class="space-y-3">
+      <div class="flex gap-2 border-b border-slate-700/50">
+        <button type="button" (click)="orderInputMode = 'amount'"
+          [class]="orderInputMode === 'amount' ? 'text-purple-400 border-purple-400' : 'text-slate-400 border-transparent'"
+          class="flex-1 pb-2 border-b-2 font-semibold text-sm transition-colors cursor-pointer">
+          Amount
+        </button>
+        <button type="button" (click)="orderInputMode = 'quantity'"
+          [class]="orderInputMode === 'quantity' ? 'text-purple-400 border-purple-400' : 'text-slate-400 border-transparent'"
+          class="flex-1 pb-2 border-b-2 font-semibold text-sm transition-colors cursor-pointer">
+          Quantity
+        </button>
+      </div>
+
+      @if (orderInputMode === 'amount') {
+      <div>
+        <label class="text-sm text-slate-400 mb-2 block">
+          Amount <span class="text-red-400">*</span>
+        </label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="p2pOrderForm.amount" name="editMinLimit"
+          placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);"
+          (ngModelChange)="calculateQuantity()" />
+        <div class="text-xs text-slate-500 mt-1">
+          {{ activeTab === 'buy' ? 'You will receive approximately' : 'You will sell approximately' }}
+          {{ p2pOrderForm.quantity | number:'1.6-6' }}
+          {{ selectedP2pAd?.token_symbol || 'USDT' }}
+        </div>
+      </div>
+      } @else {
+      <div>
+        <label class="text-sm text-slate-400 mb-2 block">
+          Quantity <span class="text-red-400">*</span>
+        </label>
+        <p-inputnumber class="w-full"
+          inputStyleClass="w-full rounded-3xl border border-gray-100/30 px-4 py-3 text-right" mode="decimal"
+          [minFractionDigits]="2" [maxFractionDigits]="2" [(ngModel)]="p2pOrderForm.quantity" name="editMinLimit"
+          placeholder="0.00" style="background-color: oklch(20.8% 0.042 265.755);"
+          (ngModelChange)="calculateAmount()" />
+        <div class="text-xs text-slate-500 mt-1">
+          {{ activeTab === 'buy' ? 'Total cost will be approximately' : 'You will receive approximately' }}
+          ₱{{ p2pOrderForm.amount | number:'1.2-2' }} PHP
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Payment Method -->
+    <div>
+      <label class="text-sm text-slate-400 mb-2 block">
+        {{ activeTab === 'buy' ? 'How would you like to pay?' : 'How would you like to receive payment?' }}
+        <span class="text-red-400">*</span>
+      </label>
+      <p-select [options]="p2pAdPaymentTypes" [(ngModel)]="selectedP2pAdPaymentType" placeholder="Select payment type"
+        class="w-full" size="large">
+        <ng-template #selectedItem let-selectedOption>
+          @if (selectedOption) {
+          <div class="flex items-center gap-2">
+            @if (selectedOption.p2p_payment_type?.logo_url) {
+            <img [src]="selectedOption.p2p_payment_type.logo_url" [alt]="selectedOption.p2p_payment_type.name"
+              class="w-5 h-5 object-contain" />
+            } @else {
+            <div class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i class="pi pi-wallet text-purple-400 text-xs"></i>
+            </div>
+            }
+            <span class="font-medium">{{ selectedOption.p2p_payment_type?.name }}</span>
+          </div>
+          }
+        </ng-template>
+        <ng-template let-adPaymentType #item>
+          <div class="flex items-center gap-3 py-2">
+            <img [src]="adPaymentType.p2p_payment_type?.logo_url" [alt]="adPaymentType.p2p_payment_type?.name"
+              class="w-8 h-8 rounded-full object-cover" />
+            <span class="font-medium">{{ adPaymentType.p2p_payment_type?.name }}</span>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+
+    <!-- Wallet Address for Buy Orders -->
+    @if (activeTab === 'buy') {
+    <div class="bg-green-500/10 border-2 border-green-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-wallet text-white text-sm"></i>
+        </div>
+        <div class="flex-1">
+          <h4 class="text-sm font-semibold text-green-300 mb-1">Token Delivery Address</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Please provide your wallet address where you want to receive the {{ selectedP2pAd?.token_symbol || 'USDT' }}
+            tokens.
+            Make sure the address is correct as transactions cannot be reversed.
+          </p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm text-slate-400 mb-2 block">
+            Select Chain <span class="text-red-400">*</span>
+          </label>
+          <p-select [options]="chains" [(ngModel)]="selectedChain" optionLabel="name"
+            class="w-full" size="large" (onChange)="onChainSelected()">
+            <ng-template #selectedItem let-selectedOption>
+              @if (selectedOption) {
+              <div class="flex items-center gap-2">
+                <img [src]="'images/chains/' + selectedOption.name.toLowerCase() + '.png'"
+                  [alt]="selectedOption.name" class="w-5 h-5 object-contain" />
+                <span class="font-medium">{{ selectedOption.name }}</span>
+              </div>
+              }
+            </ng-template>
+            <ng-template let-chain #item>
+              <div class="flex items-center gap-2 py-1">
+                <img [src]="'images/chains/' + chain.name.toLowerCase() + '.png'"
+                  [alt]="chain.name" class="w-5 h-5 object-contain" />
+                <span class="font-medium">{{ chain.name }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+        <div>
+          <label class="text-sm text-slate-400 mb-2 block">
+            Your Wallet Address <span class="text-red-400">*</span>
+          </label>
+          <input type="text" pInputText [(ngModel)]="p2pOrderForm.wallet_address" name="walletAddress"
+            placeholder="e.g., 0x1234...abcd or bc1q..."
+            class="w-full rounded-3xl border border-gray-100/30 px-4 py-3 font-mono text-sm"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          <div class="text-xs text-green-400 mt-1.5 flex items-center gap-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Double-check your address before proceeding</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Account Details for Sell Orders -->
+    @if (activeTab === 'sell') {
+    <div class="bg-purple-500/10 border-2 border-purple-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3 mb-3">
+        <div
+          class="w-8 h-8 rounded-full bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0">
+          <i class="pi pi-credit-card text-white text-sm"></i>
+        </div>
+        <div class="flex-1">
+          <h4 class="text-sm font-semibold text-purple-300 mb-1">Payment Receiving Details</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Provide your {{ selectedP2pAdPaymentType?.p2p_payment_type?.name || 'payment' }} account details where you
+            want to receive the PHP payment.
+            Ensure the information is accurate to avoid payment delays.
+          </p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm text-slate-400 mb-2 block">
+            Account Name <span class="text-red-400">*</span>
+          </label>
+          <input type="text" pInputText [(ngModel)]="p2pOrderForm.account_name" name="accountName"
+            placeholder="e.g., Juan Dela Cruz" class="w-full rounded-3xl border border-gray-100/30 px-4 py-3"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-400 mb-2 block">
+            Account Number / Mobile Number <span class="text-red-400">*</span>
+          </label>
+          <input type="text" pInputText [(ngModel)]="p2pOrderForm.account_number" name="accountNumber"
+            placeholder="e.g., 09171234567 or 1234567890" class="w-full rounded-3xl border border-gray-100/30 px-4 py-3"
+            style="border-radius: 9999px; background-color: oklch(20.8% 0.042 265.755);" />
+          <div class="text-xs text-purple-400 mt-1.5 flex items-center gap-1">
+            <i class="pi pi-info-circle"></i>
+            <span>Enter the account number associated with your {{ selectedP2pAdPaymentType?.p2p_payment_type?.name ||
+              'payment method' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Trading Terms -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-info-circle text-blue-400 text-lg mt-0.5"></i>
+        <div>
+          <h4 class="text-sm font-semibold text-blue-300 mb-2">Trading Terms</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">{{ tradingTerms }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-2 pt-5">
+      <button type="button" (click)="openConfirmOrderDialog()" [disabled]="isCreatingOrder"
+        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-600 disabled:to-slate-600' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-600'"
+        class="px-6 py-3 rounded-3xl text-white font-semibold transition-all duration-200 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        @if (isCreatingOrder) {
+        <i class="pi pi-spin pi-spinner mr-2"></i>
+        }
+        {{ activeTab === 'buy' ? 'Buy' : 'Sell' }} {{ selectedP2pAd?.token_symbol || 'USDT' }}
+      </button>
+      <button type="button" (click)="showCreateOrderDialog = false"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Confirm Order Dialog -->
+<p-dialog [(visible)]="showConfirmOrderDialog" [modal]="true" [closable]="true" [draggable]="false"
+  [style]="{ width: '95vw', maxWidth: '450px', 'border-radius': '1.5rem' }">
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <div
+        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600' : 'bg-linear-to-r from-purple-600 to-pink-600'"
+        class="w-10 h-10 rounded-full flex items-center justify-center">
+        <i class="pi pi-shopping-cart text-white text-lg"></i>
+      </div>
+      <span class="text-lg font-bold text-white">Confirm Order</span>
+    </div>
+  </ng-template>
+  <div class="space-y-4 py-4">
+    <div class="bg-blue-500/10 border-2 border-blue-500/30 rounded-3xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="pi pi-info-circle text-blue-400 text-xl mt-0.5"></i>
+        <div class="space-y-2">
+          <p class="text-white font-semibold text-sm">Please confirm your order details:</p>
+          <p class="text-xs text-slate-300">Make sure all information is correct before proceeding.</p>
+        </div>
+      </div>
+    </div>
+
+    @if (selectedP2pAd && p2pOrderForm) {
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-4">
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400">Type</span>
+          <span
+            [class]="activeTab === 'buy' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-purple-500/20 text-purple-300 border-purple-500/30'"
+            class="px-3 py-1 rounded-full text-xs font-bold border uppercase">
+            {{ activeTab }}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Price</span>
+          <span class="text-white font-semibold">₱{{ selectedP2pAd.price | number:'1.2-2' }} PHP</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Quantity</span>
+          <span class="text-white font-semibold">
+            {{ p2pOrderForm.quantity | number:'1.2-6' }} {{ selectedP2pAd.token_symbol }}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Payment Method</span>
+          <span class="text-white font-semibold">{{ selectedP2pPaymentType?.name }}</span>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-slate-700/50">
+          <span class="text-slate-400 font-semibold">Total Amount</span>
+          <span class="text-white font-bold text-base">₱{{ p2pOrderForm.amount | number:'1.2-2' }} PHP</span>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  <ng-template #footer>
+    <div class="flex gap-3 pt-2">
+      <button type="button" (click)="confirmCreateOrder()" [disabled]="isCreatingOrder"
+        [class]="activeTab === 'buy' ? 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-600 disabled:to-slate-600' : 'bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-600'"
+        class="px-6 py-3.5 rounded-3xl text-white font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        @if (isCreatingOrder) {
+        <i class="pi pi-spin pi-spinner"></i>
+        } @else {
+        <i class="pi pi-check"></i>
+        }
+        <span>{{ isCreatingOrder ? 'Creating...' : 'Confirm Order' }}</span>
+      </button>
+      <button type="button" (click)="closeConfirmOrderDialog()" [disabled]="isCreatingOrder"
+        class="px-6 py-3 rounded-3xl bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Toast -->
+<p-toast />

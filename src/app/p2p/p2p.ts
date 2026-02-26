@@ -1,0 +1,63 @@
+import { Component, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterOutlet } from '@angular/router';
+
+import { TabsModule as PTabsModule } from 'primeng/tabs';
+import { DialogModule as PDialogModule } from 'primeng/dialog';
+import { InputTextModule as PInputTextModule } from 'primeng/inputtext';
+import { ButtonModule as PButtonModule } from 'primeng/button';
+import { SelectModule as PSelectModule } from 'primeng/select';
+
+import { SubHeader } from './sub-header/sub-header';
+import { Footer as LayoutFooter } from './../layout/footer/footer';
+
+@Component({
+  selector: 'app-p2p',
+  imports: [
+    RouterOutlet,
+    CommonModule,
+    FormsModule,
+    PTabsModule,
+    PDialogModule,
+    PInputTextModule,
+    PButtonModule,
+    PSelectModule,
+    SubHeader,
+    LayoutFooter
+  ],
+  templateUrl: './p2p.html',
+  styleUrl: './p2p.css',
+})
+export class P2p {
+
+  constructor(
+    private router: Router
+  ) { }
+
+  mobileMenuOpen: boolean = false;
+  isP2PUserLoggedIn: boolean = false;
+  showComingSoonModal: boolean = false;
+
+  activeMenu: string = 'marketplace';
+  activeTab: 'buy' | 'sell' = 'buy';
+
+  ngOnInit() {
+    this.checkAuthStatus();
+  }
+
+  checkAuthStatus(): void {
+    const googleUser = localStorage.getItem('auth_user');
+    if (googleUser) {
+      this.isP2PUserLoggedIn = true;
+    }
+  }
+
+  mobileMenuOpenOnClick(mobileMenuOpen: boolean): void {
+    this.mobileMenuOpen = mobileMenuOpen;
+  }
+
+  navigateToCrossChain(): void {
+    this.router.navigate(['/cross-chain']);
+  }
+}
